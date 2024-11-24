@@ -128,3 +128,6 @@ def get_unread_notifications_count(request):
 def mark_notifications_as_read(request):
     Notification.objects.filter(is_new=True).update(is_new=False)
     return JsonResponse({'status': 'success'})
+
+
+#test
