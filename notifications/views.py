@@ -1,49 +1,68 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import Notification
-from .forms import NotificationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, Http404, JsonResponse
-from django.conf import settings
 from django.core.paginator import Paginator
+from django.conf import settings
+from django.db.models import Q
 import os
 
-# Kiểm tra nếu người dùng là superuser hoặc thuộc nhóm "Notification Managers"
+from .models import Notification
+from .forms import NotificationForm
+
+# Kiểm tra quyền quản trị
 def is_admin_or_superuser(user):
     return user.is_superuser or user.groups.filter(name='Notification Managers').exists()
 
-# Hiển thị danh sách thông báo
+# Hiển thị danh sách thông báo với bộ lọc và tìm kiếm
 @login_required
 def notifications_list(request):
-    notifications = Notification.objects.all().order_by('-created_at')
-    
-    # Đánh dấu tất cả thông báo chưa đọc là đã đọc khi người dùng truy cập trang này
-    Notification.objects.filter(is_new=True).update(is_new=False)
+    filter_type = request.GET.get('filter', 'all')
+    search_query = request.GET.get('search', '')
 
-    # Kiểm tra quyền quản lý
-    is_manager = is_admin_or_superuser(request.user)
+    # Lấy tất cả thông báo chưa lưu trữ
+    notifications = Notification.objects.filter(is_archived=False)
 
-    # Thêm phân trang
-    paginator = Paginator(notifications, 10)  # Hiển thị 10 thông báo mỗi trang
+    if filter_type == 'important':
+        notifications = notifications.filter(is_important=True)
+    elif filter_type == 'unread':
+        notifications = notifications.exclude(read_by=request.user)
+
+    # Nếu có từ khóa tìm kiếm, lọc theo tiêu đề hoặc nội dung
+    if search_query:
+        notifications = notifications.filter(
+            Q(title__icontains=search_query) | Q(message__icontains=search_query)
+        )
+
+    # Áp dụng sắp xếp tùy thuộc vào người dùng
+    if not is_admin_or_superuser(request.user):
+        # Người dùng thông thường: sắp xếp theo `is_modified`
+        notifications = notifications.order_by('-is_modified', '-created_at')
+    else:
+        # Admin: sắp xếp theo `created_at` mà không cần `is_modified`
+        notifications = notifications.order_by('-created_at')
+
+    # Phân trang với 10 thông báo mỗi trang
+    paginator = Paginator(notifications, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
-    # Tính toán số thứ tự bắt đầu cho trang hiện tại
+    # Tính toán start_number dựa trên số trang và số thông báo trên mỗi trang
     start_number = (page_obj.number - 1) * paginator.per_page
 
     context = {
         'notifications': page_obj,
-        'is_manager': is_manager,
-        'start_number': start_number  # Truyền số thứ tự bắt đầu vào context
+        'filter_type': filter_type,
+        'search_query': search_query,
+        'unread_notifications_count': Notification.objects.exclude(read_by=request.user).count(),
+        'start_number': start_number,
+        'is_manager': is_admin_or_superuser(request.user),
     }
 
-    # Chọn template phù hợp dựa vào quyền của người dùng
-    if is_manager:
-        return render(request, 'notifications/notifications_list_admin.html', context)
-    else:
-        return render(request, 'notifications/notifications_list_user.html', context)
+    template = 'notifications/notifications_list_admin.html' if is_admin_or_superuser(request.user) else 'notifications/notifications_list_user.html'
+    return render(request, template, context)
 
-# Thêm thông báo và tải file lên (chỉ dành cho superuser hoặc admin)
+# Thêm thông báo (admin/superuser)
 @login_required
 @user_passes_test(is_admin_or_superuser)
 def add_notification(request):
@@ -62,7 +81,7 @@ def add_notification(request):
         'button_text': 'Submit'
     })
 
-# Cập nhật thông báo (chỉ dành cho superuser hoặc admin)
+# Cập nhật thông báo (admin/superuser)
 @login_required
 @user_passes_test(is_admin_or_superuser)
 def update_notification(request, id):
@@ -70,7 +89,10 @@ def update_notification(request, id):
     if request.method == 'POST':
         form = NotificationForm(request.POST, request.FILES, instance=notification)
         if form.is_valid():
-            form.save()
+            notification = form.save(commit=False)
+            notification.is_modified = True  # Đánh dấu là "modified"
+            notification.is_new = False      # Bỏ trạng thái "new" nếu trước đó là thông báo mới
+            notification.save()
             messages.success(request, 'Notification updated successfully!')
             return redirect('notifications_list')
     else:
@@ -82,7 +104,7 @@ def update_notification(request, id):
         'button_text': 'Update'
     })
 
-# Xóa thông báo (chỉ dành cho superuser hoặc admin)
+# Xóa thông báo (admin/superuser)
 @login_required
 @user_passes_test(is_admin_or_superuser)
 def delete_notification(request, id):
@@ -94,13 +116,25 @@ def delete_notification(request, id):
 
     return render(request, 'notifications/delete_notification.html', {'notification': notification})
 
-# Hiển thị chi tiết thông báo
+# Chi tiết thông báo và đánh dấu là đã đọc
 @login_required
 def notification_detail(request, id):
     notification = get_object_or_404(Notification, id=id)
+    if request.user not in notification.read_by.all():
+        notification.read_by.add(request.user)
+        notification.is_new = False
+        notification.save()
     return render(request, 'notifications/notification_detail.html', {'notification': notification})
 
-# Download file đính kèm trong thông báo
+# Đánh dấu hoặc bỏ đánh dấu là quan trọng
+@login_required
+def mark_as_important(request, id):
+    notification = get_object_or_404(Notification, id=id)
+    notification.is_important = not notification.is_important
+    notification.save()
+    return redirect('notifications_list')
+
+# Tải file đính kèm trong thông báo
 @login_required
 def download_file(request, id):
     notification = get_object_or_404(Notification, id=id)
@@ -117,17 +151,45 @@ def download_file(request, id):
     else:
         raise Http404("No file attached")
 
-# API để lấy số lượng thông báo chưa đọc
+# API lấy số lượng thông báo chưa đọc
 @login_required
 def get_unread_notifications_count(request):
-    unread_count = Notification.objects.filter(is_new=True).count()
+    unread_count = Notification.objects.exclude(read_by=request.user).count()
     return JsonResponse({'new_notifications_count': unread_count})
 
-# Đánh dấu tất cả thông báo là đã đọc
+# Đánh dấu tất cả là đã đọc
 @login_required
 def mark_notifications_as_read(request):
-    Notification.objects.filter(is_new=True).update(is_new=False)
+    notifications = Notification.objects.exclude(read_by=request.user)
+    for notification in notifications:
+        notification.read_by.add(request.user)
     return JsonResponse({'status': 'success'})
 
+# View để lưu trữ thông báo
+@login_required
+def archive_notification(request, id):
+    notification = get_object_or_404(Notification, id=id)
+    notification.is_archived = True
+    notification.save()
+    messages.success(request, 'Notification archived successfully!')
+    return redirect('notifications_list')
 
-#test
+# View để hiển thị thông báo đã lưu trữ
+@login_required
+def archived_notifications_list(request):
+    # Lấy tất cả thông báo đã lưu trữ
+    notifications = Notification.objects.filter(is_archived=True)
+
+    context = {
+        'notifications': notifications,
+    }
+
+    return render(request, 'notifications/archived_notifications.html', context)
+
+@login_required
+def unarchive_notification(request, id):
+    notification = get_object_or_404(Notification, id=id)
+    notification.is_archived = False
+    notification.save()
+    messages.success(request, 'Notification unarchived successfully!')
+    return redirect('archived_notifications_list')

@@ -1,34 +1,102 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container my-5">
-    <h2 class="text-center text-primary mb-4">Your Notifications</h2>
+<div class="container my-5 position-relative">
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" style="display: none;" class="text-center">
+        <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+    </div>
 
-    <!-- Danh sách thông báo dưới dạng cards, mỗi hàng một khung -->
-    <div class="row justify-content-center">
+    <!-- Decorative Elements for Background -->
+    <div class="decorative-shape"></div>
+    <div class="decorative-shape-2"></div>
+
+    <!-- Notification Header -->
+    <div class="alert alert-gradient text-center mb-5 rounded shadow-sm position-relative z-index-2">
+        <h4 class="mb-0 font-weight-bold">Welcome to Your Notifications Center!</h4>
+        <p class="mt-2">Stay updated with the latest notifications. You have <strong>{{ notifications.paginator.count }}</strong> notifications.</p>
+    </div>
+
+    <div class="text-center mb-4 position-relative z-index-2">
+        <p class="text-muted">Here you can view your latest updates, important notifications, and stay informed.</p>
+        <p>Use the buttons below to quickly filter or scroll down to see all notifications.</p>
+    </div>
+
+    <!-- Navigation Button to Archived Notifications -->
+    <div class="text-center mb-4">
+        <a href="{% url 'archived_notifications_list' %}" class="btn btn-outline-info">Archived Notifications</a>
+    </div>
+
+    <!-- Filter and Search Bar -->
+    <div class="d-flex justify-content-center align-items-center mb-4 position-relative z-index-2">
+        <!-- Filter Buttons -->
+        <div class="btn-group-filter mr-3">
+            <a href="?filter=all" class="btn btn-gradient mx-2 {% if filter_type == 'all' %}active-filter{% endif %}">All Notifications</a>
+            <a href="?filter=important" class="btn btn-outline-danger mx-2 {% if filter_type == 'important' %}active-filter{% endif %}">Important</a>
+            <a href="?filter=unread" class="btn btn-outline-secondary mx-2 {% if filter_type == 'unread' %}active-filter{% endif %}">Unread</a>
+        </div>
+
+        <!-- Search Form -->
+        <form method="GET" action="{% url 'notifications_list' %}" class="form-inline d-flex align-items-center">
+            <input type="text" name="search" class="form-control search-input mr-2" placeholder="Search notifications..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary search-button">Search</button>
+        </form>
+    </div>
+
+    <h2 class="text-center text-primary mb-4 position-relative z-index-2">Your Notifications</h2>
+
+    <!-- Masonry Layout for Notifications -->
+    <div id="notification-list" class="notification-masonry position-relative z-index-2">
         {% for notification in notifications %}
-        <div class="col-lg-8 col-md-10 col-sm-12 mb-4">
-            <div class="card h-100 border border-2 rounded shadow-lg bg-light">
-                <div class="card-body d-flex flex-column justify-content-between">
-                    <!-- Số thứ tự và tiêu đề thông báo là liên kết -->
+        <div class="notification-item {% if notification.is_important %}important{% elif notification.is_new %}unread{% endif %}">
+            <div class="card border-0 rounded shadow-lg bg-light notification-card position-relative">
+                <div class="card-body d-flex flex-column justify-content-between position-relative">
                     <div class="d-flex align-items-center mb-3">
-                        <span class="badge badge-secondary mr-2">#{{ start_number|add:forloop.counter }}</span>
+                        <span class="mr-3"><i class="fas fa-bell text-primary"></i></span>
+                        <span class="badge badge-secondary mr-2">#{{ start_number|add:forloop.counter }}</span> <!-- Hiển thị số thứ tự -->
                         <h5 class="card-title mb-0 font-weight-bold">
                             <a href="{% url 'notification_detail' notification.id %}" class="text-dark text-decoration-none">
                                 {{ notification.title|slice:":40" }}{% if notification.title|length > 40 %}...{% endif %}
                             </a>
                         </h5>
+
+                        {% if notification.is_important %}
+                        <span class="important-badge">
+                            Important
+                        </span>
+                        {% endif %}
+
+                        {% if notification.is_new %}
+                        <span class="badge badge-danger ml-2">New</span>
+                        {% elif notification.is_modified %}
+                        <span class="badge badge-warning ml-2">Modified</span>
+                        {% endif %}
                     </div>
-                    <!-- Ngày tạo thông báo -->
+
                     <p class="text-muted small mb-2">Posted on {{ notification.created_at|date:"M d, Y H:i" }}</p>
-                    
-                    <!-- Nội dung ngắn gọn của thông báo -->
                     <p class="card-text text-secondary">
                         {{ notification.message|slice:":100" }}{% if notification.message|length > 100 %}...{% endif %}
                     </p>
 
-                    <!-- Nút để xem thêm thông báo -->
                     <div class="mt-auto text-right">
+                        <form action="{% url 'mark_as_important' notification.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn {% if notification.is_important %}btn-success{% else %}btn-outline-success{% endif %} btn-sm">
+                                {% if notification.is_important %}
+                                    Mark as Not Important
+                                {% else %}
+                                    Mark as Important
+                                {% endif %}
+                            </button>
+                        </form>
+
+                        <!-- Nút Lưu trữ -->
+                        <form action="{% url 'archive_notification' notification.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                Archive
+                            </button>
+                        </form>
                         <a href="{% url 'notification_detail' notification.id %}" class="btn btn-outline-primary btn-sm">Read More</a>
                     </div>
                 </div>
@@ -41,35 +109,231 @@
         {% endfor %}
     </div>
 
-    <!-- Điều khiển phân trang -->
-    <div class="d-flex justify-content-center mt-4">
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4 position-relative z-index-2">
         {% if notifications.has_other_pages %}
         <nav aria-label="Page navigation">
             <ul class="pagination">
                 {% if notifications.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1" aria-label="First">&laquo; First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ notifications.previous_page_number }}">Previous</a>
-                    </li>
+                    <li class="page-item"><a class="page-link" href="?page=1&search={{ search_query }}&filter={{ filter_type }}" aria-label="First">&laquo; First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ notifications.previous_page_number }}&search={{ search_query }}&filter={{ filter_type }}">Previous</a></li>
                 {% endif %}
-
                 <li class="page-item disabled">
                     <span class="page-link">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
                 </li>
-
                 {% if notifications.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ notifications.next_page_number }}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ notifications.paginator.num_pages }}" aria-label="Last">Last &raquo;</a>
-                    </li>
+                    <li class="page-item"><a class="page-link" href="?page={{ notifications.next_page_number }}&search={{ search_query }}&filter={{ filter_type }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ notifications.paginator.num_pages }}&search={{ search_query }}&filter={{ filter_type }}" aria-label="Last">Last &raquo;</a></li>
                 {% endif %}
             </ul>
         </nav>
         {% endif %}
     </div>
 </div>
+
+<!-- JavaScript for Loading Spinner -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const loadingSpinner = document.getElementById("loading-spinner");
+
+        // Hiển thị spinner khi form tìm kiếm được gửi
+        const searchForm = document.querySelector("form");
+        searchForm.addEventListener("submit", function() {
+            loadingSpinner.style.display = "block";
+        });
+
+        // Hiển thị spinner khi các nút bộ lọc được bấm
+        const filterButtons = document.querySelectorAll(".btn-group-filter a");
+        filterButtons.forEach(button => {
+            button.addEventListener("click", function() {
+                loadingSpinner.style.display = "block";
+            });
+        });
+    });
+</script>
+
+<!-- CSS Enhancements for Decorative Background and Spinner -->
+<style>
+    body {
+        background: #f4f5f7;
+    }
+
+    .alert-gradient {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: #ffffff;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .decorative-shape, .decorative-shape-2 {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        background: rgba(44, 62, 80, 0.1);
+        z-index: 0;
+    }
+
+    .decorative-shape {
+        width: 300px;
+        height: 300px;
+        top: 10%;
+        left: -100px;
+    }
+
+    .decorative-shape-2 {
+        width: 250px;
+        height: 250px;
+        bottom: 5%;
+        right: -120px;
+    }
+
+    /* Loading Spinner */
+    #loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1050;
+        color: #2c3e50;
+    }
+
+    /* Button Styles */
+    .btn-gradient, .search-button {
+        background: none;
+        color: #2c3e50;
+        border: 2px solid #2c3e50;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        padding: 6px 15px;
+    }
+
+    .btn-gradient:hover, .search-button:hover {
+        background: #34495e;
+        color: #fff;
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-outline-danger, .btn-outline-secondary {
+        border-radius: 20px;
+        border: 2px solid #2c3e50;
+        color: #2c3e50;
+    }
+
+    .btn-outline-danger:hover, .btn-outline-secondary:hover {
+        background-color: #2c3e50;
+        color: #fff;
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Tạo khoảng cách giữa filter và search */
+    .form-inline {
+        margin-left: 20px;
+    }
+
+    /* Search Bar */
+    .search-input {
+        border-radius: 20px;
+        border: 2px solid #2c3e50;
+        padding: 6px 15px;
+        height: 38px;
+    }
+
+    /* Masonry Layout */
+    .notification-masonry {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+
+    .notification-item {
+        flex: 1 1 30%;
+    }
+
+    .notification-card {
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #fff;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .notification-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .important {
+        border: 2px solid #28a745;
+        transition: all 0.3s ease;
+    }
+
+    .important:hover {
+        transform: translateY(-5px);
+        border-color: #218838;
+    }
+
+    .badge-danger {
+        background-color: #e74c3c;
+        font-size: 0.8em;
+        padding: 4px 6px;
+        border-radius: 50px;
+    }
+
+    .important-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        background-color: #28a745;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 10px;
+        font-size: 0.75em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 10px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .important-badge:hover {
+        background-color: #218838;
+        transform: translateY(-1px);
+    }
+
+    .active-filter {
+        background-color: #34495e;
+        color: #fff;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transform: scale(1.05);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .page-link {
+        color: #2c3e50;
+    }
+
+    .page-link:hover {
+        color: #34495e;
+    }
+
+    /* Màu nút Mark as Important */
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-outline-success {
+        color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-outline-success:hover {
+        background-color: #28a745;
+        color: #fff;
+    }
+</style>
 {% endblock %}

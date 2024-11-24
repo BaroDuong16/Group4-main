@@ -3,29 +3,27 @@
 {% block content %}
 <div class="container my-5">
     <!-- Tiêu đề trang -->
-    <h2 class="text-center text-primary mb-4">Notification Detail</h2>
-    
+    <h2 class="text-center text-primary mb-4 page-title">Notification Detail</h2>
+
     <!-- Thẻ thông báo với hiệu ứng shadow và border mềm mại -->
-    <div class="card shadow-lg border-0">
+    <div class="card shadow-lg border-0 notification-detail-card">
         <div class="card-body p-5">
             <!-- Tiêu đề thông báo -->
-            <h3 class="font-weight-bold text-dark mb-4">{{ notification.title }}</h3>
-            
+            <h3 class="font-weight-bold notification-title">{{ notification.title }}</h3>
+
             <!-- Thông tin người gửi và thời gian tạo -->
-            <div class="d-flex justify-content-between align-items-center text-muted mb-4">
+            <div class="d-flex justify-content-between align-items-center text-muted mb-4 sender-info">
                 <span><i class="fas fa-user mr-2"></i> <strong>From:</strong> {{ notification.from_user.get_full_name|default:"Admin" }}</span>
                 <span><i class="fas fa-calendar-alt mr-2"></i> {{ notification.created_at|date:"M d, Y H:i" }}</span>
             </div>
 
             <!-- Nội dung thông báo với spacing đẹp mắt -->
-            <p class="card-text text-dark" style="line-height: 1.7;">
-                {{ notification.message|linebreaks }}
-            </p>
+            <p class="card-text text-dark notification-message">{{ notification.message|linebreaks }}</p>
 
             <!-- Tải xuống tệp đính kèm nếu có -->
             {% if notification.file %}
             <div class="mt-4 text-center">
-                <a href="{% url 'download_file' notification.id %}" class="btn btn-outline-primary btn-lg" target="_blank">
+                <a href="{% url 'download_file' notification.id %}" class="btn btn-outline-primary btn-lg btn-download" target="_blank" aria-label="Download Attachment">
                     <i class="fas fa-download"></i> Download Attachment
                 </a>
             </div>
@@ -35,9 +33,129 @@
 
     <!-- Nút quay lại với spacing hợp lý -->
     <div class="text-center mt-5">
-        <a href="{% url 'notifications_list' %}" class="btn btn-secondary btn-lg">
+        <a href="{% url 'notifications_list' %}" class="btn btn-secondary btn-lg btn-back">
             <i class="fas fa-arrow-left"></i> Back to Notifications
         </a>
     </div>
 </div>
+
+<!-- Additional CSS -->
+<style>
+    /* Container Styling */
+    .container {
+        max-width: 800px;
+    }
+
+    /* Card Styling */
+    .notification-detail-card {
+        background-color: #f9fafb;
+        border-radius: 12px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .notification-detail-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Page Title Styling */
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        opacity: 0;
+        animation: fadeIn 0.6s ease-in-out forwards;
+    }
+
+    /* Notification Title Styling */
+    .notification-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #34495e;
+        transition: color 0.3s ease;
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-in-out 0.2s forwards;
+    }
+
+    /* Sender Info Styling */
+    .sender-info span {
+        font-size: 0.95rem;
+    }
+
+    /* Notification Message Styling */
+    .notification-message {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        line-height: 1.8;
+        letter-spacing: 0.5px;
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-in-out 0.4s forwards;
+    }
+
+    /* Download Button Styling */
+    .btn-download {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        opacity: 0;
+        animation: fadeIn 0.6s ease-in-out 0.6s forwards;
+    }
+
+    .btn-download:hover {
+        transform: scale(1.05);
+        background-color: #3498db;
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    /* Back Button Styling */
+    .btn-back {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-3px);
+        background-color: #6c757d;
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .notification-title {
+            font-size: 1.5rem;
+        }
+
+        .notification-message, .sender-info span {
+            font-size: 1rem;
+        }
+
+        .btn-download, .btn-back {
+            font-size: 1rem;
+            padding: 10px 20px;
+        }
+    }
+</style>
 {% endblock %}

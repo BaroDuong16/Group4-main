@@ -1,0 +1,253 @@
+<div class="notification-header">
+    <h1 class="header-title">📬 Archived Notifications</h1>
+    <p class="header-subtitle">You have <strong>{{ notifications|length }}</strong> archived notifications.</p>
+</div>
+
+{% if notifications %}
+    <div class="container">
+        <div class="notification-list">
+            {% for notification in notifications %}
+                <div class="notification-item">
+                    <!-- Icon Notification -->
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <!-- Content -->
+                    <div class="notification-content">
+                        <a href="{% url 'notification_detail' notification.id %}" class="notification-link">
+                            <h5 class="notification-title">{{ notification.title|truncatechars:50 }}</h5>
+                            <p class="notification-message">{{ notification.message|truncatechars:100 }}</p>
+                        </a>
+                        <p class="notification-time">Archived on: {{ notification.created_at|date:"M d, Y H:i" }}</p>
+                        <form action="{% url 'unarchive_notification' notification.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-retrieve">Unarchive</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% else %}
+    <p class="text-center text-muted">No archived notifications available.</p>
+{% endif %}
+
+<div class="footer-btn text-center">
+    <a href="{% url 'notifications_list' %}" class="btn btn-back">Back to Notifications</a>
+</div>
+
+<!-- Back to Top Button -->
+<button onclick="scrollToTop()" class="back-to-top" title="Go to top">⬆️</button>
+
+<!-- CSS -->
+<style>
+    /* General Styling */
+    body {
+        background: #f8f9fa; /* Light gray background */
+        font-family: 'Arial', sans-serif;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        animation: fadeInPage 0.6s ease-in-out;
+    }
+
+    /* Header */
+    .notification-header {
+        text-align: center;
+        background: #ffffff;
+        padding: 20px 10px;
+        color: #2c3e50;
+        border-bottom: 2px solid #dfe6e9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+    }
+
+    .header-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .header-subtitle {
+        font-size: 1rem;
+        margin: 5px 0 0;
+        color: #7f8c8d;
+    }
+
+    /* Notification List */
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 10px;
+    }
+
+    .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: flex-start;
+        background: #ffffff; /* White background */
+        border-radius: 12px; /* Rounded corners */
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+        overflow: hidden;
+        position: relative; /* For the hover effect */
+    }
+
+    .notification-item:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px);
+    }
+
+    .notification-icon {
+        background: linear-gradient(135deg, #1e90ff, #2c3e50); /* Gradient background */
+        color: #ffffff; /* White bell icon */
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Larger bell icon size */
+        margin-right: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .notification-item:hover .notification-icon {
+        transform: scale(1.1); /* Slight enlargement on hover */
+    }
+
+    .notification-content {
+        flex-grow: 1;
+    }
+
+    .notification-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin: 0 0 5px;
+    }
+
+    .notification-message {
+        font-size: 1rem;
+        color: #7f8c8d;
+        margin: 0 0 5px;
+    }
+
+    .notification-link {
+        text-decoration: none;
+    }
+
+    .notification-link:hover .notification-title,
+    .notification-link:hover .notification-message {
+        color: #1e90ff;
+    }
+
+    .notification-time {
+        font-size: 0.85rem;
+        color: #aeb6bf;
+    }
+
+    .btn-retrieve {
+        background: #1e90ff;
+        color: #ffffff;
+        border: none;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s ease;
+    }
+
+    .btn-retrieve:hover {
+        background: #1c7ed6;
+        transform: translateY(-2px);
+    }
+
+    /* Footer Button */
+    .footer-btn {
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .btn-back {
+        background: #2c3e50;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        text-decoration: none;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(41, 128, 185, 0.2);
+        transition: transform 0.3s, background-color 0.3s;
+    }
+
+    .btn-back:hover {
+        background: #1e608b;
+        transform: translateY(-3px);
+    }
+
+    /* Back to Top Button */
+    .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: #2c3e50;
+        color: #ffffff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, transform 0.3s ease;
+    }
+
+    .back-to-top.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .back-to-top:hover {
+        background: #1e3a5f;
+    }
+
+    /* Keyframes */
+    @keyframes fadeInPage {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+
+<script>
+    // Show/hide back-to-top button
+    window.addEventListener("scroll", function () {
+        const backToTop = document.querySelector(".back-to-top");
+        if (window.scrollY > 200) {
+            backToTop.classList.add("show");
+        } else {
+            backToTop.classList.remove("show");
+        }
+    });
+
+    // Scroll to top function
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+</script>
