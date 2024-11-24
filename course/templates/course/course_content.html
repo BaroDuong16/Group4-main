@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% load static %}
+
+{% block title %}Course Content{% endblock %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'course/course.css' %}">
+    <style>
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-tabs .nav-link.active {
+            border-bottom: 2px solid #007bff; /* Bootstrap primary color */
+        }
+    </style>
+</head>
+
+<div class="container-fluid" id="course-content">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <div class="course-title h4">{{ course.course_name }}</div>
+        </div>
+
+        <div class="col-md-10 content"> <!-- Added content div -->
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs" id="session-tabs" role="tablist">
+                {% for session in sessions %}
+                <li class="nav-item">
+                    <a class="nav-link {% if session.id == current_session.id %}active{% endif %}" id="tab-{{ session.id }}" href="{% url 'course:course_content' course.pk session.id %}">
+                        {{ session.name }}
+                    </a>
+                </li>
+                {% endfor %}
+                <li class="nav-item">
+                    <a class="nav-link {% if current_material == null %}active{% endif %}" id="message-tab" href="#" role="tab" aria-controls="message-content" aria-selected="true">MESSAGE</a>
+                </li>
+            </ul>
+
+            <div class="message-content" id="message-content" style="display: none; margin-top: 20px;">
+                <h3>Course Completion Progress</h3>
+                <p>{{ completion_percent|floatformat:0 }}% completed</p>
+                {% if certificate_url %}
+                <div class="mt-3">
+                    <button id="view-certificate" class="btn btn-primary">View Certificate</button>
+                    <a href="{{ certificate_url }}" class="btn btn-success" download>Download Certificate</a>
+                </div>
+                {% endif %}
+            </div>
+
+
+            <div class="materials-list mb-4 border rounded p-3" style="max-height: 70vh; overflow-y: auto;">
+                <div class="section-title h5">{{ current_session.name }}</div>
+                <ul class="list-group mb-4">
+                    {% for material in materials %}
+                    <li class="list-group-item {% if material.id == current_material.id %}active{% endif %}">
+                        <a href="{% url 'course:course_content' course.pk current_session.id %}?file_id={{ material.id }}&file_type={{ material.material_type }}">{{ material.title }}</a>
+                        {% if material.id == current_material.id %}
+                            <div class="content-detail mt-2">
+                                {% if content_type == 'assignments' %}
+                                    {{ preview_content|safe }}
+                                {% elif content_type == 'labs' %}
+                                    {{ preview_content|safe }}
+                                {% elif content_type == 'lectures' %}
+                                    {{ preview_content|safe }}
+                                {% elif content_type == 'references' %}
+                                    {{ preview_content|safe }}
+                                {% elif content_type == 'assessments' %}
+                                    <a href="{% url 'assessment:take_assessment' assessment.id %}" class="btn btn-outline-secondary" style="background-color: gray; width: 13rem;">Take Assessement</a>
+                                {% else %}
+                                <p>No preview available for this material.</p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </li>
+                    {% empty %}
+                    <p class="mb-4">No materials available for this session.</p>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if current_material %}
+            <div class="mt-3" id="action-buttons"> <!-- Add an ID for easy manipulation -->
+                <button id="complete-btn" class="btn {% if completion_status %}btn-secondary{% else %}btn-success{% endif %}" data-course-id="{{ course.pk }}" data-file-id="{{ current_material.id }}">
+                    {% if completion_status %}Completed{% else %}Mark as Complete{% endif %}
+                </button>
+                {% if next_material or next_session %}
+                <a id="next-btn" href="{% if next_session %}{% url 'course:course_content' course.pk next_session.id %}{% else %}{% url 'course:course_content' course.pk current_session.id %}?file_id={{ next_material.id }}&file_type={{ next_material.material_type }}{% endif %}" class="btn btn-secondary" style="background-color: gray;">
+                    {% if next_session %}Next Session{% else %}Next Item{% endif %}
+                </a>
+                {% endif %}
+
+                <a href="{% url 'course:course_detail' course.id %}" class="btn btn-outline-secondary" style="background-color: gray;">Back to Course Detail</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Ensure the session tabs are visible
+    // $('#session-tabs').show();
+
+    $('.materials-list').click(function() {
+        $('#session-menu').toggle(); // Toggle materials list
+        $('.message-content').hide(); // Hide Course Completion Progress
+        $('.materials-list').show(); // Show materials list
+        $('#action-buttons').show(); // Show action buttons
+    });
+
+    // Toggle visibility for Message content
+    $('#message-tab').click(function() {
+        $('#session-menu').hide(); // Hide materials list
+        $('.materials-list').hide(); // Hide materials list
+        $('.message-content').toggle(); // Toggle Course Completion Progress
+        $('#action-buttons').hide(); // Hide action buttons
+    });
+
+    // // Toggle message content on tab click
+    // $('#message-tab').click(function(e) {
+    //     e.preventDefault(); // Prevent default link behavior
+    //     // $('.message-content').hide(); // Hide Course Completion Progress
+    //     // $('.materials-list').show(); // Show materials list
+    //     $('.message-content').toggle(); // Toggle visibility of the message content
+    //     $('.nav-link').removeClass('active'); // Remove active class from all tabs
+    //     $(this).addClass('active'); // Add active class to the clicked tab
+    // });
+
+    // Certificate functionality
+    $('#view-certificate').click(function() {
+        var certificateUrl = "{{ certificate_url }}";
+        if (certificateUrl) {
+            window.open(certificateUrl, '_blank');
+        }
+    });
+
+    // Handle completion button click
+    $('#complete-btn').click(function() {
+        var button = $(this);
+        var courseId = button.data('course-id');
+        var fileId = button.data('file-id');
+
+        $.ajax({
+            url: "{% url 'course:toggle_completion' course.pk %}",
+            method: 'POST',
+            data: {
+                'file_id': fileId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.completed) {
+                    button.text('Completed');
+                    button.removeClass('btn-success').addClass('btn-secondary');
+                } else {
+                    button.text('Mark as Complete');
+                    button.removeClass('btn-secondary').addClass('btn-success');
+                }
+                // Reload page after updating status
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert("An error occurred: " + xhr.responseText);  // Add alert for better visibility
+            }
+        });
+    });
+
+    // Add iframe resizing logic here
+    $('iframe').css({
+        'width': '65rem',
+        'height': '37rem',
+        'border': 'none'
+    });
+});
+</script>
+{% endblock %}

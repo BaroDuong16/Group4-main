@@ -1,0 +1,12 @@
+<ul class="nav nav-tabs my-3" role="tablist">
+    <li class="nav-item">
+        <a href="{% url 'achievement:user_progress' %}" class="nav-link {% if request.path == '/achievement/user_progress/' %}active{% endif %}">User Progress</a>
+    </li>
+    <li class="nav-item">
+        <a href="{% url 'achievement:performance_analytics' %}" class="nav-link {% if request.path == '/achievement/performance_analytics/' %}active{% endif %}">Performance Analytics</a>
+    </li>
+    <li class="nav-item">
+        <a href="{% url 'achievement:ai_insights' %}" class="nav-link {% if request.path == '/achievement/ai_insights/' %}active{% endif %}">AI Insights</a>
+    </li>
+</ul>
+  

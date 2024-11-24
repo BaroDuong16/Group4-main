@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback List{% endblock %}
+
+{% block content %}
+<div class="mt-1">
+    <h2 class="mb-4">Feedback List</h2>
+
+    <!-- Tab navigation -->
+    <ul class="nav nav-tabs mb-3 d-flex justify-content-between" id="feedbackTab" role="tablist">
+        <div class="d-flex">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="course-feedback-tab" data-bs-toggle="tab" data-bs-target="#course-feedback" type="button" role="tab" aria-controls="course-feedback" aria-selected="true">Course Feedback</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="instructor-feedback-tab" data-bs-toggle="tab" data-bs-target="#instructor-feedback" type="button" role="tab" aria-controls="instructor-feedback" aria-selected="false">Instructor Feedback</button>
+            </li>
+        </div>
+        <div class="d-flex">
+            <input type="text" id="searchBar" class="form-control me-2" placeholder="Search..." onkeyup="filterFeedback()">
+            <select id="courseFilter" class="form-select me-2" onchange="filterFeedback()">
+                <option value="">All Courses</option>
+                {% for course in courses %}
+                <option value="{{ course.course_name }}">{{ course.course_name }}</option>
+                {% endfor %}
+            </select>
+            <button id="ratingSortButton" class="btn btn-secondary" onclick="toggleRatingSort()">
+                <i class="fas fa-sort-amount-down"></i>
+            </button>
+        </div>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="feedbackTabContent">
+        <!-- Course Feedback Tab -->
+        <div class="tab-pane fade show active" id="course-feedback" role="tabpanel" aria-labelledby="course-feedback-tab">
+            <h3>Course Feedback</h3>
+
+            <table class="table table-striped" id="courseFeedbackTable">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Average Rating</th>
+                        <th>Comments</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in course_feedbacks %}
+                    <tr>
+                        <td>{{ feedback.course.course_name }}</td>
+                        <td>{{ feedback.average_rating }}</td>
+                        <td>{{ feedback.comments }}</td>
+                        <td>{{ feedback.created_at }}</td>
+                        <td>
+                            <a href="{% url 'feedback:course_feedback_detail' feedback.id %}" class="btn btn-info">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Instructor Feedback Tab -->
+        <div class="tab-pane fade" id="instructor-feedback" role="tabpanel" aria-labelledby="instructor-feedback-tab">
+            <h3>Instructor Feedback</h3>
+            <table class="table table-striped" id="instructorFeedbackTable">
+                <thead>
+                    <tr>
+                        <th>Instructor</th>
+                        <th>Average Rating</th>
+                        <th>Comments</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in instructor_feedbacks %}
+                    <tr>
+                        <td>{{ feedback.instructor.username }}</td>
+                        <td>{{ feedback.average_rating }}</td>
+                        <td>{{ feedback.comments }}</td>
+                        <td>{{ feedback.created_at }}</td>
+                        <td>
+                            <a href="{% url 'feedback:instructor_feedback_detail' feedback.id %}" class="btn btn-info">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterFeedback() {
+        const searchBar = document.getElementById('searchBar').value.toLowerCase();
+        const courseFilter = document.getElementById('courseFilter').value.toLowerCase();
+        const courseTable = document.getElementById('courseFeedbackTable');
+        const instructorTable = document.getElementById('instructorFeedbackTable');
+        const courseRows = courseTable.getElementsByTagName('tr');
+        const instructorRows = instructorTable.getElementsByTagName('tr');
+
+        filterRows(courseRows, courseFilter, searchBar);
+        filterRows(instructorRows, courseFilter, searchBar);
+    }
+
+    function filterRows(rows, courseFilter, searchBar) {
+        for (let i = 1; i < rows.length; i++) {
+            const courseOrInstructor = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+            const comments = rows[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+
+            let showRow = true;
+
+            if (courseFilter && courseOrInstructor !== courseFilter) {
+                showRow = false;
+            }
+
+            if (searchBar && !courseOrInstructor.includes(searchBar) && !comments.includes(searchBar)) {
+                showRow = false;
+            }
+
+            rows[i].style.display = showRow ? '' : 'none';
+        }
+    }
+
+    function filterInstructorFeedback() {
+        const instructorFilter = document.getElementById('instructorFilter').value.toLowerCase();
+        const searchBar = document.getElementById('instructorSearchBar').value.toLowerCase();
+        const table = document.getElementById('instructorFeedbackTable');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            const instructor = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+            const comments = rows[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+
+            let showRow = true;
+
+            if (instructorFilter && instructor !== instructorFilter) {
+                showRow = false;
+            }
+
+            if (searchBar && !comments.includes(searchBar)) {
+                showRow = false;
+            }
+
+            rows[i].style.display = showRow ? '' : 'none';
+        }
+    }
+
+    function toggleRatingSort() {
+        const button = document.getElementById('ratingSortButton');
+        const icon = button.querySelector('i');
+        const courseTable = document.getElementById('courseFeedbackTable');
+        const instructorTable = document.getElementById('instructorFeedbackTable');
+        const courseRows = Array.from(courseTable.getElementsByTagName('tr')).slice(1);
+        const instructorRows = Array.from(instructorTable.getElementsByTagName('tr')).slice(1);
+
+        let ascending = icon.classList.contains('fa-sort-amount-down');
+
+        sortRows(courseRows, ascending);
+        sortRows(instructorRows, ascending);
+
+        icon.classList.toggle('fa-sort-amount-down', !ascending);
+        icon.classList.toggle('fa-sort-amount-up', ascending);
+    }
+
+    function sortRows(rows, ascending) {
+        rows.sort((a, b) => {
+            const ratingA = parseFloat(a.getElementsByTagName('td')[1].textContent);
+            const ratingB = parseFloat(b.getElementsByTagName('td')[1].textContent);
+            return ascending ? ratingA - ratingB : ratingB - ratingA;
+        });
+
+        rows.forEach(row => row.parentNode.appendChild(row));
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Subjects{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Subjects for {{ program.program_name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            {% for subject in all_subjects %}
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="subjects" value="{{ subject.id }}"
+                        {% if subject in selected_subjects %} checked {% endif %}>
+                    <label class="form-check-label" for="{{ subject.id }}">{{ subject.name }}</label>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-4">Save Changes</button>
+        <a href="{% url 'training_program:training_program_list' %}" class="btn btn-secondary mt-4">Back to Training Program List</a>
+    </form>
+</div>
+{% endblock %}

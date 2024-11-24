@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<style>
+    .navbar-brand {
+        display: none !important;;
+    }
+</style>
+{% endblock %}
+{% block title %}Quiz{% endblock %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <style>
+        .container {
+            width: 100%; /* Chiếm toàn bộ chiều rộng màn hình */
+            padding: 0px; /* Thêm padding nhỏ để tránh nội dung dính sát mép màn hình */
+        }
+
+        @media (min-width: 768px) { /* Áp dụng cho màn hình từ medium trở lên */
+            #quizCards .col-md-4 {
+                flex: 0 0 33.333%; /* Mỗi card chiếm 1/3 chiều rộng */
+                max-width: 33.333%; /* Đảm bảo card không vượt quá 1/3 */
+            }
+        }
+         /* Thêm style cho màn hình nhỏ */
+        @media (max-width: 767px) {
+            #quizCards .col-md-4 {
+                flex: 0 0 100%; /* Mỗi card chiếm toàn bộ chiều rộng trên màn hình nhỏ */
+                max-width: 100%;
+            }
+        }
+
+        .quiz-card {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: none;
+        }
+
+        .card-title a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-text {
+            font-size: 0.8rem; /* Giảm kích thước chữ */
+            color: #555;
+            white-space: normal;
+        }
+
+        
+
+        .btn {
+            padding: 0.3rem 0.5rem; /* Điều chỉnh độ padding */
+            font-size: 0.8rem; /* Điều chỉnh kích thước chữ */
+        }
+
+        .btn-blue {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+        }
+
+        .btn-blue-green {
+            background-color: #0f9d58;
+            color: white;
+            border: none;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .actions .btn {
+            margin-left: 10px;
+        }
+
+        .footer-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-actions a{
+            font-size: 0.7rem; /* Điều chỉnh kích thước chữ theo ý muốn */
+        }
+
+        .copy-preview-duplicate a {
+            margin-right: 5px;
+            color: #4285f4;
+        }
+
+        .copy-preview-duplicate {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .category-tag {
+            background-color: #eee;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .stats-container {
+        display: flex;
+        justify-content: space-between; /* Căn chỉnh hai div con sang hai bên */
+        align-items: flex-start; 
+        margin-bottom: 15px;
+    }
+        .stats-container > div {
+            flex: 1 1 0; /* Cho phép co giãn và chiếm ít nhất một chút không gian */
+            min-width: 0; /*  Loại bỏ min-width để cho phép phần tử co lại */
+        }
+
+        .stats-container > div:first-child { /* Áp dụng cho phần tử chứa Course và Available Quiz */
+            margin-right: 0; /* Loại bỏ margin-right */
+            word-break: break-word; /* Cho phép xuống dòng cho nội dung dài */
+            flex-grow: 2;
+        }
+
+        .invited-assessed-qualified {
+            font-size: 0.8rem;
+            color: #888;
+            text-align: right; /* Căn phải nội dung */
+        }
+        .invited-assessed {
+            display: flex; /* Flexbox cho invited-assessed */
+            flex-direction: column; /* Sắp xếp theo cột */
+            margin-right: 20px; /* Thêm khoảng cách giữa hai phần */
+        }
+
+        .invited-assessed-qualified p {
+            margin: 0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .invited-assessed-qualified i {
+            margin-left: 5px;
+            font-size: 0.9rem;
+        }
+
+
+    
+        .form-control {
+            font-size: 0.8rem; /* Điều chỉnh kích thước chữ giống với card-text */
+            color: #555; /* Điều chỉnh màu chữ giống với card-text */
+        }
+
+        /* Định nghĩa độ dài cho thanh search và căn lề cho select */
+        .form-group.select-group {
+            flex: 1; /* Để thanh select co giãn theo chiều ngang */
+        }
+
+        .form-group.search-group {
+            flex: 3; /* Để thanh search dài hơn */
+        }
+
+        .form-inline {
+            width: 100%; /* Đảm bảo form inline chiếm toàn bộ chiều rộng */
+        }
+
+        /* Đặt độ dài của thanh select và search */
+        select.form-control {
+            min-width: 200px; /* Đặt chiều rộng tối thiểu cho thanh select */
+        }
+
+        input#searchInput {
+            width: 100%; /* Đặt chiều rộng của thanh search */
+        }
+
+
+        .qualifying {
+            text-align: left;
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .qualifying .progress {
+            width: 100px; /* Set a fixed width for the progress bar */
+            height: 8px; /* Adjust height as needed */
+            margin-left: 10px;
+            border-radius: 5px;
+        }
+
+        .qualifying small {
+            font-size: 0.8rem;
+            color: #555;
+            margin-right: 5px;
+        }
+
+        .progress-bar {
+            animation: progress-animation 1s ease-in-out; /* Thời gian và loại animation */
+        }
+
+        @keyframes progress-animation {
+            from {
+                width: 0%;
+            }
+            to {
+                width: {{ qualifying_percentage }}%; /* Kết thúc tại giá trị phần trăm thực tế */
+            }
+        }
+
+
+    </style>
+</head>
+
+<div class="container mt-4 ">
+    <h1 class="mb-4">Student Quiz</h1>
+
+    <div class="text-center mb-4">
+
+        <form method="GET" action="{% url 'std_quiz:quiz_list' %}" class="form-inline justify-content-center mt-3">
+            <div class="form-group select-group mx-2">
+                <select class="form-control" id="courseSelect" name="course" onchange="this.form.submit()">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                        <option value="{{ course.id }}" {% if course.id|stringformat:"s" == selected_course %}selected{% endif %}>
+                            {{ course.course_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group search-group mx-2">
+                <input type="text" class="form-control" placeholder="Search Quizzes..." id="searchInput" onkeyup="searchQuizzes()">
+            </div>
+        </form> 
+    </div>
+
+    <div class="row" id="quizCards">
+        {% for quiz_item in quiz_data %}
+        <div class="col-md-6">
+            <div class="quiz-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="title-description d-flex justify-content-between align-items-center">
+                            <div> 
+                                <h5 class="card-title">
+                                    <span class="description">{{ quiz_item.quiz.quiz_title }}</span>
+                                    <span class="small-description">{{ quiz_item.quiz.quiz_description }}</span>
+                                </h5>
+                            </div>                             
+                        </div>
+                        <div class="stats-container">
+                            <div>
+                                <p class="card-text"><strong>Course:</strong> {{ quiz_item.quiz.course }}</p>                
+                                <p class="card-text"><strong>Available:</strong> {{ quiz_item.quiz.start_datetime|date:"d M Y H:i" }} - {{ quiz.end_datetime|date:"d M Y H:i" }}</p>
+                                <p class="card-text"><strong>Time Limit:</strong> {{ quiz_item.quiz.time_limit }} minutes</p>
+                                <p class="card-text"><strong>Attempts Allowed:</strong> {{ quiz_item.quiz.attempts_allowed }}</p>
+                            </div>
+
+                            <div class="invited-assessed-qualified">
+                                <p style="margin-bottom: 0;">{{ quiz_item.marks }} Marks <i class="fa-regular fa-circle"></i></p>
+                                <p style="margin-bottom: 0;">{{ quiz_item.grade }} Grade <i class="fa-solid fa-circle"></i></p>
+                                
+                                
+                            </div>
+                            
+                        </div>   
+                        
+                        
+                        
+                        <div class="card-footer footer-actions">
+                            {% if quiz_item.quiz.questions.exists %}
+                                <a href="{% url 'std_quiz:take_quiz_invited' quiz_item.quiz.id %}" class="btn btn-blue btn-sm small-text" title="Preview quiz">
+                                    <i class="fas fa-play"></i> Re_attempt
+                                </a>
+                            {% else %}
+                                <span class="btn btn-blue btn-sm small-text disabled" title="No questions available">No questions </span>
+                                    
+                            {% endif %}
+                        
+                            {% if quiz_item.quiz.studentquizattempt_set.count > 0 %}
+                                <a href="{% url 'std_quiz:quiz_result_invited' quiz_item.quiz.id quiz_item.quiz.studentquizattempt_set.last.id %}" class="btn btn-blue-green btn-sm">
+                                    Result</a>
+                            {% else %}
+                                <span class="text-muted" style="font-size: 0.7rem;">No Attempts</span>
+                            {% endif %}
+                        
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p>No quizzes available.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function searchQuizzes() {
+    var input, filter, cards, card, i, txtValue;
+    input = document.getElementById("searchInput");
+    filter = input.value.toUpperCase();
+    cards = document.getElementsByClassName("quiz-card");
+
+    for (i = 0; i < cards.length; i++) {
+        card = cards[i];
+        txtValue = card.textContent || card.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            card.style.display = "";
+        } else {
+            card.style.display = "none";
+        }
+    }
+}
+
+    
+    
+    $(document).ready(function() {
+        $('.dropdown-toggle').click(function(event) {
+            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền
+            // Ẩn tất cả các dropdown khác
+            $('.dropdown-menu').not($(this).next('.dropdown-menu')).hide();
+            // Bật tắt dropdown hiện tại
+            $(this).next('.dropdown-menu').toggle();
+        });
+    
+        // Ẩn dropdown khi nhấp ra ngoài
+        $(document).click(function() {
+            $('.dropdown-menu').hide();
+        });
+    });
+        
+</script>
+
+{% endblock %}

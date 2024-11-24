@@ -1,0 +1,19 @@
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col-11">Lesson</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sub_module_looping in sub_modules %}
+      <tr class="{% if sub_module.pk %}{% if sub_module.pk == sub_module_looping.pk %}table-active{% endif %}{% endif %}">
+        <td id="sub_module_{{sub_module_looping.pk}}">
+          <a href="{% url "course_Truong:short_link_learning_view" course.pk sub_module_looping.pk%}">
+            {{ module.order }}.{{ sub_module_looping.order }}) {{ sub_module_looping.title }}
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+

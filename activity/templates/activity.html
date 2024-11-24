@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Activity Log{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4">User Activity Log</h2>
+    <form method="get" class="d-flex mb-4 gap-2">
+        <input type="text" name="search" class="form-control" placeholder="Search activity details..." value="{{ search_query }}">
+        
+        <label for="from_date" class="visually-hidden">From:</label>
+        <input type="date" id="from_date" name="from_date" class="form-control" value="{{ from_date }}">
+        
+        <label for="to_date" class="visually-hidden">To:</label>
+        <input type="date" id="to_date" name="to_date" class="form-control" value="{{ to_date }}">
+        
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th class="text-center">#</th>
+                <th>Activity Type</th>
+                <th>Details</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in activity_logs %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter0|add:activity_logs.start_index }}</td>
+                    <td>{{ log.get_activity_type_display }}</td>
+                    <td>{{ log.activity_details }}</td>
+                    <td>{{ log.activity_timestamp }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No activity records found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if activity_logs.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?search={{ search_query|urlencode }}&from_date={{ from_date|urlencode }}&to_date={{ to_date|urlencode }}&page={{ activity_logs.previous_page_number }}" aria-label="Previous">
+                        &laquo; Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if activity_logs.number > 3 %}
+                <li class="page-item">
+                    <a class="page-link" href="?search={{ search_query|urlencode }}&from_date={{ from_date|urlencode }}&to_date={{ to_date|urlencode }}&page=1">1</a>
+                </li>
+                {% if activity_logs.number > 4 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?search={{ search_query|urlencode }}&from_date={{ from_date|urlencode }}&to_date={{ to_date|urlencode }}&page=2">2</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endif %}
+
+            {% for num in activity_logs.paginator.page_range %}
+                {% if num >= activity_logs.number|add:'-2' and num <= activity_logs.number|add:'2' %}
+                    {% if num == activity_logs.number %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?search={{ search_query|urlencode }}&from_date={{ from_date|urlencode }}&to_date={{ to_date|urlencode }}&page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if activity_logs.number < activity_logs.paginator.num_pages|add:'-2' %}
+                {% if activity_logs.number < activity_logs.paginator.num_pages|add:'-3' %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link" href="?search={{ search_query|urlencode }}&from_date={{ from_date|urlencode }}&to_date={{ to_date|urlencode }}&page={{ activity_logs.paginator.num_pages }}">{{ activity_logs.paginator.num_pages }}</a>
+                </li>
+            {% endif %}
+
+            {% if activity_logs.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?search={{ search_query|urlencode }}&from_date={{ from_date|urlencode }}&to_date={{ to_date|urlencode }}&page={{ activity_logs.next_page_number }}" aria-label="Next">
+                        Next &raquo;
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

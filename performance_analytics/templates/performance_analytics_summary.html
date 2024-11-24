@@ -1,0 +1,236 @@
+{% extends "user_summary.html" %}
+
+
+{% block title %}Certificate{% endblock %}
+
+{% block content %}
+
+    
+<style>
+        /* Existing styles remain unchanged */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            /* padding: 20px; */
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tab:hover {
+            background-color: #d0d0d0;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 7px;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        /* New styles for progress bar */
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 10px 0;
+            height: 25px;
+        }
+        .progress-bar-performance {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%; /* Initial width; will be set dynamically */
+            border-radius: 5px;
+            transition: width 0.4s ease;
+        }
+    
+        /* Existing "My Courses" styles */
+        .course-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        .course-info {
+            display: flex;
+            align-items: center;
+        }
+        .course-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+        .course-icon img {
+        max-width: 100%;  /* Giới hạn chiều rộng của ảnh không vượt quá phần tử cha */
+        height: 100%;     /* Chiều cao tự động điều chỉnh theo tỷ lệ */
+        object-fit: fill; /* Đảm bảo ảnh vừa khít với phần tử cha */
+        display: block;   /* Loại bỏ khoảng trống dưới ảnh do inline elements */
+        }
+        .course-details {
+            margin-left: 10px;
+        }
+        .course-title {
+            font-size: 18px;
+            color: #0056b3;
+        }
+        .course-title:hover {
+            text-decoration: underline;
+        }
+        .institution {
+            font-size: 14px;
+            color: #888;
+        }
+        .grade {
+            font-size: 14px;
+            color: #000;
+        }
+        .add-linkedin {
+            background-color: #0077b5;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-linkedin:hover {
+            background-color: #005a87;
+        }
+    
+        
+    
+        .toggle-section {
+            color: #0056b3;
+            cursor: pointer; /* Thay đổi con trỏ thành hình bàn tay khi hover */
+        }
+    
+        /* Hiệu ứng gạch chân khi di chuột */
+        .toggle-section:hover {
+            text-decoration: underline;
+        }
+        
+    
+</style>
+<body>
+    <div class="container">
+        {{ block.super}}
+        
+
+        <div id="performance" class="tab-content active">
+            {% if page_obj %}
+            <div class="grid">
+                {% for data in page_obj %}
+                    <div class="card"> 
+                        <h2>{{ data.course }}</h2>
+                        <p><strong>Completion Rate:</strong> {{ data.completion_rate }}%</p>
+                        <div class="progress-container">
+                            <div class="progress-bar-performance" style="width: {{ data.completion_rate }}%"> <center>{{ data.completion_rate }}%</center></div> <!-- Set the width dynamically -->
+                        </div>
+                        <p><strong>Average Score:</strong> {{ data.average_score }}</p>
+                    </div>
+                {% endfor %}               
+            </div>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Next</a> 
+                        <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+            {% else %}
+                <center> <p>No performances found.</p> </center>
+            {% endif %}
+        </div>
+        </div>
+    </div>
+    <script>
+        // Function to store the active tab in localStorage
+        function setTab(tabName) {
+            localStorage.setItem('activeTab', tabName);
+            loadActiveTab();
+        }
+
+        // Function to load the active tab
+        function loadActiveTab() {
+            var activeTab = localStorage.getItem('activeTab') || 'performance'; // Default to 'certificates'
+
+            document.querySelectorAll('.tab').forEach(button => {
+                if (button.getAttribute('onclick').includes(activeTab)) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                if (content.id === activeTab) {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadActiveTab);
+    </script>
+
+</body>
+{% endblock %}
+

@@ -1,0 +1,9 @@
+<!-- reading_material_detail.html -->
+<!-- {% block title %}{{ reading_material.title }}{% endblock %} -->
+
+{% block content %}
+<h1>{{ reading_material.title }}</h1>
+<div class="reading-material-content">
+    {{ reading_material.content|safe }} <!-- Display the full content -->
+</div>
+{% endblock %}

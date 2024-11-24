@@ -1,0 +1,129 @@
+{% extends 'basePortal.html' %}
+{% block title %}Course Details{% endblock %}
+{% block content %}
+
+
+<div class="container mt-5">
+    <!-- Course Header -->
+    
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h1 class="card-title">{{ course.course_name }}</h1>
+            {% if course.instructor %}
+            <h6 class="card-subtitle text-muted">Instructor: 
+                <a href="{% url 'student_portal:instructor_profile' course.instructor.id %}">
+                    {{ course.instructor.get_full_name }} - {{ course.instructor.username }}
+                </a>
+            </h6>
+            {% else %}
+            <h6 class="card-subtitle text-muted">Instructor: Not assigned</h6>
+            {% endif %}
+
+            <p class="card-text mt-3"><strong>Description:</strong>: {{ course.description }}</p>
+            <p><strong>Users Enrolled:</strong> {{ users_enrolled_count }}</p>
+            
+            <!-- Average Rating -->
+            {% if course_average_rating %}
+                <strong>Average Rating:</strong>
+                {% for i in "12345"|make_list %}
+                    {% if course_average_rating|floatformat:1|add:"0.0" >= i %}
+                        <i class="fas fa-star text-warning"></i> <!-- Full Yellow Star -->
+                    {% else %}
+                        <i class="far fa-star text-muted"></i> <!-- Empty Star -->
+                    {% endif %}
+                {% endfor %}
+                <span class="ms-2">({{ course_average_rating|floatformat:1 }} / 5)</span>
+            {% else %}
+            <p class="text-muted mt-2">No ratings available</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="mt-auto text-center">
+        <a href="{% url 'student_portal:course_content' course.id sessions.0.id%}" class="btn btn-primary">Study</a>
+    {% if is_enrolled  %}
+        <a href="{% url 'student_portal:unenroll' course.pk %}" class="btn btn-outline-danger me-2" title="Click to unenroll">Unenroll</a>
+    {% else %}
+        <a href="{% url 'student_portal:enroll' course.id %}" class="btn btn-success me-2" title="Click to enroll">Enroll</a>
+    {% endif %}
+        <a href="{% url 'student_portal:course_list' %}" class="btn btn-secondary">Back to Courses</a>
+    </div>
+    <!-- Tags -->
+    {% if random_tags %}
+    <div class="mb-4">
+        <h5>Tags:</h5>
+        {% for tag in random_tags %}
+        <span class="badge bg-primary">{{ tag.name }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Prerequisites -->
+    {% if prerequisites %}
+    <div class="mb-4">
+        <h5>Prerequisites:</h5>
+        <ul class="list-group">
+            {% for prerequisite in prerequisites %}
+            <li class="list-group-item">{{ prerequisite.course_name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p class="text-muted">No prerequisites for this course.</p>
+    {% endif %}
+
+    <!-- Sessions -->
+    <div class="mb-4">
+        <h5>Sessions ({{ session_count }})</h5>
+        <ul class="list-group">
+            {% for session in sessions %}
+            <li class="list-group-item">{{ session.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Latest Feedbacks -->
+    {% if latest_feedbacks %}
+    <div class="mb-4">
+        <h5>Latest Feedback</h5>
+        <div class="list-group">
+            {% for feedback in latest_feedbacks %}
+            
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="mb-1"><strong>{{ feedback.student.get_full_name }} {{ feedback.student.username }}</strong> <small class="text-muted">- {{ feedback.created_at|date:"F j, Y" }}</small></p>
+                        <p class="mb-0">{{ feedback.comments|truncatewords:20 }}</p>
+                    </div>
+                    
+                    <div class="ms-2">
+                        
+                        <span class="ms-2">({{ course_average_rating|floatformat:1 }} / 5)</span>
+                        <div class="d-flex align-items-center mt-3">
+                            {% if course_average_rating %}
+                                <span class="text-warning">
+                                    {% for i in "12345"|make_list %}
+                                        {% if course_average_rating|floatformat:1|add:"0.0" >= i %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">No ratings yet</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <p class="text-muted">No feedback available yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

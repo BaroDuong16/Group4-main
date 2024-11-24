@@ -1,0 +1,57 @@
+<!-- templates/backup/list_backups.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>Backup / Restore</h1>
+
+    <!-- Search Form -->
+    <form method="get" class="mb-4">
+        <div class="row align-items-center">
+            
+            <div class="col-md-8">
+                {{ search_form.search_query }}
+            </div>
+            <div class="col-md-4">
+                
+                <button type="submit" class="btn btn-outline-primary">🔍 Search</button>
+                <a href="{% url 'backup:create_backup' %}" class="btn btn-primary">
+                    <i class="fas fa-database"></i> Create New Backup</a>
+            </div>
+        </div>
+    </form>
+
+
+
+    <!-- Backup Table -->
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>#</th>
+                <th>File Name</th>
+                <th>Size</th>
+                <th>Created At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for backup in backups %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ backup.file_name }}</td>
+                <td>{{ backup.size }}</td>
+                <td>{{ backup.created_at|date:"Y-m-d H:i:s" }}</td>
+                <td>
+                    <a href="{% url 'backup:restore_backup' backup.id %}" class="btn btn-success btn-sm">Restore</a>
+                    <a href="{% url 'backup:delete_backup' backup.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No backups found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

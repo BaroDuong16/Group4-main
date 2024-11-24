@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include Tab Navigation -->
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:course_overview_report' %}">Course Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:student_enrollment_report' %}">Student Enrollment</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:course_completion_report' %}">Course Completion</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:session_overview_report' %}">Session Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:material_usage_report' %}">Material Usage</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:enrollment_trends_report' %}">Enrollment Trends</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:material_type_distribution_report' %}">Material Type Distribution</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:tag_report' %}">Tag Report</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:user_progress_report' %}">User Progress</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:instructor_performance_report' %}">Instructor Performance</a>
+    </li>
+</ul>
+<h1>Instructor Performance Report</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Instructor</th>
+            <th>Enrollment Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for instructor in instructors %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ instructor.instructor.username }}</td>
+            <td>{{ instructor.enrollment_count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Module Group,Add New Module Group" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Module Group,Add New Module Group" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.group_name.label_tag }}
+            {{ form.group_name|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'module_group:module_group_list' %}" class="btn btn-secondary">Back to Module Group List</a>
+    </form>
+</div>
+{% endblock %}

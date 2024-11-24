@@ -1,0 +1,550 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Content for {{ course.course_name }}{% endblock %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body id="content-edit" >
+    <div class="custom-container mx-auto p-8 bg-white rounded-lg shadow-xl">
+        <h2 class="text-2xl font-semibold text-teal-600 mb-4 main-color-text">Edit {{ course.course_name }}</h2>
+        <div class="tab-container">
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'Tab1')">Detail</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab2')">Sessions</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab3')">Topic-Tags</button>
+                <button class="tablinks active" onclick="openTab(event, 'Tab4')">Course Materials</button>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="marked_for_deletion" id="marked-for-deletion" value="">
+            <div id="Tab1" class="tabcontent"></div>
+            <div id="Tab2" class="tabcontent"></div>
+            <div id="Tab3" class="tabcontent"></div>
+
+            <div id="Tab4" class="tabcontent" style="display: block; ">
+                <!-- Session Navigation -->
+                <div class="sub-navbar" style="background-color: #389bb0; padding: 3px; border-radius: 10px; margin-bottom: 12px; position: relative; display: flex; align-items: center; justify-content: space-between;">
+                    <button id="scroll-left" type="button" style="background-color: #fff; border: none; cursor: pointer; padding: 5px; border-radius: 50%;">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div id="session-buttons-container">
+                        {% for session in sessions %}
+                            <button type="submit" name="session_id" value="{{ session.id }}" class="btn"
+                                    style="background-color: transparent;
+                                        color: {% if session.id == selected_session.id %} #FFD700 {% else %} white {% endif %};
+                                        border: none;
+                                        margin-right: 10px; /* Adjust margin for all buttons */
+                                        font-size: 16px;
+                                        font-weight: bold;
+                                        padding: 10px 15px;">
+                                {{ session.name }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                    <button id="scroll-right" type="button" style="background-color: #fff; border: none; cursor: pointer; padding: 5px; border-radius: 50%;">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Content Wrapper -->
+                <div class="content-wrapper" style=" max-width: 2800px; ">
+                    <!-- Existing Materials Display Section -->
+                    <div class="material-list">
+                        <h2 style="margin: 0; font-size: 27px; margin-bottom: 8px;">Material</h2>
+
+                        <!-- Fixed Buttons Section -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; align-items: center;">
+                                <button type="button" id="add-reading-material" class="btn btn-secondary" style="border: none; background: none; display: flex; align-items: center;">
+                                    <i class="fas fa-plus-circle" style="font-size: 24px; color: #389bb0;"></i>
+                                    <span style="margin-left: 8px; color: #389bb0;">Add New Material</span>
+                                </button>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <button type="button" id="add-uploaded-pdf" class="btn btn-secondary" style="border: none; background: none; display: flex; align-items: center; margin-left: 3px;">
+                                    <i class="fas fa-file-upload" style="font-size: 24px; color: #389bb0;"></i>
+                                    <span style="margin-left: 10px; color: #389bb0;">Add PDF</span>
+                                </button>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <a href="{% url 'course:reorder_course_materials' course.pk selected_session.id %}" class="btn btn-secondary" style="border: none; background: none; display: flex; align-items: center;">
+                                    <i class="fas fa-arrows-alt" style="font-size: 24px; color: #389bb0;"></i>
+                                    <span style="margin-left: 10px; color: #389bb0;">Reorder Material</span>
+                                </a>
+                            </div>
+                            <!-- Nút Select assessment -->
+                            <div class="form-group" style="flex: 1; margin-bottom: 20px;">
+                                <h3 style="color: #389bb0; margin-bottom: 10px;">Assessment</h3>
+                                <div class="mb-4">
+                                    {% if assessments %}
+                                        <select name="assessment_id[]" id="assessment-select" class="select2" multiple style="width: 100%;">
+                                            {% for assessment in assessments %}
+                                                <option value="{{ assessment.id }}">
+                                                    {{ assessment.title }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        <p class="text-muted">No assessments available.</p>
+                                    {% endif %}
+                                </div>
+                                <input type="hidden" name="deleted_assessment_ids" id="deleted-assessment-ids">
+                            </div>
+                        </div>
+
+                        <hr style="margin: 20px 0; border: none; border-top: 3px solid #000;">
+
+                        <!-- Scrollable Files Section -->
+                        <div class="material-container">
+                            {% for reading_material in reading_materials %}
+                                <div class="material-item">
+                                    <div class="material-info">
+                                        <span class="index-number">{{ forloop.counter }}.</span>
+                                        <a href="#" class="title" data-id="{{ reading_material.id }}">{{ reading_material.title }}</a>
+                                    <span class="material-type">({{ reading_material.material.material_type|capfirst }})</span>
+                                    </div>
+                                    <div class="material-actions">
+                                        <a href="{% url 'course:edit_reading_material' course.pk selected_session.id reading_material.id %}" class="btn btn-warning" style="padding: 5px 10px; font-size: 14px; line-height: 1;">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <span class="trash-can" style="cursor: pointer; color: gray; margin-left: 10px;" data-id="{{ reading_material.id }}" data-type="{{ reading_material.material.material_type }}">
+                                            <i class="fas fa-trash"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="material-item">No materials available.</div>
+                            {% endfor %}
+                            <!-- Display the selected assessment if it exists -->
+                            {% for assessment in current_assessments %}
+                                <div class="material-item">
+                                    <div class="material-info">
+                                        <span class="index-number">{{ forloop.counter }}.</span>
+                                        <a href="#" class="title" data-id="{{ assessment.id }}">{{ assessment.title }}</a>
+                                    <span class="material-type">({{ assessment.material_type|capfirst }})</span>
+                                    </div>
+                                    <div class="material-actions">
+                                        <span class="trash-can" style="cursor: pointer; color: gray; margin-left: 10px;" data-id="{{ assessment.material_id }}" data-type="{{ assessment.material_type }}">
+                                            <i class="fas fa-trash"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="material-item">No assessments available.</div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                    <div class="new-content">
+                        <h2 style="margin: 0; font-size: 27px; margin-bottom: 8px;">Add New Content</h2>
+
+                        <!-- Area to show selected reading material -->
+                        <div id="content-display" style="border: 1px solid #ccc; padding: 15px; margin-top: 20px; display: none;">
+                            <div id="content-preview" style="margin-top: 10px;"></div>
+                        </div>
+
+                        <div id="reading-materials">
+                            <div class="reading-material-entry" style="display: flex; align-items: flex-start; margin-bottom: 10px; font-size: 36px; font-weight: bold;">
+                                <div style="flex-grow: 1;">
+                                    <input type="text" name="reading_material_title[]" class="form-control" value="{{ selected_session.name }}" placeholder="Reading Material Title">
+                                    <textarea name="reading_material_content[]" class="form-control ckeditor" placeholder="Content"></textarea>
+                                    <select name="reading_material_type[]" class="form-control" style="margin-top: 10px;">
+                                        <option value="" disabled {% if material_types|length == 0 %}selected{% endif %}>Select Material Type</option>
+                                        {% for key, value in material_types.items %}
+                                            {% if key != 'assessments' %} <!-- Exclude "Assessments" option -->
+                                                <option value="{{ key }}" {% if key == 'lectures' %}selected{% endif %}>{{ value }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <span class="delete-reading-material" style="cursor: pointer; color: red; margin-left: 10px;">&times;</span>
+                            </div>
+                        </div>
+
+                        <div id="uploaded-pdfs" style="margin-bottom: 10px;"></div>
+                    </div>
+                </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: -10px; padding-right: 55px;">
+                        <button type="submit" class="btn btn-primary" style="background-color: #389bb0; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; margin-right: 10px;">
+                            Save
+                        </button>
+                        <a href="{% url 'course:course_list' %}" style="background-color: gray; color: white; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; text-decoration: none;">
+                            Return to Course List
+                        </a>
+                    </div>
+            </div>
+        </form>
+    </div>
+</body>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    document.getElementById('scroll-left').addEventListener('click', function() {
+        const container = document.getElementById('session-buttons-container');
+        container.scrollBy({
+            top: 0,
+            left: -150, // Adjust this value as needed for the scroll amount
+            behavior: 'smooth'
+        });
+    });
+
+    document.getElementById('scroll-right').addEventListener('click', function() {
+        const container = document.getElementById('session-buttons-container');
+        container.scrollBy({
+            top: 0,
+            left: 150, // Adjust this value as needed for the scroll amount
+            behavior: 'smooth'
+        });
+    });
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if (tabName === 'Tab1') {
+            var courseId = {{ course.pk }};
+            localStorage.setItem("activeTab", "Tab1");
+            window.location.href = `/course/edit/${courseId}/details/`;
+        } else if (tabName === 'Tab2') {
+            var courseId = {{ course.pk }};
+            localStorage.setItem("activeTab", "Tab2");
+            window.location.href = `/course/edit/${courseId}/sessions/`;
+        } else if (tabName === 'Tab3') {
+            var courseId = {{ course.pk }};
+            localStorage.setItem("activeTab", "Tab3");
+            window.location.href = `/course/edit/${courseId}/topic-tags/`;
+        } else {
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+            localStorage.setItem("activeTab", tabName);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let savedTab = localStorage.getItem("activeTab") || "Tab4";
+        let defaultTabButton = document.querySelector(`.tablinks[onclick="openTab(event, '${savedTab}')"]`);
+        if (defaultTabButton) {
+            defaultTabButton.click();
+        }
+    });
+
+    let readingMaterialCounter = 1;
+    let markedForDeletion = []; // Array to keep track of marked materials
+
+    function clearReadingMaterials() {
+        const readingMaterialsContainer = document.getElementById('reading-materials');
+        readingMaterialsContainer.innerHTML = '';
+    }
+
+    function clearUploadedPdfs() {
+        const uploadedPdfsContainer = document.getElementById('uploaded-pdfs');
+        uploadedPdfsContainer.innerHTML = '';
+    }
+
+    function addRMEntry(sessionName) {
+        clearUploadedPdfs();
+        clearContentPreview(); // Clear content display when adding new material
+        const container = document.getElementById('reading-materials');
+        const newEntry = document.createElement('div');
+        newEntry.className = 'reading-material-entry';
+        newEntry.style.display = 'flex';
+        newEntry.style.alignItems = 'flex-start';
+        newEntry.style.marginBottom = '10px';
+        newEntry.style.fontSize = '36px';
+        newEntry.style.fontWeight = 'bold';
+
+        newEntry.innerHTML = `
+            <div style="flex-grow: 1; width: 100%;">
+            <input type="text" name="reading_material_title[]" class="form-control" value="${sessionName}" placeholder="Reading Material Title">
+                <textarea name="reading_material_content[]" class="form-control ckeditor" placeholder="Content"></textarea>
+                <select name="reading_material_type[]" class="form-control" style="margin-top: 10px;">
+                    <option value="" disabled {% if material_types|length == 0 %}selected{% endif %}>Select Material Type</option>
+                    {% for key, value in material_types.items %}
+                        <option value="{{ key }}" {% if key == 'lectures' %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <span class="delete-new-reading-material" style="cursor: pointer; color: red; margin-left: 10px;">&times;</span>
+        `;
+
+        container.appendChild(newEntry);
+        const newTextarea = newEntry.querySelector('textarea');
+        initializeCKEditor(newTextarea);
+        attachDeleteButton(newEntry.querySelector('.delete-new-reading-material'));
+        readingMaterialCounter++;
+    }
+
+    function initializeCKEditor(textarea) {
+        CKEDITOR.replace(textarea, {
+            height: 300,
+            versionCheck: false,
+        });
+    }
+
+    function addPDFEntry() {
+        clearReadingMaterials();
+        clearContentPreview(); // Clear content display when adding new material
+        const container = document.getElementById('uploaded-pdfs');
+        const newEntry = document.createElement('div');
+        newEntry.className = 'pdf-upload-entry';
+        newEntry.style.display = 'flex';
+        newEntry.style.alignItems = 'flex-start';
+        newEntry.style.fontSize = '36px';
+        newEntry.style.fontWeight = 'bold';
+        newEntry.innerHTML = `
+            <div style="flex-grow: 1; margin-bottom: 5px;">
+                <input type="file" name="uploaded_material_file[]" class="form-control" accept="application/pdf" style="margin-bottom: 5px;" multiple>
+                <select name="uploaded_material_type[]" class="form-control" style="margin-bottom: 5px;">
+                    <option value="" disabled {% if material_types|length == 0 %}selected{% endif %}>Select Material Type</option>
+                    {% for key, value in material_types.items %}
+                        {% if key != 'assessments' %} <!-- Exclude "Assessments" option -->
+                            <option value="{{ key }}" {% if key == 'lectures' %}selected{% endif %}>{{ value }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <span class="delete-pdf-upload" style="cursor: pointer; color: red; margin-left: 10px;">&times;</span>
+        `;
+
+        container.appendChild(newEntry);
+        attachDeletePDFButton(newEntry.querySelector('.delete-pdf-upload'));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCKEditor(document.querySelector('.ckeditor'));
+        const sessionName = "{{ selected_session.name }}";
+
+        document.getElementById('add-reading-material').addEventListener('click', function() {
+            addRMEntry(sessionName);
+        });
+
+        document.querySelectorAll('.delete-reading-material').forEach(button => {
+            attachDeleteButton(button);
+        });
+
+        // Attach click handler to trash cans for marking deletion
+        document.querySelectorAll('.trash-can').forEach(button => {
+            attachTrashcanAction(button);
+        });
+
+        document.getElementById('add-uploaded-pdf').addEventListener('click', function() {
+            addPDFEntry();
+        });
+    });
+
+    function toggleTrashcanColor(event) {
+        const icon = event.currentTarget.querySelector('i');
+        icon.classList.toggle('trashcan-active');
+    }
+
+    function attachTrashcanAction(button) {
+        button.addEventListener('click', function(event) {
+            const materialId = event.currentTarget.getAttribute('data-id');
+            const materialType = event.currentTarget.getAttribute('data-type');
+
+            // Toggle the color for visual feedback
+            toggleTrashcanColor(event);
+
+            // Mark or unmark the material for deletion
+            const itemKey = `${materialId}:${materialType}`;
+            if (markedForDeletion.includes(itemKey)) {
+                markedForDeletion = markedForDeletion.filter(item => item !== itemKey);
+            } else {
+                markedForDeletion.push(itemKey);
+            }
+
+            // Update the hidden input with the marked items
+            document.getElementById('marked-for-deletion').value = markedForDeletion.join(',');
+        });
+    }
+
+    function deleteMarkedMaterials() {
+        const idsToDelete = document.getElementById('marked-for-deletion').value.split(',');
+        idsToDelete.forEach(item => {
+            const [materialId, materialType] = item.split(':');
+            fetch(`/course-material/delete/${materialId}/${materialType}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => {
+                if (response.ok) {
+                    const entry = document.querySelector(`.trash-can[data-id="${materialId}"][data-type="${materialType}"]`).closest('li');
+                    entry.parentNode.removeChild(entry);
+                } else {
+                    console.error('Failed to delete material.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+
+    // Call deleteMarkedMaterials on form submission
+    document.querySelector('form').addEventListener('submit', function(event) {
+        deleteMarkedMaterials();
+    });
+
+    function attachDeletePDFButton(button) {
+        button.addEventListener('click', function() {
+            const entry = this.parentNode;
+            entry.parentNode.removeChild(entry);
+        });
+    }
+
+    function attachDeleteButton(button) {
+        button.addEventListener('click', function() {
+            const entry = this.closest('.reading-material-entry');
+            if (entry) {
+                entry.parentNode.removeChild(entry);
+            }
+        });
+    }
+    // Function to handle material item click
+    function attachMaterialClickEvent(materialLink, readingMaterial) {
+        materialLink.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            const contentDisplay = document.getElementById('content-display');
+            const contentPreview = document.getElementById('content-preview');
+
+            // Clear previous content
+            contentPreview.innerHTML = '';
+
+            // Hide all existing cells
+            const allEntries = document.querySelectorAll('.reading-material-entry');
+            allEntries.forEach(entry => {
+                entry.style.display = 'none'; // Hide each entry
+            });
+            const allPDFEntries = document.querySelectorAll('.pdf-upload-entry');
+            allPDFEntries.forEach(entry => {
+                entry.style.display = 'none'; // Hide each PDF upload entry
+            });
+
+            // Fetch the content of the reading material
+            fetch(`/course/reading-material/${readingMaterial.id}/`) // Update with your URL pattern
+                .then(response => response.text())
+                .then(content => {
+                    contentPreview.innerHTML = content; // Display the content
+                    contentDisplay.style.display = 'block'; // Show the display area
+                })
+                .catch(error => console.error('Error fetching material content:', error));
+        });
+    }
+
+
+    // Attach click event to each material title link
+    document.querySelectorAll('.material-item .title').forEach(materialLink => {
+        const materialId = materialLink.getAttribute('data-id');
+        attachMaterialClickEvent(materialLink, { id: materialId });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.material-item .title').forEach(materialLink => {
+            materialLink.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent the default link behavior
+                const readingMaterialId = this.getAttribute('data-id') || this.getAttribute('href').split('/').pop(); // Extract ID
+
+                // Clear previous content
+                const contentDisplay = document.getElementById('content-display');
+                const contentPreview = document.getElementById('content-preview');
+                contentPreview.innerHTML = '';
+
+                // Fetch the content of the reading material
+                fetch(`/course/reading-material/${readingMaterialId}/`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json(); // Ensure this returns JSON if you're processing as such
+                    })
+                    .then(data => {
+                        contentPreview.innerHTML = data.content; // Display the content
+                        contentDisplay.style.display = 'block'; // Show the display area
+
+                        // Optionally, hide the 'Add New Content' area
+                        document.getElementById('reading-materials').style.display = 'none';
+                    })
+                    .catch(error => console.error('Error fetching material content:', error));
+            });
+        });
+    });
+
+    function clearContentPreview() {
+        const contentDisplay = document.getElementById('content-display');
+        const contentPreview = document.getElementById('content-preview');
+
+        // Only clear the innerHTML, don't hide it immediately
+        contentPreview.innerHTML = ''; // Clear preview content
+
+        // If you want to hide the display only when it's not needed:
+        if (!contentPreview.innerHTML) {
+            contentDisplay.style.display = 'none'; // Hide content display only if there's no content
+        }
+    }
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select assessments",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Add this function to refresh the assessment list after deletion
+        function refreshAssessmentList() {
+            $.ajax({
+                url: window.location.href,
+                method: 'GET',
+                success: function(response) {
+                    // Extract the new assessment options from the response
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(response, 'text/html');
+                    const newOptions = doc.querySelector('#assessment-select').innerHTML;
+
+                    // Update the select element with new options
+                    $('#assessment-select').html(newOptions);
+                    $('#assessment-select').trigger('change'); // Refresh Select2
+                }
+            });
+        }
+
+        // Update the trash can click handler for assessments
+        $('.trash-can').on('click', function() {
+            const materialId = $(this).data('id');
+            const materialType = $(this).closest('.material-item').find('.material-type').text();
+
+            if (materialType.includes('Assessments')) {
+                // Add the assessment ID to deleted_assessment_ids
+                const currentDeleted = $('#deleted-assessment-ids').val();
+                $('#deleted-assessment-ids').val(currentDeleted ? `${currentDeleted},${materialId}` : materialId);
+
+                // Remove the material item from display
+                $(this).closest('.material-item').remove();
+
+                // Refresh the assessment select list
+                refreshAssessmentList();
+            }
+        });
+    });
+</script>
+{% endblock %}

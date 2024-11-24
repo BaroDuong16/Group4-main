@@ -1,0 +1,9 @@
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="form-group">
+        <textarea name="message" class="form-control" rows="3" placeholder="Edit your message...">{{ message.message }}</textarea>
+    </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>

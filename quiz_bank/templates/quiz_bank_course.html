@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+{% load form_filters %}
+
+{% block title %}Quiz Bank - {{ course.course_code }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <h2>Quiz Bank - {{ course.course_code }}</h2>
+    <h5>Course Full Name: {{ course.course_name }}</h5>
+    <div class="mt-3">
+      <button class="btn btn-success" title="Import Question Bank from Excel" data-toggle="modal" data-target="#importModal" data-toggle="tooltip">
+          <i class="fas fa-file-import"></i> Import
+      </button>
+      <p>
+        <span>
+          <form method="get">
+            Filter by: {{ filter_form.filter_by }}
+            <button class="btn btn-primary" type="submit">Filter</button>
+            <a class="btn btn-secondary" href="{% url 'quiz_bank:quiz_bank_course' course.id %}">Reset Filter</a>
+          </form>
+        </span>
+      </p>
+      
+    </div>
+    {% if is_shown %}
+    {% if question_count > 1 %}
+    <h5>Total: {{ question_count }} questions</h5>
+    {% else %}
+    <h5>Total: {{ question_count }} question</h5>
+    {% endif %}
+
+    <div class="mt-3">
+      <form method="post">
+        
+          {% csrf_token %}
+          
+          <div class="form-group">
+            <p>
+            <span>
+            Enter Number of Questions : 
+            {{ form.number_of_questions }}
+            <button type="submit" class="btn btn-primary" title="View Randomized Question for course {{course.code}}">
+              Show Randomized Questions
+            </button> 
+            {% if not is_valid %}
+            <span style="color: red;">Invalid Input (input must be an integer greater than 0)</span>
+            {% endif %}
+            
+          </span> 
+          </p>      
+          </div>
+  
+      </form>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Questions</th>
+                    <th>Question Type</th>
+                    <th>Answer Options</th>
+                    <th>Key</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in question_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ question.question }}</td>
+                    <td>{{ question.question_type }}</td>
+                    <td>
+                      {% if question.question_type != 'TEXT' %}
+                        <ul>
+                            {% for answer in question.options %}
+                            <li>
+                                {{ answer }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                      {% else %}
+                      N/A
+                      {% endif %}
+                    </td>
+                    <td>
+                      <ul>
+                        {% for key in question.correct %}
+                        <li>
+                            {{ key }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    </td>
+                    <td>
+                      <a href="{% url 'quiz_bank:edit_question' course_id=course.id question_id=question.id %}" class="btn btn-info btn-sm" title="Edit Question" data-toggle="tooltip">
+                        Edit
+                      </a>
+                      <a href="{% url 'quiz_bank:delete_question' course_id=course.id question_id=question.id %}" class="btn btn-primary btn-sm" title="Delete Question">
+                        Delete
+                      </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'quiz_bank:quiz_bank_view' %}" class="btn btn-secondary">Back to Question Bank - Home</a>
+    </div>
+    {% else %}
+    <p>Nothing to show here</p>
+    <a href="{% url 'quiz_bank:quiz_bank_view' %}" class="btn btn-secondary">Back to Question Bank - Home</a>
+    {% endif %}
+
+    
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importModalLabel">Import Question Bank from Excel</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Import Form -->
+        <form method="post" enctype="multipart/form-data" action="{% url 'quiz_bank:import_quiz_bank_from_page' course.id %}">
+        <div class="mb-4">
+          <span>
+            Please download and use the Excel template: 
+            <ul>
+              <li><a href="{% static 'excel/MCQ.xlsx' %}" target="_blank">MCQ (Multiple Choice Questions).</a></li>
+              <li><a href="{% static 'excel/TF.xlsx' %}" target="_blank">TF (True/False Questions).</a></li>
+              <li><a href="{% static 'excel/TEXT.xlsx' %}" target="_blank">TEXT (Text Answer Questions).</a></li>
+            </ul>
+            The Excel file must contain exactly one sheet with the required columns.
+          </span>
+        </div>
+        <div class="mb-4">
+          <span style="color: darkcyan;">
+            Note:
+            <ul>
+              <li>Please <span style="color: crimson;">double check the Course Code/Course Name</span> before importing.</li>
+              <li>And also, please use the excel template above and edit it <span style="color: crimson;">(except the first line which defines attributes)</span>.</li>
+              <li>If there is any question <span style="color: crimson;">got skipped</span>, maybe that question that has <span style="color: crimson;">already existed</span> in the question bank for the course.</li>
+            </ul>
+          </span>
+        </div>
+          {% csrf_token %}
+          <div class="form-group">
+            {{ form.question_type.label_tag }}
+            {{ form.question_type|add_class:"form-control" }}
+          </div>
+          
+    <label for="id_excel_file">Upload Excel File:</label>
+    <input type="file" name="excel_file" required="" aria-invalid="true" id="id_excel_file">
+          </p>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Upload</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <!-- Initialize Bootstrap Tooltips -->
+  <script>
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
+{% endblock %}

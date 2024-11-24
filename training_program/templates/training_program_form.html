@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% block title %}{{ form.instance.pk|yesno:"Edit Training Program,Add New Training Program" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Training Program,Add New Training Program" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.program_name.label_tag }}
+            {{ form.program_name|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.program_code.label_tag }}
+            {{ form.program_code|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.description.label_tag }}
+            {{ form.description|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'training_program:training_program_list' %}" class="btn btn-secondary">Back to Training Program List</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Training Program List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Training Program List</h2>
+    <a href="{% url 'training_program:training_program_add' %}" class="btn btn-primary"> <i class="fas fa-plus"></i> Add Training Program</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Actions</th>
+                <th>Manage Subjects</th> <!-- Added column for managing subjects -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for program in programs %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ program.program_name }}</td>
+                <td>{{ program.program_code }}</td>
+                <td>{{ program.description }}</td>
+                <td>
+                    <a href="{% url 'training_program:training_program_edit' program.pk %}" class="btn btn-warning btn-sm" title="Edit Training Program"><i class="fas fa-edit"></i></a>
+                    <a href="{% url 'training_program:training_program_delete' program.pk %}" class="btn btn-danger btn-sm" title="Delete Training Program"><i class="fas fa-trash"></i> </a>
+                </td>
+                <td>
+                    <a href="{% url 'training_program:training_program_manage_subjects' program.pk %}" class="btn btn-info btn-sm" title="Add subject to a training program ">Add Subjects</a>
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</div>
+{% endblock %}

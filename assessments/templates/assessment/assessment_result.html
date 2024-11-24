@@ -1,0 +1,86 @@
+{% extends 'basePortal.html' %}
+{% load static %}  <!-- Load static files -->
+{% block title %}{{ assessment.assessment_title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Assessment Results for {{ assessment.title }}</h2>
+    
+    <!-- Back to List Button -->
+    <div class="text-end mb-3">
+        <a href="{% url 'assessment:assessment_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">Quiz Answers</h3>
+        </div>
+    
+        <div class="alert alert-info text-center p-4 shadow-sm">
+            <h3 class="mb-0">Quiz Score: 
+                <strong class="text-primary">{{ score_quiz }}</strong> 
+            </h3>
+        </div>
+            
+        <div class="mt-4">
+            <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                <ul class="list-group">
+                    {% for answer in user_answers %}
+                        <li class="list-group-item">
+                            <strong>{{ forloop.counter }}. </strong> {{ answer.question.question_text }}<br>
+                            <ul class="list-group">
+                                {% for option in answer.question.answer_options.all %}
+                                    <li class="list-group-item 
+                                        {% if option in answer.selected_options.all %}
+                                            {% if option.is_correct %}list-group-item-success{% else %}list-group-item-danger{% endif %}
+                                        {% endif %}
+                                    ">
+                                        - {{ option.option_text }} 
+                                        {% if option in answer.selected_options.all %}
+                                            {% if option.is_correct %}
+                                                <span class="badge bg-success">Your Answer: Correct</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Your Answer: Incorrect</span>
+                                            {% endif %}
+                                        {% elif option.is_correct %}
+                                            <span class="badge bg-success">Correct</span>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            {% if not answer.selected_options.exists and answer.question.question_type == 'MCQ' %}
+                                <strong>Text Response:</strong> {{ answer.text_response|default:"No text response." }}
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">No answers submitted.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">Exercise Submissions</h3>
+        </div>
+        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+            <ul class="list-group">
+                {% for submission in user_submissions %}
+                    <li class="list-group-item">
+                        <strong>Exercise:</strong> {{ submission.exercise.title }}<br>
+                        <strong>Code Submitted:</strong>
+                        <pre class="bg-light p-2">{{ submission.code }}</pre>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">No submissions made.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="alert alert-primary" role="alert">
+        <h4 class="alert-heading">Total Assessment Score: {{ score_asm }}</h4>
+    </div>
+</div>
+{% endblock %}

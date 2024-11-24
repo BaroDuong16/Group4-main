@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mt-4">
+    <!-- Nút Back -->
+    <a href="{% url 'reports:report_dashboard' %}" class="btn btn-secondary mb-3">Back to Reports</a>
+</div>
+<style>
+    .nav-tabs .nav-link {
+        background-color: rgba(135, 206, 235, 0.6);  /* Màu xanh biển nhạt cho tất cả các tab */
+        color: #000;  /* Màu chữ đen */
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #fff;  /* Màu trắng cho tab đang hoạt động */
+        color: #000;  /* Màu chữ đen cho tab đang hoạt động */
+    }
+
+    .nav-tabs .nav-link:hover {
+        background-color: rgba(135, 206, 235, 0.8);  /* Màu xanh biển nhạt hơn khi hover */
+        color: #fff;  /* Màu chữ đen khi hover */
+    }
+</style>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_overview_report' %}">User Overview </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:student_id_report' %}">Student ID</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:role_report' %}">Role</a>
+    </li>   
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_statistics_report' %}">User Statistics</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:login_frequency_report' %}">Login Frequency</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_duration_login' %}">User Duration Login</a>
+    </li>
+</ul>
+<div class="container mt-4">
+    <h2 class="text-center">Login frequency</h2>  <!-- Sử dụng title động ở đây -->
+
+    <!-- Form chọn ngày -->
+    <form method="get" class="form-inline mb-4">
+        <label for="from_date">From date:</label>
+        <input type="date" id="from_date" name="from_date" class="form-control mx-2" value="{{ from_date }}">
+        
+        <label for="to_date">By date:</label>
+        <input type="date" id="to_date" name="to_date" class="form-control mx-2" value="{{ to_date }}">
+        
+    </form>
+
+    <!-- Biểu đồ tần suất đăng nhập -->
+    <canvas id="loginFrequencyChart" width="400" height="200"></canvas>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('loginFrequencyChart').getContext('2d');
+        const loginFrequencyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ times|safe }},
+                datasets: [{
+                    label: 'Number of logins',
+                    data: {{ counts|safe }},
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of logins'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Ngày'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Bảng tần suất đăng nhập -->
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Number of logins</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in login_frequency %}
+                <tr>
+                    <td>{{ record.day|date:"Y-m-d" }}</td>
+                    <td>{{ record.login_count }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center">There was no login activity during the selected time period.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Course Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% include "nav_tab.html" %}
+
+    <div class="row mb-2">
+        <div class="col-2">
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                {% for sub_course in sub_courses %}
+                <button
+                    class="nav-link {% if last_sub_course_pk %}{% if sub_course.pk == last_sub_course_pk %}active{% endif %}{% else %}{% if forloop.counter == 1 %}active{% endif %}{% endif %} text-left w-100 text-truncate"
+                    id="sub_course_id_{{ sub_course.pk }}_tab" data-toggle="pill" data-target="#sub_course_id_{{ sub_course.pk }}"
+                    type="button" role="tab" aria-controls="sub_course_id_{{ sub_course.pk }}"
+                    aria-selected="{% if last_sub_course_pk %}{% if sub_course.pk == last_sub_course_pk %}true{% endif %}{% else %}{% if forloop.counter == 1 %}true{% else %}false{% endif %}{% endif %}">
+                    {{ sub_course.order }}. {{ sub_course.title }}
+                </button>
+
+                {% endfor %}
+
+            </div>
+        </div>
+        <div class="col-10">
+            <div class="tab-content" id="v-pills-tab">
+                {% for sub_course, modules_and_quizzes in sub_courses.items %}
+                <div class="tab-pane fade {% if last_sub_course_pk %}{% if sub_course.pk == last_sub_course_pk %}active show{% endif %}{% else %}{% if forloop.counter == 1 %}active show{% endif %}{% endif %} pl-4"
+                    id="sub_course_id_{{ sub_course.pk }}" role="tabpanel" aria-labelledby="sub_course_id_{{ sub_course.pk }}_tab"
+                    style="border-left: solid 1px black;">
+
+                    <h3 class="mb-4"><strong>Title</strong>: {{ sub_course.title }}</h3>
+
+                    <div class="dropdown">
+                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-toggle="dropdown"
+                            aria-expanded="false">
+                            Actions
+                        </a>
+
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'course_Truong:sub_course_edit' course.pk sub_course.pk%}">Edit</a>
+                            <a class="dropdown-item"
+                                href="{% url 'course_Truong:sub_course_delete' course.pk sub_course.pk%}">Delete</a>
+                            <a class="dropdown-item" href="{% url 'course_Truong:sub_course_move_up' course.pk sub_course.pk%}">Move
+                                Up</a>
+                            <a class="dropdown-item"
+                                href="{% url 'course_Truong:sub_course_move_down' course.pk sub_course.pk%}">Move Down</a>
+                        </div>
+                    </div>
+                    <hr>
+                    <h3>Module</h3>
+                    {% include "module_management/module_collapse.html" %}
+                    <a href="{% url "course_Truong:module_add" course.pk sub_course.pk %}" class="btn btn-info">Add Module</a>
+                    <hr>
+                    <h3>Quiz</h3>
+                    {% include "quiz_management/quiz_collapse.html" %}
+                    <a href="{% url 'course_Truong:quiz_add' course.pk sub_course.pk %}" class="btn btn-info">Add Quiz</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'course_Truong:sub_course_add' course.pk%}" class="btn btn-primary">Add sub course</a>
+    <a href="{% url 'course_Truong:course_list'%}" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}

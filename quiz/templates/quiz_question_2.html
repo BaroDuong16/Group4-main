@@ -1,0 +1,571 @@
+<!-- quiz_question.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<div class="mb-2">
+    <a href="{% url 'quiz:quiz_detail' quiz.id %}" class="btn btn-link"><i class="fas fa-arrow-left"></i> Back to Detail</a>
+</div>
+
+<div class="container mt-4 text-center">
+    <h2>{{ quiz.quiz_title }}</h2>
+    <p class="small-description">{{ quiz.quiz_description }} - {{quiz.created_at}}</p>
+
+    <!-- Search bar moved above questions section -->
+    <div class="form-group mb-4">
+        <form id="searchForm" method="GET" action="{% url 'quiz:quiz_question' pk=quiz.id %}" onsubmit="return handleSubmit()">
+            <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search questions..." value="{{ search_query }}" style="width: 60%; margin: auto;" oninput="handleInput()">
+        </form>
+    </div>
+
+    <div class="row">
+
+        <!-- Questions Section -->
+        <div class="col-md-5">  
+            <div class="card">
+                
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-center" style="flex: 1;">Questions</h5> <!-- Centered title -->
+<!--TOGGLE ADDQUESTION FORM--> <button type="button" class="btn btn-primary btn-sm" onclick="toggleAddQuestionForm()" style="padding: 0.1rem 0.4rem;">
+                        <i class="fas fa-plus"></i> 
+                    </button>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Add Question Form -->
+                    <div id="addQuestionFormContainer" style="display: none;">   <!--DIV   ADDQUESTION FORM CONTAINER -->
+                        <form method="POST" id="addQuestionForm">     <!--FORM   ADD QUESTION -->
+                            {% csrf_token %}
+                            <input type="hidden" name="add_question" value="true">    
+
+                            <div class="mb-3">  <!-- Question Text -->
+                                <label for="{{ question_form.question_text.id_for_label }}" class="form-label">Question:</label>
+                                {{ question_form.question_text.errors }}
+                                {{ question_form.question_text|add_class:"form-control" }}
+                            </div>
+                        
+                            <div class="mb-3">  <!-- Question Type -->
+                                <label for="{{ question_form.question_type.id_for_label }}" class="form-label">Type:</label>
+                                {{ question_form.question_type.errors }}
+                                {{ question_form.question_type|add_class:"form-select" }}
+                            </div>
+                        
+                            <div class="mb-3">  <!-- Points -->
+                                <label for="{{ question_form.points.id_for_label }}" class="form-label">Points:</label>
+                                {{ question_form.points.errors }}
+                                {{ question_form.points|add_class:"form-control" }}
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-save"></i> Save</button>
+                        </form>
+                    </div>
+
+                    <div style="height: 12px;"></div>
+                    
+                    <!-- Questions List -->
+                    <ul class="list-group" id="questionList" style="max-height: 350px; overflow-y: auto;"> <!--ID QUESTION LIST -->
+                        {% if questions %}
+                            {% for question in questions %}
+<!--CLASS QUESTION ITEM -->         <li class="list-group-item question-item d-flex justify-content-between align-items-center border-bottom" data-question-id="{{ question.id }}">
+                                    <div class="question-area flex-grow-1">
+<!--CLASS QUESTION DISPLAY -->          <div class="question-display" id="question-display-{{ question.id }}">
+                                            <div class="text-left">
+                                                <strong>{{ forloop.counter }}.</strong> {{ question.question_text }}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Edit Form -->
+<!--ID CLASS: Edit Form -->                 <div id="editForm-{{ question.id }}" style="display: none; width: 100%; margin-top: 5px;" class="edit-form">
+<!--fORM CLASS: Edit QUESTION Form -->      <form method="post" action="{% url 'quiz:quiz_question' quiz.id %}" class="edit-question-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="edit_question" value="true">
+                                                <input type="hidden" name="question_id" value="{{ question.id }}">
+
+                                                <div class="input-group">
+                                                    <textarea name="question_text" class="form-control form-control-sm" rows="2">{{ question.question_text }}</textarea>
+                                                    <div class="input-group-append">
+                                                        <button type="submit" class="btn btn-sm btn-link text-success ">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-link text-danger" onclick="hideEditForm({{ question.id }})">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <input type="hidden" name="question_type" value="{{ question.question_type }}">
+                                                <input type="hidden" name="points" value="{{ question.points }}">
+                                            </form>
+                                        </div>
+                                    </div>    
+                                    <div class="edit-controls">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-link text-primary edit-question" data-question-id="{{ question.id }}" onclick="toggleEditForm({{ question.id }})">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+                                            <form method="post" action="{% url 'quiz:question_delete' question.id %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-link text-danger p-0" 
+                                                onclick="return confirm('Are you sure you want to delete this question?')">
+                                                    <i class="fas fa-times" style="font-size: 20px; color: gray;"></i>
+                                                </button>
+                                            </form>
+                                        </div>    
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item text-center">No questions available</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Answer Section -->
+        <div class="col-md-7">  
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-center" style="flex: 1;">Add/Edit Answers</h5>  
+                </div>
+                <div class="card-body" id="answerFormContainer" style="display: none;">
+                    <div id="answerDisplay"></div>   
+                    <div class="d-flex justify-content-end"> 
+                        <button type="button" class="btn btn-light btn-sm mb-2" id="editButton" style="display:none;" onclick="editAnswers()">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    </div> 
+                    <form method="POST" id="addAnswerForm" style="display:none;">  
+                        {% csrf_token %}
+                        <input type="hidden" name="question_id" id="selectedQuestionId" value="">
+                        <div id="answerOptionsContainer"></div>
+                        <button type="button" class="btn btn-primary me-2 btn-md" onclick="addNewAnswerField()">
+                            <i class="fas fa-plus"></i> Add Answer
+                        </button>
+
+                        <div id="newAnswerField" style="display: none;">
+                            <label for="new_option_text">New Answer:</label>
+                            <input type="text" class="form-control" name="new_option_text" id="new_option_text">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="new_is_correct" id="new_is_correct">
+                                <label class="form-check-label" for="new_is_correct">Is Correct</label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="removed_answers" id="removedAnswers" value="">
+                        <input type="hidden" name="edit_answers" value="true">
+
+                        <button type="submit" class="btn btn-success btn-md">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>       
+    </div>
+</div>
+
+
+<script>
+
+    // JavaScript to handle question/answer display and form toggle
+
+    const questionItems = document.querySelectorAll('.question-item');                  // QUESTION ITEM
+    const answerFormContainer = document.getElementById('answerFormContainer');         // ANSWER FORM CONTAINER
+    const answerDisplay = document.getElementById('answerDisplay');                     //ANSWER DISPLAY
+    const addAnswerForm = document.getElementById('addAnswerForm');                     // ADD ANSWER FORM
+    const answerOptionsContainer = document.getElementById('answerOptionsContainer');   //ANSWER OPTION
+    const selectedQuestionIdInput = document.getElementById('selectedQuestionId');      //SELECTED CONTAINER
+    const editButton = document.getElementById('editButton');                           //EDIT BUTTON
+    let currentlyOpenQuestion = null; // Track currently open question               
+
+
+    function toggleAddQuestionForm() {
+        const addQuestionFormContainer = document.getElementById('addQuestionFormContainer');
+        addQuestionFormContainer.style.display = addQuestionFormContainer.style.display === 'none' ? 'block' : 'none';
+    }
+
+    questionItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const questionId = item.dataset.questionId;
+
+            if (currentlyOpenQuestion === questionId) {
+                // Clicking the already open question - close it
+                item.classList.remove('highlight');
+                answerFormContainer.style.display = 'none';
+                answerDisplay.innerHTML = '';
+                currentlyOpenQuestion = null;
+            } else {
+                // Clicking a different question - open it (and close any previously open one)
+                if (currentlyOpenQuestion !== null) {
+                    // A question is currently open, so close it first
+                    const previouslyOpenItem = document.querySelector(`.question-item[data-question-id="${currentlyOpenQuestion}"]`);
+                    if (previouslyOpenItem) {
+                    previouslyOpenItem.classList.remove('highlight');
+                    }
+                }
+
+
+                item.classList.add('highlight');
+                answerFormContainer.style.display = 'block';
+                addAnswerForm.style.display = 'none';
+                editButton.style.display = 'block';
+                loadAnswers(questionId);
+                currentlyOpenQuestion = questionId;
+                selectedQuestionIdInput.value = questionId; // Update the hidden input field
+
+            }
+        });
+    });
+
+    // Handle Edit button click
+    editButton.addEventListener('click', () => {
+        const questionId = selectedQuestionIdInput.value;
+        loadAnswersForEditing(questionId); // Load answers into edit form
+        addAnswerForm.style.display = 'block';  // Show edit form
+        editButton.style.display = 'none';    // Hide edit button
+        answerDisplay.innerHTML = '';         // Clear displayed answers
+    });
+
+    // Load answers to display or edit
+    function loadAnswers(questionId) {
+        fetch(`/quiz/get_answers/${questionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                answerDisplay.innerHTML = ''; // Clear the display area first
+                if (data.answers.length === 0) { // Check if there are no answers
+                    loadAnswersForEditing(questionId); // Load the edit form directly
+                    addAnswerForm.style.display = 'block';
+                    editButton.style.display = 'none';  // Hide the edit button
+                } else {
+                    answerDisplay.innerHTML = data.answers.map((answer, index) => {
+                        // Calculate the alphabet letter based on the index
+                        const alphabet = String.fromCharCode(65 + index); // 65 is the ASCII code for 'A'
+                        return `
+                            <div class="answer-card mb-3 p-3 border border-light rounded shadow-sm text-start position-relative">
+                                <p class="mb-0" style="text-align: left;"><strong>${alphabet}.</strong> ${answer.option_text}</p>
+                                ${answer.is_correct ? '<i class="fas fa-check-circle position-absolute" style="color: green; right: 10px; top: 10px; font-size: 1.5rem;"></i>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+            });
+    }
+
+
+    // Load answers into the editing form
+    function loadAnswersForEditing(questionId) {
+        fetch(`/quiz/get_answers/${questionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                answerOptionsContainer.innerHTML = ''; // Clear previous answers
+                data.answers.forEach(answer => {
+                    addAnswerField(answer); 
+                });
+            });
+    }
+
+    // Function to dynamically add answer fields for editing
+    function addAnswerField(answerData = null) {
+        const newAnswerDiv = document.createElement('div');
+        newAnswerDiv.className = 'form-group mb-3 answer-field'; 
+
+        let answerText = "";
+        let isChecked = "";
+        let answerId = "";
+
+        if (answerData) {
+            answerText = answerData.option_text;
+            isChecked = answerData.is_correct ? "checked" : "";
+            answerId = answerData.id; // Include answer ID if available
+        }
+
+        newAnswerDiv.innerHTML = `
+            <div class="input-group">
+                <input type="checkbox" class="form-check-input" name="is_correct[]" value="${answerId}" ${isChecked}>
+                <input type="hidden" name="answer_id[]" value="${answerId}">
+                <textarea class="form-control" name="option_text[]" placeholder="Enter answer..." required>${answerText}</textarea>
+                <i class="fas fa-times remove-answer" data-answer-id="${answerId}" style="color: #dc3545;"></i> <!-- Trash can icon -->
+            </div>
+        `;
+
+        document.getElementById('answerOptionsContainer').appendChild(newAnswerDiv);
+
+        // Add remove button functionality
+        const removeButton = newAnswerDiv.querySelector('.remove-answer');
+        removeButton.dataset.answerId = answerData ? answerData.id : '';
+        removeButton.addEventListener('click', () => {
+            removeAnswerField(answerId); // Pass answerId directly
+            newAnswerDiv.remove(); // Immediately remove from DOM
+        });
+    }
+
+    // Function to add new answer fields
+    function addNewAnswerField() {
+        const newAnswerDiv = document.createElement('div');
+        newAnswerDiv.className = 'form-group mb-3 answer-field';
+
+        newAnswerDiv.innerHTML = `
+            <div class="input-group">
+                <input type="checkbox" class="form-check-input" name="new_is_correct[]" value="new_${optionCount}">
+                <textarea class="form-control" name="new_option_text[]" placeholder="Enter new answer..." required></textarea>
+                <i class="fas fa-times remove-answer" style="color: #dc3545; cursor: pointer;"></i> <!-- Trash can icon -->
+            </div>
+        `;
+
+        document.getElementById('answerOptionsContainer').appendChild(newAnswerDiv);
+        
+        // Add event listener for the remove button
+        const removeButton = newAnswerDiv.querySelector('.remove-answer');
+        removeButton.addEventListener('click', () => {
+            // Call the removeAnswerField function with no ID (since this is a new answer)
+            removeAnswerField(null); // Adjust as necessary if you want to track new answers
+            newAnswerDiv.remove(); // Immediately remove from DOM
+        });
+
+        optionCount++; // Increment index for each new answer
+    }
+
+    // Remove answer functionality (with tracking for deletion of existing answers)
+    function removeAnswerField(answerId) {
+        if (answerId) {  // Only for existing answers
+            const removedAnswersInput = document.getElementById('removedAnswers');
+            removedAnswersInput.value = (removedAnswersInput.value ? removedAnswersInput.value + "," : "") + answerId;
+        }
+    }
+
+    // Initialize option count for new answers
+    let optionCount = 0;
+
+    function toggleEditForm(questionId) {
+        const editForm = document.getElementById(`editForm-${questionId}`);
+        const questionDisplay = document.getElementById(`question-display-${questionId}`);
+        const editControls = document.querySelector(`.question-item[data-question-id="${questionId}"] .edit-controls`); // Select edit/delete buttons
+        const originalQuestionText = questionDisplay.textContent;
+    
+    
+        if (editForm.style.display === 'none') {
+            editForm.style.display = 'block';
+            questionDisplay.style.display = 'none';
+            editControls.style.display = 'none'; // Hide buttons when edit form is shown
+    
+        } else {
+            editForm.style.display = 'none';
+            questionDisplay.style.display = 'block';
+            editControls.style.display = 'block'; // Show buttons when edit form is hidden
+            editForm.querySelector('textarea[name="question_text"]').value = originalQuestionText.trim();
+    
+        }
+    }
+    
+    function hideEditForm(questionId) {
+        const editForm = document.getElementById(`editForm-${questionId}`);
+        const questionDisplay = document.getElementById(`question-display-${questionId}`);
+        const editControls = document.querySelector(`.question-item[data-question-id="${questionId}"] .edit-controls`);
+        const originalQuestionText = questionDisplay.textContent;  // Get the text content
+        const originalQuestionNumber = questionDisplay.querySelector('strong').textContent.slice(0, -1); // Extract original question number
+    
+    
+        editForm.style.display = 'none';
+        questionDisplay.style.display = 'block';
+        editControls.style.display = 'block';
+    
+        // Reset BOTH question text AND question number:
+        editForm.querySelector('textarea[name="question_text"]').value = originalQuestionText.trim().split(". ")[1];  // Extract the text part only
+    
+        const questionNumberInput = editForm.querySelector('input[name="question_number"]');
+        if (questionNumberInput) {
+            questionNumberInput.value = originalQuestionNumber;  // Reset question number input
+        }
+    }
+    
+    function handleInput() {
+        const searchInput = document.getElementById('searchInput');
+        const form = document.getElementById('searchForm');
+    
+        if (searchInput.value === '') {
+            // Clear the search parameter from the form action
+            form.action = "{% url 'quiz:quiz_question' pk=quiz.id %}";  // Update action without search parameter
+            // Remove the search parameter from the URL
+            window.history.replaceState(null, '', "{% url 'quiz:quiz_question' pk=quiz.id %}");
+        } else {
+            // Set the form action to include the search query
+            form.action = "{% url 'quiz:quiz_question' pk=quiz.id %}?search=" + encodeURIComponent(searchInput.value);
+        }
+    }
+    
+    function handleSubmit() {
+        const searchInput = document.getElementById('searchInput');
+        
+        // If the search input is empty, reload the page without the search parameter
+        if (searchInput.value === '') {
+            window.location.href = "{% url 'quiz:quiz_question' pk=quiz.id %}";
+            return false; // Prevent form submission
+        }
+    
+        return true; // Allow form submission if search input is not empty
+    }
+    
+</script>
+
+<style>
+    /* Styling for highlighted questions */
+    .list-group-item.highlight {
+        background-color: #d1ecf1 !important; /* Light blue - use !important to override other styles */
+        border-color: #bee5eb !important; /* Matching border color */
+        border-left: 3px solid #007bff !important; /* Distinctive left border to clearly show selection */
+        font-weight: bold; /* Optionally make text bolder */
+    }
+
+    .list-group-item.highlight:hover {
+        background-color: #c5e3ee !important;  /* Slightly darker shade on hover for highlighted questions*/
+    }
+
+    
+
+    /* Basic styles for answer fields */
+    .answer-field {
+        border: 1px solid #ccc; /* Add border */
+        border-radius: 5px; /* Rounded corners */
+        padding: 10px; /* Padding inside the field */
+        background-color: #f9f9f9; /* Light background */
+        margin-bottom: 10px; /* Space between fields */
+        display: flex; /* Flexbox for better layout */
+        align-items: center; /* Center vertically */
+    }
+
+    /* Input and textarea styles */
+    .answer-field textarea {
+        flex: 1; /* Take up remaining space */
+        margin-right: 10px; /* Space between textarea and icon */
+    }
+
+    /* Checkbox styles */
+    .form-check-input {
+        margin-right: 10px; /* Space between checkbox and text */
+    }
+
+    /* Trash icon styles */
+    .remove-answer {
+        font-size: 1.2em; /* Increase size */
+        margin-left: 10px; /* Space between textarea and icon */
+        cursor: pointer; /* Pointer cursor on hover */
+    }
+
+    /* Change background color on hover */
+    .answer-field:hover {
+        background-color: #e6f7ff; /* Light blue on hover */
+    }
+
+    /* Highlight when active */
+    .answer-field.active {
+        border-color: #007bff; /* Change border color when active */
+    }
+
+    .remove-answer:hover {
+        color: #c82333; /* Darker red for hover */
+    }
+
+    .answer-card {
+        background-color: #f8f9fa; /* Light background for contrast */
+        border-radius: 0.5rem; /* Rounded corners */
+        transition: transform 0.2s; /* Smooth transition effect */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        position: relative; /* Needed for absolute positioning of the icon */
+    }
+    
+    .answer-card:hover {
+        transform: translateY(-3px); /* Lift effect on hover */
+    }
+    
+    .answer-card p {
+        margin: 0; /* Remove default margin */
+        padding-right: 30px; /* Add some padding to the right for icon spacing */
+    }
+    
+    
+    .answer-card i {
+        font-size: 1.5rem; /* Larger icon size for better visibility */
+    }
+    
+    /* Styling for the list items */
+    .list-group-item {
+        background-color: #f8f9fa; /* Example: light gray background */
+        border: 1px solid #ccc; /* Example: thin gray border */
+        padding: 10px; /* Adjust padding as needed */
+        cursor: pointer; /* Add pointer cursor for interactivity */
+        transition: background-color 0.3s; /* Smooth background transition on hover */
+    }
+
+    .list-group-item:hover {
+        background-color: #e9ecef; /* Example: slightly darker gray on hover */
+    }
+
+
+    /* Styling for the question text */
+    .text-left {
+        /* Style question text here */
+        font-size: 16px; /* Example */
+        color: #333;    /* Example */
+    }
+
+    /* Styling for the counter */
+    .text-left strong {
+        font-weight: bold; /* Make the counter bold */
+        margin-right: 5px;  /* Add some space between counter and question */
+    }
+
+
+    /* Styling for the delete icon */
+    .list-group-item .fa-times {
+        /* Styles for the 'x' icon. */
+        font-size: 18px;      /* Adjust icon size */
+        color: #888;        /* Adjust icon color */
+        opacity: 0.7;       /* Make icon slightly transparent */
+        transition: opacity 0.3s;  /* Transition for hover effect */
+    }
+
+    .list-group-item:hover .fa-times {
+        opacity: 1; /* Make icon fully opaque on hover */
+    }
+
+
+    /* Styling for the scrollbar (if you need customization) */
+    .list-group::-webkit-scrollbar {
+        width: 8px; /* Adjust scrollbar width */
+    }
+
+    .list-group::-webkit-scrollbar-thumb {
+        background-color: #ddd; /* Adjust scrollbar thumb color */
+        border-radius: 4px; /* Adjust scrollbar thumb border radius */
+    }
+
+    .input-group .btn-success {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      
+      }
+
+    .edit-form .input-group { /* Target input group inside edit-form */
+    display: flex;
+    align-items: center;  /* Align items vertically */
+    }
+    
+    .edit-form .input-group .form-control-sm { /* Add margin to the right of the input field */
+        margin-right: 5px; 
+    }
+    
+
+    .question-item + .question-item {  /* Targets the next question-item */
+        margin-top: 15px;   /* Adjust spacing as needed */
+    }
+    
+    /* Or add padding to the bottom of each question item: */
+    .question-item {
+        padding-bottom: 15px; /* Adjust spacing */
+    }
+</style>
+
+{% endblock %}

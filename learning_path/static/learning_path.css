@@ -1,0 +1,44 @@
+.custom-img {
+    width: 150px; /* Fixed width */
+    height: 100px; /* Fixed height */
+    object-fit: cover; /* Ensures images fit within the specified dimensions */
+}
+
+
+.sidebar {
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+}
+
+.timeline {
+    counter-reset: step-counter;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 60px;
+    border: 1px solid gray;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.timeline-item::before {
+    counter-increment: step-counter;
+    content: counter(step-counter);
+    position: absolute;
+    top: 20px;
+    left: -35px;
+    width: 45px;
+    height: 45px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

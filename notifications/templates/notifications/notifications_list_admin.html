@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4 text-center">Admin Notifications</h2>
+
+    <!-- Nút "Add New Notification" chỉ hiển thị khi người dùng có quyền -->
+    {% if is_manager %}
+        <div class="d-flex justify-content-end mb-4">
+            <a href="{% url 'add_notification' %}" class="btn btn-success">+ Add New Notification</a>
+        </div>
+    {% endif %}
+
+    <!-- Hiển thị bảng với các thông báo -->
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th> <!-- Cột số thứ tự -->
+                    <th>Title</th>
+                    <th>File</th>
+                    <th>Created At</th>
+                    {% if is_manager %}
+                        <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for notification in notifications %}
+                <tr>
+                    <!-- Số thứ tự được hiển thị bằng biến start_number + forloop.counter -->
+                    <td>{{ start_number|add:forloop.counter }}</td>
+                    
+                    <!-- Tiêu đề là liên kết đến trang chi tiết thông báo -->
+                    <td>
+                        <a href="{% url 'notification_detail' notification.id %}" class="text-primary font-weight-bold">
+                            {{ notification.title|slice:":10" }}{% if notification.title|length > 10 %}...{% endif %}
+                        </a>
+                    </td>
+                    
+                    <td>
+                        {% if notification.file %}
+                            <a href="{% url 'download_file' notification.id %}" class="btn btn-sm btn-outline-primary">Download</a>
+                        {% else %}
+                            <span class="text-muted">No file attached</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>{{ notification.created_at|date:"M d, Y H:i" }}</td>
+                    
+                    <!-- Các nút Edit và Delete chỉ hiển thị khi người dùng có quyền -->
+                    {% if is_manager %}
+                        <td>
+                            <a href="{% url 'update_notification' notification.id %}" class="btn btn-sm btn-outline-info me-1">Edit</a>
+                            <a href="{% url 'delete_notification' notification.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No notifications available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Điều khiển phân trang -->
+    {% if notifications.has_other_pages %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if notifications.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notifications.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
+                </li>
+
+                {% if notifications.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notifications.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notifications.paginator.num_pages }}" aria-label="Last">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Moderation Warning{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Moderation Warning</h2>
+    <p>Your comment has been flagged as inappropriate and cannot be posted.</p>
+    <a href="{% url 'thread:thread_list' %}" class="btn btn-primary">Back to Threads</a>
+</div>
+{% endblock %}

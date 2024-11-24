@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custome_filters %}
+{% block title %}Location{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'department:department_list' %}">Department</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'department:location_list' %}">Location</a>
+        </li>
+    </ul>
+
+    <!-- Hiển thị thông báo thành công hoặc lỗi -->
+    {% if messages %}
+        <div class="mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ message.tags }}"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="mt-3">
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <form method="GET" class="d-flex ms-2">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search for location..." value="{{ query }}">
+                    <button type="submit" class="btn btn-outline-success ms-2">Search</button>
+                </div>
+            </form>
+            <div class="mt-3">
+                <button type="button" id="delete_button" class="btn btn-outline-danger" title="Delete selected locations">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+                <a href="{% url 'department:location_list' %}" class="btn btn-outline-primary" title="Refresh Location List" id="refresh_button">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </a>
+                <a href="{% url 'department:location_create' %}" class="btn btn-primary" title="Add Location">
+                    <i class="fas fa-plus"></i> Add
+                </a>
+            </div>
+            
+        </div>
+    
+        <!-- Form xử lý xóa nhiều địa điểm -->
+        <form id="delete_form" method="POST" action="{% url 'department:location_delete' %}">
+            {% csrf_token %}
+            <!-- Thêm các nội dung khác nếu cần -->
+        </form>
+            <table class="table table-striped mt-4">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select_all" class="form-check-input"></th>
+                        <th>#</th>
+                        <th>Location Name</th>
+                        <th>Address</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if page_obj.object_list %}
+                        {% for location in page_obj.object_list %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="selected_locations" value="{{ location.pk }}" class="form-check-input">
+                            </td>
+                            <td>{{ page_obj.number|add:'-1'|multiply:5|add:forloop.counter }}</td>
+                            <td>{{ location.name }}</td>
+                            <td>{{ location.address }}</td>
+                            <td>
+                                <a href="{% url 'department:location_update' location.pk %}" class="btn btn-outline-dark btn-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No locations found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </form>
+
+        <!-- Phân trang -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&search={{ query }}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ query }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ query }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ query }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ query }}" aria-label="Last">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedCheckboxes = JSON.parse(localStorage.getItem('selectedLocations')) || {};
+        const checkboxes = document.querySelectorAll('input[name="selected_locations"]');
+
+        // Cập nhật trạng thái checkbox dựa trên localStorage
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = storedCheckboxes[checkbox.value] || false;
+        });
+
+        // Lưu trạng thái checkbox vào localStorage khi checkbox được thay đổi
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                storedCheckboxes[checkbox.value] = checkbox.checked;
+                localStorage.setItem('selectedLocations', JSON.stringify(storedCheckboxes));
+            });
+        });
+
+        // Chọn tất cả checkbox
+        const selectAllCheckbox = document.getElementById('select_all');
+        selectAllCheckbox.addEventListener('change', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+                storedCheckboxes[checkbox.value] = checkbox.checked; // Cập nhật trạng thái cho tất cả
+            });
+            localStorage.setItem('selectedLocations', JSON.stringify(storedCheckboxes));
+        });
+
+        // Xóa địa điểm đã chọn
+        document.getElementById('delete_button').addEventListener('click', function() {
+            const selectedLocations = Object.keys(storedCheckboxes).filter(locationId => storedCheckboxes[locationId]);
+
+            if (selectedLocations.length === 0) {
+                alert('Please select at least one location to delete.');
+                return;
+            }
+            if (confirm('Are you sure you want to delete the selected locations?')) {
+                const deleteForm = document.getElementById('delete_form');
+
+                // Tạo các input ẩn để gửi các giá trị đã chọn
+                selectedLocations.forEach(locationId => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selected_locations'; // Tên phải khớp với tên trong form
+                    input.value = locationId;
+                    deleteForm.appendChild(input);
+                });
+
+                // Reset trạng thái checkbox trong localStorage
+                selectedLocations.forEach(locationId => {
+                    delete storedCheckboxes[locationId]; // Xóa địa điểm đã chọn khỏi localStorage
+                });
+                localStorage.setItem('selectedLocations', JSON.stringify(storedCheckboxes));
+                deleteForm.submit(); // Gửi form xóa
+            }
+        });
+
+        // Xóa dữ liệu trong localStorage khi nhấn nút Refresh
+        document.getElementById('refresh_button').addEventListener('click', function() {
+            localStorage.removeItem('selectedLocations'); // Đảm bảo tên biến khớp với tên sử dụng
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false; // Bỏ chọn tất cả checkbox
+            });
+        });
+    });
+
+    // Khởi tạo tooltip nếu cần
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %} 
+{% block title %}Import Quiz{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Import Questions for "{{ quiz.quiz_title }}"</h1>
+    <p>Please download and use the <a href="{% static 'excel/import_question.xlsx' %}" target="_blank">Excel template</a>. The Excel file must contain exactly one sheet with the required columns.</p>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="file" class="form-label">Upload Excel File (.xlsx)</label>
+            <input type="file" name="file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Import Questions</button>
+    </form>
+</div>
+{% endblock %}

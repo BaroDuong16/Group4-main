@@ -1,0 +1,8 @@
+.certification-scroll-container {
+    max-height: 60vh; /* Set a fixed height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 1rem; /* Add some padding */
+    border: 1px solid #ccc; /* Optional: add a border for clarity */
+    border-radius: 0.25rem; /* Optional: rounded corners */
+    background-color: #f8f9fa; /* Optional: light background */
+}

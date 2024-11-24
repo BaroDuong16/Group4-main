@@ -1,0 +1,118 @@
+body {
+    background-color: #ffffff;
+    /* White background */
+    color: #333333;
+}
+
+.file-upload {
+    background-color: #f7f7f7;
+    /* Light gray for file upload area */
+    border: 1px solid #ccc;
+    /* Light border */
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+}
+
+.file-upload:hover {
+    background-color: #e0e0e0;
+    /* Darker gray on hover */
+}
+
+.file-upload i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.file-upload p {
+    margin: 0;
+}
+
+.file-upload span {
+    display: block;
+    margin-top: 5px;
+    color: #777;
+    /* Slightly darker gray */
+}
+
+.file-upload .btn {
+    background-color: #ff4d4d;
+    /* Bright red for the button */
+    border: none;
+    color: #fff;
+    /* White text on button */
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.file-upload .btn:hover {
+    background-color: #ff3333;
+    /* Darker red on hover */
+}
+
+.uploaded-file {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    justify-content: space-between;
+}
+
+.uploaded-file i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.uploaded-file span {
+    color: #555;
+    /* Medium gray for file info */
+}
+
+.uploaded-file .remove-file {
+    color: #ff4d4d;
+    /* Red for remove action */
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.convert-btn {
+    /* Blue for conversion button */
+    border: none;
+    color: #fff;
+    width: 100%;
+    border-radius: 5px;
+    padding: 8px 0;
+}
+
+
+#json-preview {
+    white-space: pre-wrap;
+    background-color: #f1f1f1;
+    /* Light gray for JSON preview */
+    padding: 5px;
+    color: #333;
+    /* Dark text */
+    border-radius: 5px;
+    overflow-x: auto;
+    /* Allow horizontal scrolling if necessary */
+}
+
+.json-key {
+    color: #007bff;
+    /* Blue for JSON keys */
+}
+
+.json-string {
+    color: #28a745;
+    /* Green for JSON strings */
+}
+
+.json-number {
+    color: #ffc107;
+    /* Yellow for JSON numbers */
+}
+
+.json-boolean {
+    color: #dc3545;
+    /* Red for JSON booleans */
+}

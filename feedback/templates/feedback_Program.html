@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Training Program Feedback{% endblock %}
+
+{% block content %}
+    <h2>Give Feedback for Training Program: {{ training_program.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Criteria Ratings -->
+        <label>Relevance</label>
+        {{ form.relevance }}
+
+        <label>Program Structure</label>
+        {{ form.organization }}
+
+        <label>Learning Outcome</label>
+        {{ form.learning_outcomes }}
+
+        <label>Resources</label>
+        {{ form.resources }}
+
+        <label>Support Services</label>
+        {{ form.support }}
+
+        <!-- Comments -->
+        <label>Comments</label>
+        {{ form.comments }}
+
+        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+    </form>
+{% endblock %}

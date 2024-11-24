@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Module,Add New Module" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Module,Add New Module" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.module_name.label_tag }}
+            {{ form.module_name|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.module_url.label_tag }}
+            {{ form.module_url|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.icon.label_tag }}
+            {{ form.icon|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.module_group.label_tag }}
+            {{ form.module_group|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'module_group:module_list' %}" class="btn btn-secondary">Back to Module List</a>
+    </form>
+</div>
+{% endblock %}

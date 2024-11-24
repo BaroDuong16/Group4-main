@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load role_form_filters %}
+{% block title %}{{ form.instance.pk|yesno:"Edit Role,Add New Role" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Role,Add New Role" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.role_name.label_tag }}
+            {{ form.role_name|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'role:role_list' %}" class="btn btn-secondary">Back to Role List</a>
+    </form>
+</div>
+{% endblock %}

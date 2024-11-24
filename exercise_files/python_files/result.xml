@@ -1,0 +1,1 @@
+<testsuite name="PythonTestSuite" tests="3" failures="0"><testcase classname="TestPythonCode" name="test_1" /><testcase classname="TestPythonCode" name="test_2" /><testcase classname="TestPythonCode" name="test_3" /><score>100.0</score></testsuite>

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Give Instructor Feedback{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Give Feedback to {{ instructor.username }}</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Criteria Ratings -->
+        <label>Course Knowledge</label>
+        {{ form.course_knowledge }}
+
+        <label>Communication Skills</label>
+        {{ form.communication_skills }}
+
+        <label>Approachability</label>
+        {{ form.approachability }}
+
+        <label>Engagement</label>
+        {{ form.engagement }}
+
+        <label>Professionalism</label>
+        {{ form.professionalism }}
+
+        <!-- Comments -->
+        <label>Comments</label>
+        {{ form.comments }}
+
+        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+    </form>
+
+</div>
+{% endblock %}

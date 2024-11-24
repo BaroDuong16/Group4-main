@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết địa điểm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            font-size: 18px;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        form {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chi tiết địa điểm: {{ location.name }}</h1>
+    <p><strong>Địa chỉ:</strong> {{ location.address }}</p>
+
+    <div>
+        <a href="{% url 'department:location_update' location.pk %}">Chỉnh sửa</a>
+        <form action="{% url 'department:location_delete' location.pk %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit">Xóa</button>
+        </form>
+        <a href="{% url 'department:location_list' %}">Quay lại danh sách</a>
+    </div>
+</body>
+</html>

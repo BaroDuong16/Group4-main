@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Add Assessment{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Assessment</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h3>Coding Exercises</h3>
+
+            <form method="GET" class="mb-3 d-flex">
+                <input type="text" name="search" value="{{ search }}" placeholder="Search exercises..." class="form-control me-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+
+            <ul id="exercise-list" class="list-group">
+                {% for exercise in page_obj %}
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ exercise.id }}">
+                    <div class="question">
+                        <h6 class="exercise-link">{{ exercise.title }}</h6>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary select-exercise" data-id="{{ exercise.id }}" data-title="{{ exercise.title }}"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </li>
+                {% empty %}
+                    <li class="list-group-item">No exercises available.</li>
+                {% endfor %}
+            </ul>
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination mt-3">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1&search={{ search }}" aria-label="First">
+                                <span aria-hidden="true">Top</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search }}" aria-label="Previous">
+                                <span aria-hidden="true">Previous</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item disabled"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}" aria-label="Next">
+                                <span aria-hidden="true">Next</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ search }}" aria-label="Last">
+                                <span aria-hidden="true">Last</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+        <div class="col-md-6">
+            <h3>Selected Exercises for Assessment</h3>
+            <ul id="selected-exercises" class="list-group">
+                {% for exercise in selected_exercises %}
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ exercise.id }}">
+                    {{ exercise.title }}
+                    <button class="btn btn-danger remove-exercise" data-id="{{ exercise.id }}"><i class="far fa-trash-alt"></i></button>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <form method="POST" id="exercise-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <button id="save-button" class="btn btn-success mt-2">Create Assessment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedExercisesContainer = document.getElementById('selected-exercises');
+
+        document.querySelectorAll('.select-exercise').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const exerciseId = this.getAttribute('data-id');
+                const exerciseTitle = this.getAttribute('data-title');
+
+                if (!selectedExercisesContainer.querySelector(`[data-id="${exerciseId}"]`)) {
+
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    listItem.setAttribute('data-id', exerciseId);
+                    listItem.innerHTML = `${exerciseTitle} <button class="btn btn-danger remove-exercise" data-id="${exerciseId}">Remove</button>`;
+
+                    selectedExercisesContainer.appendChild(listItem);
+
+                    this.closest('li').style.display = 'none';
+                } else {
+                    alert("This exercise is already selected!");
+                }
+            });
+        });
+
+        selectedExercisesContainer.addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-exercise')) {
+                const exerciseId = event.target.getAttribute('data-id');
+
+                const originalExerciseItem = document.querySelector(`#exercise-list [data-id="${exerciseId}"]`);
+                if (originalExerciseItem) {
+                    originalExerciseItem.style.display = 'flex'; 
+                }
+                event.target.parentElement.remove();
+            }
+        });
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        document.getElementById('save-button').addEventListener('click', function(event) {
+            event.preventDefault(); 
+
+            const selectedIds = Array.from(selectedExercisesContainer.children)
+                                     .map(li => li.getAttribute('data-id'));
+
+            const url = `/assessment/save-assessment-exercises/{{ assessment.id }}/`;  // Adjust the URL to assessment context
+            fetch(url, {
+                method: 'POST',
+                body: JSON.stringify({ exercises: selectedIds }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Exercises saved successfully with the assessment!');
+                } else {
+                    alert('Error saving exercises: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+{% endblock %}

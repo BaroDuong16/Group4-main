@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load custome_filters %}
+{% load static %}
+{% block title %}Student List{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4 center-content"> <!-- Giữ nguyên -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'user:user_list' %}">Users</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'user:student_list' %}">Students</a>
+        </li>
+    </ul>
+    <div class="mt-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="container mt-3">
+                {% if request.user.is_authenticated %}
+                    {% if request.user.profile.role.role_name == 'Manager' or request.user.is_superuser %}
+                        <a href="{% url 'user:user_add' %}" class="btn btn-primary" title="Add New User">
+                            <i class="fas fa-plus"></i> Add Student
+                        </a>
+                        <a href="{% url 'user:export_users' %}?role=Student&q={{ query }}" class="btn btn-info" title="Export Students to Excel" data-bs-toggle="tooltip">
+                            <i class="fas fa-file-export"></i> Export
+                        </a>
+                    {% endif %}
+                {% endif %}
+                <a href="{% url 'user:student_list' %}" class="btn btn-warning" title="Refresh Student List">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </a>
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the selected students?');">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+            </div>
+            <form method="GET" action="{% url 'user:user_list' %}" class="d-flex">
+                <input type="text" name="q" value="{{ query|default_if_none:'' }}" class="form-control me-1" placeholder="Search users..." aria-label="Search users">
+                <button type="submit" class="btn btn-outline-success">Search</button>
+            </form>  
+        </div>
+
+        <!-- Form to delete selected users -->
+        <form method="POST" action="{% url 'user:user_delete' %}">
+            {% csrf_token %}
+            <input type="hidden" name="origin" value="student_list">
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all" class="form-check-input"></th>
+                        <th>#</th>
+                        <th>Student Code</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Full Name</th>
+                        {% if request.user.profile.role.role_name == 'Manager' or request.user.is_superuser %}
+                            <th>Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_users" value="{{ student.user.pk }}" class="form-check-input"></td>  
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ student.student_code }}</td>
+                        <td>{{ student.user.username }}</td>
+                        <td>{{ student.user.email }}</td>
+                        <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                        {% if request.user.profile.role.role_name == 'Manager' or request.user.is_superuser %}
+                        <td>
+                            <a href="{% url 'user:user_detail' student.user.pk %}" class="btn btn-outline-dark btn-sm" title="View Student Details" data-bs-toggle="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                            <a href="{% url 'user:user_edit' student.user.pk %}" class="btn btn-outline-dark btn-sm" title="Edit Student" data-bs-toggle="tooltip">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                        
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if not students %}
+                <div class="alert alert-warning" role="alert">
+                    No students found matching your criteria.
+                </div>
+            {% endif %}
+        </form>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&search={{ query }}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ query }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ query }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ query }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ query }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        {% if messages %}
+            <div class="mt-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ message.tags }}"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedCheckboxes = JSON.parse(localStorage.getItem('selectedUsers')) || {};
+        const checkboxes = document.querySelectorAll('input[name="selected_users"]');
+        
+        // Khởi tạo trạng thái của các checkbox từ localStorage
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = storedCheckboxes[checkbox.value] || false;
+        });
+    
+        // Cập nhật trạng thái checkbox vào localStorage khi thay đổi
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                storedCheckboxes[checkbox.value] = checkbox.checked;
+                localStorage.setItem('selectedUsers', JSON.stringify(storedCheckboxes));
+            });
+        });
+    
+        // Chức năng chọn tất cả checkbox
+        const selectAllCheckbox = document.getElementById('select-all');
+        selectAllCheckbox.addEventListener('change', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+                storedCheckboxes[checkbox.value] = checkbox.checked;
+            });
+            localStorage.setItem('selectedUsers', JSON.stringify(storedCheckboxes));
+        });
+    
+        // Xóa dữ liệu localStorage khi bấm nút Refresh
+        document.querySelector('.btn-warning').addEventListener('click', function() {
+            localStorage.removeItem('selectedUsers');
+        });
+    
+        // Khởi tạo tooltip cho các phần tử có thuộc tính data-bs-toggle="tooltip"
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+    </script>
+    
+{% endblock %}

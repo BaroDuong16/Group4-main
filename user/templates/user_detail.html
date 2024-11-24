@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block title %}{{ user.first_name }} {{ user.last_name }} | Profile{% endblock %}
+{% load custome_filters %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-md-3 mt-5">
+            <!-- Sidebar với thông tin người dùng -->
+            <div class="card shadow-sm p-3 mb-4" style="position: sticky; top: 2rem;">
+                <div class="avatar-wrapper mb-3 d-flex justify-content-center align-items-center mt-4">
+                    {% if user.profile.profile_picture_url and user.profile.profile_picture_url != "http://127.0.0.1:8000/user/add/" %}
+                        <img src="{{ user.profile.profile_picture_url }}" class="img-fluid rounded-circle" style="width: 10rem; height: 10rem; object-fit: cover;">
+                    {% else %}
+                        <i class="fas fa-user img-fluid rounded-circle" style="font-size: 7rem;"></i>
+                    {% endif %}
+                </div>
+
+                <h5 class="text-center">{{ user.first_name }} {{ user.last_name }}</h5>
+
+                <ul class="list-group list-group-flush mt-3">
+                    <li class="list-group-item">
+                        <a href="#profileCard" class="text-dark d-flex align-items-center" style="text-decoration: none;">
+                            <i class="fas fa-user me-2"></i> Profile
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="#CourseCard" class="text-dark d-flex align-items-center" style="text-decoration: none;">
+                            <i class="fas fa-book me-2"></i> Courses
+                        </a>
+                    </li>
+                    {% if is_student %}
+                        <li class="list-group-item">
+                            <a href="#quizResultsCard" class="text-dark d-flex align-items-center" style="text-decoration: none;">
+                                <i class="fas fa-pencil-alt me-2"></i> Quiz Results
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="list-group-item">
+                        <a href="#activityLogCard" class="text-dark d-flex align-items-center" style="text-decoration: none;">
+                            <i class="fas fa-history me-2"></i> Activity Log
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="#editPasswordCard" class="text-dark d-flex align-items-center" style="text-decoration: none;" onclick="togglePasswordForm(event)">
+                            <i class="fas fa-edit me-2"></i> Edit Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Phần chính với thông tin chi tiết -->
+        <div class="col-md-9">
+            <!-- Profile Card -->
+            <div class="card mb-4 shadow-sm" id="profileCard">
+                <div class="card-header bg-dark text-white text-center">
+                    <strong>Profile</strong>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>ID:</strong> {{ user.id }}</div>
+                        <div class="col-6"><strong>Username:</strong> {{ user.username }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</div>
+                        <div class="col-6"><strong>Role:</strong> {{ user.profile.role.role_name|default:"N/A" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-12"><strong>Email:</strong> {{ user.email }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-12"><strong>Bio:</strong> {{ user.profile.bio|default:"N/A" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-12"><strong>Interests:</strong> {{ user.profile.interests|default:"N/A" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses Enrolled -->
+            <div class="card mb-4 shadow-sm" id="CourseCard">
+                <div class="card-header bg-dark text-white text-center">
+                    <strong>Courses Enrolled</strong>
+                </div>
+                <div class="card-body">
+                    {% if enrollments %}
+                        <ul class="list-group list-group-flush">
+                            {% for enrollment in enrollments %}
+                                <li class="list-group-item">
+                                    <span class="fw-bold">{{ enrollment.course }}</span> - 
+                                    <span class="fst-italic">Enrollment Date: {{ enrollment.date_enrolled|date:"H:i d-m-Y" }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No courses enrolled.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if is_student %}
+                <!-- Quiz Results Card -->
+                <div class="card mb-4 shadow-sm" id="quizResultsCard">
+                    <div class="card-header bg-dark text-white text-center">
+                        <strong>Quiz Results</strong>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Quiz Title</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attempt in quiz_results %}
+                                <tr>
+                                    <td>{{ attempt.quiz.quiz_title }}</td>
+                                    <td>{{ attempt.score }} / {{ attempt.quiz.total_marks }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center">No quiz attempts found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Activity Log -->
+            <div class="card mb-4 shadow-sm" id="activityLogCard">
+                <div class="card-header bg-dark text-white text-center">
+                    <strong>User Activity Log</strong>
+                </div>
+                <div class="card-body" style="max-height: 15rem; overflow-y: auto;">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Activity Type</th>
+                                <th>Details</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in activity_logs %}
+                                <tr>
+                                    <td>{{ log.get_activity_type_display }}</td>
+                                    <td>{{ log.activity_details }}</td>
+                                    <td>{{ log.activity_timestamp }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No activity records found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Edit Profile -->
+            <div class="card mb-4 shadow-sm" id="editPasswordCard">
+                <div class="card-header bg-dark text-white text-center">
+                    <strong>Edit Profile</strong>
+                </div>
+                <div class="card-body">
+                    <div id="password-form" class="d-none">
+                        <form method="POST" action="{% url 'user:user_edit_password' user.pk %}" class="d-flex align-items-center">
+                            {% csrf_token %}
+                            <input type="password" class="form-control me-2" id="old_password" name="old_password" placeholder="Enter your password to proceed" required>
+                            <button type="submit" class="btn btn-warning">Submit</button>
+                        </form>
+                    </div>
+                </div>                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordForm(event) {
+        event.preventDefault();
+        var form = document.getElementById('password-form');
+        form.classList.toggle("d-none");
+        document.getElementById('editPasswordCard').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

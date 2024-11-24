@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Subject List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Subject List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Subject Code</th> <!-- Added code column -->
+                <th>Subject Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subjects %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ subject.code }}</td> <!-- Display subject code -->
+                <td>{{ subject.name }}</td>
+                <td>{{ subject.description }}</td>
+                <td>
+                    <a href="{% url 'subject:subject_edit' subject.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'subject:subject_delete' subject.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    <a href="{% url 'subject:subject_materials' subject.pk %}" class="btn btn-info btn-sm">View Materials</a>
+                    
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'subject:subject_add' %}" class="btn btn-primary mb-4">
+        <i class="fas fa-plus"></i> Add New Subject
+    </a>    
+    <a href="{% url 'subject:upload_material' %}" class="btn btn-success mb-4">
+        <i class="fas fa-upload"></i> Upload Materials
+    </a>
+</div>
+{% endblock %}

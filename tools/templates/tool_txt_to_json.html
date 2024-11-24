@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class=" mt-1">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'tools:excel_to_json_view' %}" aria-controls="excel" aria-selected="false">Excel to JSON</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'tools:txt_to_json_view' %}" aria-controls="txt" aria-selected="true">TXT to JSON</a>
+        </li>
+    </ul>
+
+    <h2 class="mb-1 text-center">Convert Text to JSON</h2>
+
+    <!-- Form for selecting number of text areas -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form id="file-number-form" class="border p-4 rounded shadow-sm bg-light">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="number_of_textareas">Number of text areas:</label>
+                    <input type="number" id="number_of_textareas" min="1" value="1" class="form-control form-control-sm" required>
+                </div>
+                <button type="button" id="generate-textareas" class="btn btn-primary mt-3">Generate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Text areas form, initially hidden -->
+    <form method="POST" id="text-form" class="mt-1">
+        {% csrf_token %}
+        <div id="textareas-container" style="display: none;">
+            <div id="textareas-wrapper" class="mt-3"></div>
+        </div>
+
+        <!-- Convert to JSON button, initially hidden -->
+        <div id="submit-form-container" class="mt-4" style="display: none;">
+            <button type="button" class="btn btn-success btn-block" onclick="downloadJSON()">Convert to JSON</button>
+        </div>
+    </form>
+
+    <!-- Success message and file download link -->
+    {% if success_message %}
+        <div class="mt-1">
+            <h3>Success!</h3>
+            <p>{{ success_message }}</p>
+            <p>Files created:</p>
+            <ul>
+                {% for file_name in file_names %}
+                    <li>{{ file_name }}</li>
+                {% endfor %}
+            </ul>
+            <a id="download-link" href="{{ download_url }}" class="btn btn-primary mt-2">Download All as ZIP</a>
+            <a href="{% url 'tools:export_txt_to_json' %}" class="btn btn-secondary mt-2">Refresh</a>
+        </div>
+
+        <!-- Auto download ZIP link -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var downloadLink = document.getElementById('download-link');
+                if (downloadLink) {
+                    downloadLink.click(); // Tự động tải xuống file ZIP sau khi tạo
+                }
+            });
+        </script>
+    {% endif %}
+
+    <script>
+        document.getElementById('generate-textareas').addEventListener('click', function() {
+            const numberOfTextareas = document.getElementById('number_of_textareas').value;
+            const textareasWrapper = document.getElementById('textareas-wrapper');
+            textareasWrapper.innerHTML = ''; // Xóa các textareas cũ
+
+            // Kiểm tra dữ liệu nhập vào là số và lớn hơn hoặc bằng 1
+            if (!Number.isInteger(+numberOfTextareas) || numberOfTextareas < 1) {
+                alert('Please enter a valid number of text areas (greater than or equal to 1).');
+                document.getElementById('textareas-container').style.display = 'none'; // Ẩn textareas nếu nhập không hợp lệ
+                document.getElementById('submit-form-container').style.display = 'none'; // Ẩn nút chuyển đổi nếu nhập không hợp lệ
+                return; // Ngừng thực hiện nếu số không hợp lệ
+            }
+
+            for (let i = 0; i < numberOfTextareas; i++) {
+                const textareaDiv = document.createElement('div');
+                textareaDiv.className = 'form-group';
+                textareaDiv.innerHTML = `
+                    <label for="textarea${i + 1}">Text Area ${i + 1}:</label>
+                    <textarea id="textarea${i + 1}" class="form-control" rows="5" placeholder="Enter text here..."></textarea>
+                `;
+                textareasWrapper.appendChild(textareaDiv);
+            }
+
+            // Hiện các textareas và nút chuyển đổi
+            document.getElementById('textareas-container').style.display = 'block';
+            document.getElementById('submit-form-container').style.display = 'block';
+        });
+
+        function downloadJSON() {
+            const textareas = document.querySelectorAll('textarea');
+            const data = [];
+            let isEmpty = false; // Biến kiểm tra có ô textarea nào rỗng không
+
+            textareas.forEach((textarea, index) => {
+                if (textarea.value.trim() === '') {
+                    isEmpty = true; // Đánh dấu nếu có textarea rỗng
+                } else {
+                    data.push({
+                        id: `textarea${index + 1}`,
+                        content: textarea.value
+                    });
+                }
+            });
+
+            // Nếu có ô textarea nào rỗng, hiển thị thông báo lỗi
+            if (isEmpty) {
+                alert('Please fill in all text areas before converting to JSON.');
+                return; // Ngừng thực hiện nếu có ô rỗng
+            }
+
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</div>
+{% endblock %}

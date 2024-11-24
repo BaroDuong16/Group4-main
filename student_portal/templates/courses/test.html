@@ -1,0 +1,23 @@
+{% extends 'basePortal.html' %}
+{% block title %}Course Details{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <!-- Course Header -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h1 class="card-title">{{ course.course_name }}</h1>
+            {% if course.instructor %}
+            <h6 class="card-subtitle text-muted">Instructor: 
+                <a href="{% url 'student_portal:instructor_profile' course.instructor.id %}">
+                    {{ course.instructor.get_full_name }} - {{ course.instructor.username }}
+                </a>
+            </h6>
+            {% else %}
+            <h6 class="card-subtitle text-muted">Instructor: Not assigned</h6>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

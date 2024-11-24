@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Question{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Confirm Delete</h2>
+    <p>Are you sure you want to delete question?</p>
+    <h5>Question Detail: {{ question.question_text }}</h5>
+    <h5>Question Type: {{ question.question_type }}</h5>
+    <h5>Answers:</h5>
+    <ul>
+        {% for i in answer %}
+            {% if i.is_correct %}
+                <li>{{ i.option_text }}  <strong>(KEY)</strong></li>
+            {% else %}
+                <li>{{ i.option_text }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a href="{% url 'quiz_bank:quiz_bank_course' course_id=course_id%}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

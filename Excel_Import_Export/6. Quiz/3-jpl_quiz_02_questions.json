@@ -1,0 +1,73 @@
+[
+    {
+      "id": "11",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "What is the index of the first element in an array in Java?",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "12",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "How do you declare an array of integers in Java?",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "13",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[2]);",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "14",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "Which loop is guaranteed to execute at least once?",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "15",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "What is the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n  System.out.print(i + \" \");\n}\n",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "16",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "What is the length of the following array?\n\nint[] arr = new int[10];",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "17",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "How do you access the last element of an array called 'arr'?",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "18",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "What will be the output of the following code?\n\nint[] arr = {4, 5, 6};\nSystem.out.println(arr.length);",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "19",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "Which statement correctly initializes a two-dimensional array in Java?",
+      "question_type": "MCQ",
+      "points": "1"
+    },
+    {
+      "id": "20",
+      "quiz__quiz_title": "JPL_Quiz_02",
+      "question_text": "What is the result of this code snippet?\n\nint sum = 0;\nfor (int i = 1; i <= 5; i++) {\n  sum += i;\n}\nSystem.out.println(sum);",
+      "question_type": "MCQ",
+      "points": "1"
+    }
+  ]
+  

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="my-4">Delete Notification</h2>
+
+<p>Are you sure you want to delete the notification "{{ notification.title }}"?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete it</button>
+    <a href="{% url 'notifications_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Assessments List{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="my-4">Assessments</h2>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="quiz-tab" data-bs-toggle="tab" href="#quiz-content" role="tab" aria-controls="quiz" aria-selected="true">Quiz</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="exercise-tab" data-bs-toggle="tab" href="#exercise-content" role="tab" aria-controls="exercise" aria-selected="false">Exercise</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Tab for Quiz -->
+            <div class="tab-pane fade show active" id="quiz-content" role="tabpanel" aria-labelledby="quiz-tab">
+                <div id="quiz-container"> 
+                </div>
+            </div>
+
+            <!-- Tab for Exercise -->
+            <div class="tab-pane fade" id="exercise-content" role="tabpanel" aria-labelledby="exercise-tab">
+                <div id="exercise-container">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            function loadQuizContent() {
+                fetch("{% url 'quiz:quiz_list' %}")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('quiz-container').innerHTML = data;
+                });
+            }
+        
+            
+            function loadExerciseContent() {
+                fetch("{% url 'exercises:exercise_list' %}")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('exercise-container').innerHTML = data;
+                });
+            }
+        
+            document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(event) {
+                    if (event.target.id === 'quiz-tab') {
+                        loadQuizContent();
+                    } else if (event.target.id === 'exercise-tab') {
+                        loadExerciseContent();
+                    }
+                });
+            });
+        
+            loadQuizContent();
+        });
+    </script>
+{% endblock %}
+
+

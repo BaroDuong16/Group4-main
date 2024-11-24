@@ -1,0 +1,36 @@
+<div class="accordion my-2" id="accordionExample">
+    {% for quiz in modules_and_quizzes.quizzes %}
+    <div class="card">
+      <div class="card-header" id="quiz_heading_{{ quiz.pk }}">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#quiz_collapse_{{ quiz.pk }}" aria-expanded="false" aria-controls="quiz_collapse_{{ quiz.pk }}">
+            {{ quiz.order }}. {{ quiz.quiz_title }}
+          </button>
+        </h2>
+      </div>
+      <div id="quiz_collapse_{{ quiz.pk }}" class="collapse" aria-labelledby="quiz_heading_{{ quiz.pk }}" data-parent="#accordionExample">
+        <div class="card-body">
+            <h4 class="mb-4">Quiz Information</h4>
+            <div class="row">
+                <div class="col-7">
+                    <p><strong>Title</strong>: {{ quiz.quiz_title }}</p>
+                    <p><strong>Description</strong>: {{ quiz.quiz_description }}</p>
+                    <p><strong>Total Mark</strong>: {{ quiz.total_mark }}</p>
+                </div>
+                <div class="col-5">
+                    <p><strong>Created by</strong>: {{ quiz.created_by.full_name }}</p>
+                    <p><strong>Created At</strong>: {{ quiz.created_at }}</p>
+                    <p><strong>Updated at</strong>: {{ quiz.updated_at }}</p>
+                </div>
+            </div>
+            <a href="{% url 'course_Truong:quiz_detail' course.pk sub_course.pk quiz.pk%}" style="width: 7rem;"
+                        class="btn btn-primary">Detail</a>
+            <a href="{% url 'course_Truong:quiz_move_up' course.pk sub_course.pk quiz.pk%}" style="width: 7rem;"
+                        class="btn btn-success">Move Up</a>
+            <a href="{% url 'course_Truong:quiz_move_down' course.pk sub_course.pk quiz.pk%}" style="width: 7rem;"
+                        class="btn btn-warning">Move Down</a>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+</div>

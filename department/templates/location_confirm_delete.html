@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận xóa địa điểm</title>
+</head>
+<body>
+    <h1>Xóa địa điểm: {{ location.name }}</h1>
+    <p>Bạn có chắc chắn muốn xóa địa điểm này không?</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Xóa</button>
+        <a href="{% url 'department:location_list' %}">Hủy</a>
+    </form>
+</body>
+</html>

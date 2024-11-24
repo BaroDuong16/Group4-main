@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center my-4">Learning Paths</h1>
+
+<div class="d-flex justify-content-end mb-3">
+    <a href="{% url 'learning_path:learning_path_add' %}" class="btn btn-primary">Add New Learning Path</a>
+</div>
+
+<div class="row">
+    {% for item in learning_path_data %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg h-100">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">
+                                <a href="{% url 'learning_path:step_list' item.learning_path.id %}" class="text-decoration-none">
+                                    {{ forloop.counter }}. {{ item.learning_path.title }}
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted">{{ item.learning_path.description|truncatewords:20 }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="margin-top: 5px;">
+                        <!-- Action Buttons -->
+                        <div class="btn-group gap-2">
+                            <!-- Enroll Button -->
+                            <a href="{% url 'learning_path:learning_path_enroll' item.learning_path.id %}" class="btn btn-outline-success">
+                                <i class="fas fa-user-plus"></i> Enroll ({{ item.enrolled_count }})
+                            </a>
+
+                            <!-- Recommend Button -->
+                            <a href="{% url 'learning_path:learning_path_recommend' item.learning_path.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-thumbs-up"></i> Recommend ({{ item.learning_path.recommended_count }})
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a class="btn btn-outline-dark text-decoration-none" href="{% url 'learning_path:learning_path_edit' item.learning_path.id %}">
+                                <i class="fas fa-user"></i> {{ item.learning_path.creator.username }}
+                            </a>
+                        </div>
+                        <div class="col-md-8 d-flex justify-content-end gap-2">
+                            <!-- View Steps Button -->
+                            <a title="Details" href="{% url 'learning_path:step_list' item.learning_path.id %}" class="btn btn-outline-dark text-decoration-none">
+                                <i class="fas fa-list-ul"></i> 
+                            </a>
+                            <!-- Duplicate Button -->
+                            <a title="Duplicate" href="{% url 'learning_path:learning_path_duplicate' item.learning_path.id %}" class="btn btn-outline-dark text-decoration-none">
+                                <i class="fas fa-copy"></i> 
+                            </a>
+                            <!-- Edit Button -->
+                            <a title="Edit" href="{% url 'learning_path:learning_path_edit' item.learning_path.id %}" class="btn btn-outline-dark text-decoration-none">
+                                <i class="fas fa-edit"></i> 
+                            </a>
+                            
+                            <!-- Delete Button in Form -->
+                            <form action="{% url 'learning_path:learning_path_delete' item.learning_path.id %}" method="post" class="mb-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-warning" title="Delete">
+                                    <i class="fas fa-trash-alt"></i> 
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-center">No learning paths available.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

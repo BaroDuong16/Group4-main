@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% load static %}
+
+{% block title %}Edit {{ course.course_name }}{% endblock %}
+
+{% block content %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+</head>
+<body id="edit-form">
+<div class="custom-container mx-auto p-8 bg-white rounded-lg shadow-xl">
+    <h2 class="text-2xl font-semibold text-teal-600 mb-4 main-color-text">Edit {{ course.course_name }}</h2>
+        <div class="tab-container">
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'Tab1')">Detail</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab2')">Sessions</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab3')">Topic-Tags</button>
+                {% if sessions %}
+                    <button class="tablinks" onclick="openTab(event, 'Tab4')">Course Materials</button>
+                {% endif %}
+            </div>
+        </div>
+        <form method="post" class="space-y-4" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="Tab1" class="tabcontent">
+            <div class="form-row">
+                <div class="form-group">
+                    {{ course_form.course_name.label_tag }}
+                    {{ course_form.course_name|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    {{ course_form.course_code.label_tag }}
+                    {{ course_form.course_code|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    {{ course_form.creator.label_tag }}
+                    {{ course_form.creator|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    {{ course_form.instructor.label_tag }}
+                    {{ course_form.instructor|add_class:"form-control" }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    {{ course_form.description.label_tag }}
+                    {{ course_form.description|add_class:"form-control description-input" }}
+                </div>
+                <!-- Image upload and deletion -->
+                <div class="form-group">
+                    <h3>Course Image</h3>
+                    {% if course.image %}
+                        <img src="{{ course.image.url }}" alt="{{ course.course_name }}" style="max-width: 200px;">
+                        <br>
+                        <input type="hidden" name="delete_image" value="on">
+                        <button type="submit" name="action" value="delete_image" class="btn btn-danger">Clear Image</button>
+                    {% else %}
+                        <p>No image uploaded yet.</p>
+                    {% endif %}
+                    <br>
+                    {{ course_form.image.label_tag }}
+                    <input type="file" name="image" class="form-control-file" id="id_image">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <h3>Prerequisite Courses</h3>
+                    <div class="mb-4">
+                        <select name="prerequisite_courses" class="w-full p-2 border border-gray-300 rounded select2" multiple>
+                            {% if prerequisites %}
+                                {% for prereq in prerequisites %}
+                                    <option value="{{ prereq.id }}" selected>{{ prereq.course_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                            {% for course in all_courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="hidden" name="deleted_prerequisite_ids" id="delete-prerequisite-ids">
+                </div>
+            </div>
+        </div>
+
+        <div id="Tab2" class="tabcontent">
+            <!-- Warning message -->
+            <div class="alert alert-warning" role="alert">
+                Note: You can't delete sessions that have materials.
+            </div>
+            <!-- First column: Sessions -->
+            <div class="form-group" style="flex: 1;">
+                <h3>Manage Sessions</h3>
+                <div style="display: flex; flex-direction: column;">
+                <ul id="sessions-container" class="sortable" style="padding: 0; list-style-type: None;">
+                    {% for session in sessions %}
+                        <li class="session-item" data-id="{{ session.id }}">
+                            <input type="text" name="session_names" value="{{ session.name }}" class="form-control">
+                            <input type="hidden" name="session_ids" value="{{ session.id }}">
+                            {% if session.materials.count == 0 %}
+                                <button type="button" class="delete-session" data-id="{{ session.id }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                <input type="hidden" name="delete_session_ids" id="delete-session-ids">
+                <input type="hidden" name="session_order" id="session-order">
+                </div>
+
+                <!-- Add New Sessions -->
+                <div id="new-sessions-container"></div>
+                <button type="button" id="add-new-session" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="Tab3" class="tabcontent">
+            <!-- Second column: Topic, Tags, Current Existing Tags -->
+            <div class="form-group" style="flex: 1;">
+                <!-- Topic Dropdown -->
+                <div class="form-group">
+                    <h3>
+                        Topic
+                        <a href="{% url 'course:topic_add' %}" class="ms-2 text-decoration-none">
+                            <i class="fas fa-plus-circle text-success" style="font-size: 0.8em;"></i>
+                        </a>
+                    </h3>
+                    <select id="topic" name="topic" class="form-control">
+                        <option value="">Select a Topic</option>
+                        {% for topic in topics %}
+                        <option value="{{ topic.id }}">{{ topic.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Tags Checkboxes -->
+                <div class="form-group" id="tags-container">
+                    <h3>
+                        Tags
+                        <a href="{% url 'course:tag_add' %}" class="ms-2 text-decoration-none">
+                            <i class="fas fa-plus-circle text-success" style="font-size: 0.8em;"></i>
+                        </a>
+                    </h3>
+                    <div id="tags-list">
+                        <!-- Tags will be populated here based on the selected topic -->
+                    </div>
+                </div>
+
+                <!-- Existing Tags Section -->
+                <div class="form-group">
+                    <h3>Current Existing Tags</h3>
+                    {% if course.tags.all %}
+                    <ul id="current-tags">
+                        {% for tag in course.tags.all %}
+                        <li class="tag-item {% if forloop.counter > 5 %}hidden{% endif %}">
+                            {{ tag.name }}
+                            <input type="checkbox" name="delete_tag_{{ tag.id }}" id="delete_tag_{{ tag.id }}">
+                            <label for="delete_tag_{{ tag.id }}">Delete</label>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% if course.tags.all.count > 5 %}
+                    <p id="see-more-tags" class="text-link">See more</p>
+                    {% endif %}
+                    {% else %}
+                    <p>No tags added yet.</p>
+                    {% endif %}
+                </div>
+                <a href="{% url 'course:topic_tag_list' %}" class="btn btn-primary">Topic-Tag List</a>
+            </div>
+        </div>
+        <div id="Tab4" class="tabcontent"></div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" style="background-color: #389bb0; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; margin-right: 10px;">
+                Save
+            </button>
+            <a href="{% url 'course:course_list' %}" style="background-color: gray; color: white; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; text-decoration: none;">
+                Return to Course List
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    function openTab(evt, tabName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // If Tab 4 is selected, redirect to the course_content_edit view
+        if (tabName === 'Tab4') {
+            // Replace courseId and firstSessionId with actual values
+            var courseId = {{ course.pk }}; // Use dynamic course ID
+            var firstSessionId = {{ first_session_id|default:"null" }}; // Use dynamic session ID
+            localStorage.setItem("activeTab", "Tab4"); // Save Tab4 as the active tab
+            window.location.href = /course/${courseId}/content/edit/${firstSessionId}/;
+        } else {
+            // Show the selected tab and add "active" class to the clicked button
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+
+            // Save the selected tab in localStorage
+            localStorage.setItem("activeTab", tabName);
+        }
+    }
+
+    // Optionally, you can set the default tab to be opened
+    document.addEventListener("DOMContentLoaded", function() {
+        let savedTab = localStorage.getItem("activeTab") || "Tab1"; // Default to Tab1
+        let defaultTabButton = document.querySelector(.tablinks[onclick="openTab(event, '${savedTab}')"]);
+
+        if (defaultTabButton) {
+            defaultTabButton.click();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const tags = [
+            {% for tag in tags %}
+            { id: "{{ tag.id }}", name: "{{ tag.name }}", topicId: "{{ tag.topic.id }}" },
+            {% endfor %}
+        ];
+
+        // Define already-selected tags
+        const selectedTags = [
+            {% for tag in course.tags.all %}
+            "{{ tag.id }}",
+            {% endfor %}
+        ];
+
+        const topicSelect = document.getElementById('topic');
+        const tagsListContainer = document.getElementById('tags-list');
+        const seeMoreText = document.createElement('p');
+        seeMoreText.id = 'see-more-topic-tags';
+        seeMoreText.className = 'text-link';
+        seeMoreText.innerHTML = 'See more';
+
+        // Handle Topic Change to Load Tags
+        topicSelect.addEventListener('change', function() {
+            const selectedTopicId = this.value;
+            tagsListContainer.innerHTML = ''; // Clear previous tags
+            let visibleItems = 5;
+
+            if (selectedTopicId) {
+                // Filter tags by the selected topic
+                const filteredTags = tags.filter(tag => tag.topicId === selectedTopicId && !selectedTags.includes(tag.id));
+
+                // Initially display the first 5 tags
+                filteredTags.slice(0, visibleItems).forEach(tag => {
+                    const tagItem = document.createElement('div');
+                    tagItem.className = 'tag-item';
+                    tagItem.innerHTML = 
+                        <input type="checkbox" name="tags" class="tag-checkbox" value="${tag.id}" id="tag_${tag.id}">
+                        <label for="tag_${tag.id}">${tag.name}</label>
+                    ;
+                    tagsListContainer.appendChild(tagItem);
+                });
+
+                // Hide the rest of the tags
+                filteredTags.slice(visibleItems).forEach(tag => {
+                    const tagItem = document.createElement('div');
+                    tagItem.className = 'tag-item hidden'; // Initially hidden
+                    tagItem.innerHTML = 
+                        <input type="checkbox" name="tags" class="tag-checkbox" value="${tag.id}" id="tag_${tag.id}">
+                        <label for="tag_${tag.id}">${tag.name}</label>
+                    ;
+                    tagsListContainer.appendChild(tagItem);
+                });
+
+                // Add "See more" text if there are more than 5 tags
+                if (filteredTags.length > visibleItems) {
+                    tagsListContainer.appendChild(seeMoreText);
+                    seeMoreText.classList.remove('disabled'); // Make sure it's clickable
+                } else {
+                    seeMoreText.classList.add('disabled'); // Disable "See more" if no more items
+                }
+
+                // Handle "See more" functionality
+                seeMoreText.addEventListener('click', function() {
+                    const hiddenItems = tagsListContainer.querySelectorAll('.hidden');
+                    if (hiddenItems.length > 0) {
+                        // Show 5 more hidden tags
+                        Array.from(hiddenItems).slice(0, 5).forEach(tagItem => {
+                            tagItem.classList.remove('hidden');
+                        });
+
+                        // Disable "See more" if all tags are shown
+                        if (tagsListContainer.querySelectorAll('.hidden').length === 0) {
+                            seeMoreText.classList.add('disabled');
+                        }
+                    }
+                });
+            }
+        });
+
+        $(document).ready(function() {
+            // Handle "See more" functionality for tags
+            const tagItems = $('.tag-item');
+            const seeMoreText = $('#see-more-tags'); // Change this to text
+            const itemsToShow = 5;
+            let visibleItems = 5;
+
+            // Initially hide items beyond the first 5
+            tagItems.slice(visibleItems).addClass('hidden');
+
+            function showMoreTags() {
+                const hiddenItems = $('.tag-item.hidden');
+
+                if (hiddenItems.length === 0) {
+                    // Do nothing if no more hidden items
+                    return;
+                }
+
+                // Reveal 5 more tags
+                const itemsToReveal = hiddenItems.slice(0, itemsToShow);
+                itemsToReveal.removeClass('hidden');
+                visibleItems += itemsToShow;
+
+                // If all tags are revealed, disable further actions but keep "See more" visible
+                if (visibleItems >= tagItems.length) {
+                    seeMoreText.addClass('disabled'); // Mark as disabled
+                }
+            }
+            seeMoreText.on('click', function() {
+                if (!$(this).hasClass('disabled')) {
+                    showMoreTags();
+                }
+            });
+        });
+
+
+        // Collect selected tag IDs before form submission
+        form.addEventListener('submit', function() {
+            const selectedTagIds = Array.from(tagsListContainer.querySelectorAll('.tag-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+            selectedTagsInput.value = selectedTagIds.join(',');
+        });
+    });
+
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select prerequisite courses",
+            allowClear: true
+        }).on('select2:unselect', function (e) {
+            // Handle the unselection event to mark the prerequisite for deletion
+            const courseId = e.params.data.id;
+            $('#delete-prerequisite-ids').val(function(i, val) {
+                return val + (val ? ',' : '') + courseId;
+            });
+        });
+
+        $("#sessions-container").sortable({
+            handle: ".drag-handle", // Use a specific handle for dragging
+            update: function(event, ui) {
+                // Update the session order when the order is changed
+                let order = $(this).sortable('toArray', { attribute: 'data-id' });
+                $("#session-order").val(order.join(','));
+            }
+        });
+
+        // Make sure the sessions can be dragged
+        $(".session-item").each(function() {
+            $(this).prepend('<span class="drag-handle" style="cursor: move;">☰</span>'); // Add a drag handle
+        });
+
+        // Handle adding new sessions
+        let newSessionCount = 0;
+        $('#add-new-session').click(function() {
+            newSessionCount++;
+            const newSessionHtml = 
+                <div class="session-item new-session">
+                    <input type="text" name="new_session_names" class="form-control" placeholder="New Session Name">
+                    <button type="button" class="delete-session">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            ;
+            $('#new-sessions-container').append(newSessionHtml);
+        });
+
+        $('#new-sessions-container').on('click', '.delete-session', (function() {
+            $(this).closest('.session-item').remove();
+        }));
+
+        // Event delegation for deleting sessions
+        $('#sessions-container').on('click', '.delete-session', function() {
+            const sessionId = $(this).data('id');
+            if (sessionId) {
+                // Append to hidden input for deletion
+                $('#delete-session-ids').val(function(i, val) {
+                    return val + (val ? ',' : '') + sessionId;
+                });
+            }
+            $(this).closest('.session-item').remove(); // Remove the session from the UI
+        });
+    });
+
+</script>
+{% endblock %}

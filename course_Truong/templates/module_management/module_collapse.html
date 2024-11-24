@@ -1,0 +1,40 @@
+<div class="accordion my-2" id="accordionExample">
+    {% for module, sub_modules in modules_and_quizzes.modules.items %}
+    <div class="card">
+      <div class="card-header" id="quiz_heading_{{ module.pk }}">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#module_collapse_{{ module.pk }}" aria-expanded="false" aria-controls="module_collapse_{{ module.pk }}">
+            {{ module.order }}. {{ module.title }}
+          </button>
+        </h2>
+      </div>
+      <div id="module_collapse_{{ module.pk }}" class="collapse" aria-labelledby="module_heading_{{ module.pk }}" data-parent="#accordionExample">
+        <div class="card-body">
+            <h4 class="mb-4">Module Information</h4>
+            <div class="row">
+                <div class="col-7">
+                    <p><strong>Title</strong>: {{ module.title }}</p>
+                </div>
+                <div class="col-5">
+                    <p><strong>Created by</strong>: {{ module.created_by.full_name }}</p>
+                    <p><strong>Created At</strong>: {{ module.created_at }}</p>
+                    <p><strong>Updated at</strong>: {{ module.updated_at }}</p>
+                </div>
+            </div>
+            <a href="{% url 'course_Truong:module_edit' course.pk sub_course.pk module.pk%}" style="width: 7rem;"
+                        class="btn btn-primary">Edit</a>
+            <a href="{% url 'course_Truong:module_move_up' course.pk sub_course.pk module.pk%}" style="width: 7rem;"
+                        class="btn btn-success">Move Up</a>
+            <a href="{% url 'course_Truong:module_move_down' course.pk sub_course.pk module.pk%}" style="width: 7rem;"
+                        class="btn btn-warning">Move Down</a>
+            <a href="{% url 'course_Truong:module_delete' course.pk sub_course.pk module.pk%}" style="width: 7rem;"
+                        class="btn btn-danger">Delete</a>
+            <hr>
+            <h4 class="mb-4">Sub Module</h4>
+            {% include "sub_module_management/sub_module_collapse.html" %}
+            <a href="{% url "course_Truong:sub_module_add" course.pk sub_course.pk module.pk%}" class="btn btn-info">Add Sub Module</a>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+</div>

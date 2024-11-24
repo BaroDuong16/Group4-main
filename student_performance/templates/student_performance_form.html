@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit User,Add New Student Performance" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit User,Add New Student Performance" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.user_id.label_tag }}
+            {{ form.user_id|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.course_id.label_tag }}
+            {{ form.course_id|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.quiz_id.label_tag }}
+            {{ form.quiz_id|add_class:"form-control" }}
+        </div>
+       
+        <div class="form-group">
+            {{ form.score.label_tag }}
+            {{ form.score|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.feedback.label_tag }}
+            {{ form.feedback|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'student_performance:student_performance_list' %}" class="btn btn-secondary">Back to Student Performance List</a>
+    </form>
+</div>
+{% endblock %}

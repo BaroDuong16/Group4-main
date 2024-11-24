@@ -1,0 +1,16 @@
+
+
+.small-description {
+    background-color: pink; /* Màu nền nhạt */
+    border: 1px solid #d0e6ff; /* Đường viền nhẹ */
+    padding: 5px; /* Khoảng cách bên trong */
+    border-radius: 5px; /* Bo góc */
+    font-size: 0.4em; /* Kích thước chữ nhỏ hơn */
+    margin-left: 10px; /* Khoảng cách bên trái */
+    margin-bottom: 50px;
+}
+
+
+
+
+

@@ -1,0 +1,24 @@
+<div class="accordion mt-2" id="accordion_module">
+    {% for module, sub_modules in modules_and_quizzes.modules.items %}
+    <div class="card">
+        <div class="card-header" id="module_heading_{{ module.pk }}">
+            <h2 class="mb-0">
+                <button
+                    class="btn btn-link btn-block text-left {% if sub_module.module.id %}{% if module.pk == sub_module.module.id %}collapsed{% endif %}{% endif %}"
+                    type="button" data-toggle="collapse" data-target="#module_collapse_{{ module.pk }}"
+                    aria-expanded="{% if sub_module.module.id %}{% if module.pk == sub_module.module.id %}true{% else %}false{% endif %}{% endif %}"
+                    aria-controls="module_collapse_{{ module.pk }}">
+                    {{ module.order }}) {{ module.title }}
+                </button>
+            </h2>
+        </div>
+        <div id="module_collapse_{{ module.pk }}"
+            class="collapse {% if sub_module.module.id %}{% if module.pk == sub_module.module.id %}show{% endif %}{% endif %}"
+            aria-labelledby="module_heading_{{ module.pk }}" data-parent="#accordion_module">
+            <div class="card-body">
+                {% include "course_operations/sub_module_list.html" %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>

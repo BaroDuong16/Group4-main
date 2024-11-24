@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Assessment Types</h2>
+<a href="{% url 'assessment:assessment_type_create' %}" class="btn btn-primary">Add New Assessment Type</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for assessment_type in assessment_types %}
+        <tr>
+            <td>{{ assessment_type.id }}</td>
+            <td>{{ assessment_type.type_name }}</td>
+            <td>
+                <a href="{% url 'assessment:assessment_type_update' assessment_type.id %}" class="btn btn-warning">Edit</a>
+                <form action="{% url 'assessment:assessment_type_delete' assessment_type.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

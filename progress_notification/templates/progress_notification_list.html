@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Progress Notification List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Progress Notification List</h2>
+    <div class="mt-3">
+
+        <a href="{% url 'progress_notification:progress_notification_add' %}" class="btn btn-primary" title="Add New Notification" data-toggle="tooltip">
+          <i class="fas fa-plus"></i> Add Notification
+        </a>
+        <button class="btn btn-success" title="Import Notification from Excel" data-toggle="modal" data-target="#importModal" data-toggle="tooltip">
+          <i class="fas fa-file-import"></i> Import
+        </button>
+  
+        <a href="{% url 'progress_notification:export_progress_notification' %}" class="btn btn-secondary" title="Export Notification to Excel" data-toggle="tooltip">
+          <i class="fas fa-file-export"></i> Export
+        </a>
+      </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Course</th>
+                <th>Notification Message</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notification in progress_notification %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ notification.user }}</td>
+                <td>{{ notification.course }}</td>
+                <td>{{ notification.notification_message }}</td>
+                <td>
+                  <a title="Details" href="{% url 'progress_notification:progress_notification_detail' notification.id %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-info-circle"></i></a>
+                  <a title="Edit"  href="{% url 'progress_notification:progress_notification_edit' notification.id %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-edit"></i></a>
+                  <a title="Delete" href="{% url 'progress_notification:progress_notification_delete' notification.id %}" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash-alt"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="importModalLabel">Import Insights from Excel</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Import Form -->
+          <form method="post" enctype="multipart/form-data" action="{% url 'progress_notification:import_progress_notification' %}">
+          <div class="mb-4">
+            <span>
+              Please download and use the <a href="{% static 'excel/import_progress_notification.xlsx' %}" target="_blank">Excel template</a>. The Excel file must contain exactly one sheet with the required columns.
+            </span>
+          </div>
+            {% csrf_token %}
+            <p>
+              <label for="id_excel_file">Upload Excel File:</label>
+              <input type="file" name="excel_file" required="" aria-invalid="true" id="id_excel_file">
+            </p>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Initialize Bootstrap Tooltips -->
+  <script>
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
+{% endblock %}

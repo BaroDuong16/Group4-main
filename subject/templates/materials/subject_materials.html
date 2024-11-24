@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load basename_filter %}
+
+{% block title %}Materials for {{ subject.name }} ({{ subject.code }}){% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Materials for [{{ subject.code }} - {{ subject.name }} ]</h2>
+
+    <a href="{% url 'subject:upload_material' %}" class="btn btn-success mb-4">
+        <i class="fas fa-upload"></i> Upload New Material
+    </a>
+    <a href="{% url 'subject:subject_list' %}" class="btn btn-secondary mb-4">
+        <i class="fas fa-arrow-left"></i> Back to Subject List
+    </a>
+    
+    <!-- Tabs with File Counts -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="assignments-tab" data-toggle="tab" href="#assignments" role="tab" aria-controls="assignments" aria-selected="true">
+                Assignments ({{ assignments|length }} files)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="labs-tab" data-toggle="tab" href="#labs" role="tab" aria-controls="labs" aria-selected="false">
+                Labs ({{ labs|length }} files)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="lectures-tab" data-toggle="tab" href="#lectures" role="tab" aria-controls="lectures" aria-selected="false">
+                Lectures ({{ lectures|length }} files)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="references-tab" data-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">
+                References ({{ references|length }} files)
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-3" id="myTabContent">
+        <!-- Assignments Tab -->
+        <div class="tab-pane fade show active" id="assignments" role="tabpanel" aria-labelledby="assignments-tab">
+            <a href="{% url 'subject:download_all_materials' 'assignments' %}" class="btn btn-primary mb-4">
+                <i class="fas fa-download"></i> Download All 
+            </a>
+            
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 40%;">File Name</th>
+                        <th style="width: 15%;">File Type</th>
+                        <th style="width: 20%;">File Size</th>
+                        <th style="width: 20%;">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table>
+                    <tbody>
+                        {% for assignment in assignments %}
+                        <tr>
+                            <td style="width: 5%;">{{ forloop.counter }}</td>
+                            <td style="width: 40%;">{{ assignment.file.name|basename }}</td>
+                            <td style="width: 15%;">{{ assignment.get_file_type }}</td>
+                            <td style="width: 20%;">{{ assignment.file.size|filesizeformat }}</td>
+                            <td style="width: 20%;">
+                                <a href="{{ assignment.file.url }}" class="btn btn-primary btn-sm" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <form action="{% url 'subject:delete_material' assignment.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No assignments available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Labs Tab -->
+        <div class="tab-pane fade" id="labs" role="tabpanel" aria-labelledby="labs-tab">
+            <a href="{% url 'subject:download_all_materials' 'labs' %}" class="btn btn-primary mb-4">
+                <i class="fas fa-download"></i> Download All 
+            </a>
+            
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 40%;">File Name</th>
+                        <th style="width: 15%;">File Type</th>
+                        <th style="width: 20%;">File Size</th>
+                        <th style="width: 20%;">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-striped table-hover">
+                    <tbody>
+                        
+                        {% for lab in labs %}
+                        <tr>
+                            <td style="width: 5%;">{{ forloop.counter }}</td>
+                            <td style="width: 40%;">{{ lab.file.name|basename }}</td>
+                            <td style="width: 15%;">{{ lab.get_file_type }}</td>
+                            <td style="width: 20%;">{{ lab.file.size|filesizeformat }}</td>
+                            <td style="width: 20%;">
+                                <a href="{{ lab.file.url }}" class="btn btn-primary btn-sm" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <form action="{% url 'subject:delete_material' lab.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                <!-- View button -->
+                                {% if lab.id %}
+                                <a href="{% url 'subject:view_material' lab.id %}" title="View Material" class="btn btn-info btn-sm" target="_blank">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% else %}
+                                    <span class="text-muted">No file available</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No labs available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Lectures Tab -->
+        <div class="tab-pane fade" id="lectures" role="tabpanel" aria-labelledby="lectures-tab">
+            <a href="{% url 'subject:download_all_materials' 'lectures' %}" class="btn btn-primary mb-4">
+                <i class="fas fa-download"></i> Download All 
+            </a>
+            
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 40%;">File Name</th>
+                        <th style="width: 15%;">File Type</th>
+                        <th style="width: 20%;">File Size</th>
+                        <th style="width: 20%;">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table>
+                    <tbody>
+                        {% for lecture in lectures %}
+                        <tr>
+                            <td style="width: 5%;">{{ forloop.counter }}</td>
+                            <td style="width: 40%;">{{ lecture.file.name|basename }}</td>
+                            <td style="width: 15%;">{{ lecture.get_file_type }}</td>
+                            <td style="width: 20%;">{{ lecture.file.size|filesizeformat }}</td>
+                            <td style="width: 20%;">
+                                <a href="{{ lecture.file.url }}" class="btn btn-primary btn-sm" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <form action="{% url 'subject:delete_material' lecture.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No lectures available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- References Tab -->
+        <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
+            <a href="{% url 'subject:download_all_materials' 'references' %}" class="btn btn-primary mb-4">
+                <i class="fas fa-download"></i> Download All
+            </a>
+           
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 40%;">File Name</th>
+                        <th style="width: 15%;">File Type</th>
+                        <th style="width: 20%;">File Size</th>
+                        <th style="width: 20%;">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table>
+                    <tbody>
+                        {% for reference in references %}
+                        <tr>
+                            <td style="width: 5%;">{{ forloop.counter }}</td>
+                            <td style="width: 40%;">{{ reference.file.name|basename }}</td>
+                            <td style="width: 15%;">{{ reference.get_file_type }}</td>
+                            <td style="width: 20%;">{{ reference.file.size|filesizeformat }}</td>
+                            <td style="width: 20%;">
+                                <a href="{{ reference.file.url }}" class="btn btn-primary btn-sm" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <form action="{% url 'subject:delete_material' reference.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">No references available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+<div class="w-75 mx-auto pb-4">
+    <h3 class="mb-4">Quiz Information</h3>
+    <div class="row">
+        <div class="col">
+            <p><strong>Title: </strong>{{ quiz.quiz_title }}</p>
+            <p><strong>Description: </strong>{{ quiz.quiz_description }}</p>
+            <p><strong>Total Mark: </strong>{{ quiz.total_mark }}</p>
+            <p><strong>Mark To Pass</strong>: {{ quiz.mark_to_pass }}</p>
+            <p><strong>Number of Questions: </strong>{{ num_of_questions }}</p>
+        </div>
+        <div class="col">
+            <p><strong>Created by: </strong>{{ quiz.created_by.full_name }}</p>
+            <p><strong>Created At: </strong>{{ quiz.created_at }}</p>
+            <p><strong>Updated at: </strong>{{ quiz.updated_at }}</p>
+        </div>
+    </div>
+    <hr>
+    <a href="{% url "course_Truong:short_link_do_quiz" course.pk quiz.pk %}" class="btn btn-primary px-3 py-2">Start Assignment</a>
+    <h5 class="mt-4">Your Attempt</h5>
+    <table class="table" style="width: 60%;">
+        <thead>
+          <tr>
+            <th class="col-1">#</th>
+            <th class="col-7">Date</th>
+            <th class="col-3">Mark</th>
+            <th class="col-1"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attempt in attempts %}
+            <tr>
+              <th scope="row" style="justify-content: center;">{{ forloop.counter }}</th>
+              <td>{{ attempt.attempt_date }}</td>
+              <td class="{% if attempt.score >= quiz.mark_to_pass %}bg-success{% else %}bg-danger{% endif %}">{{ attempt.score }}</td>
+              <td><a href="{% url "course_Truong:short_link_attempted_quiz_preview" course.pk quiz.pk attempt.pk %}" >View</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+</div>

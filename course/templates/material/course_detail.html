@@ -1,0 +1,20 @@
+<!-- course_detail.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ course.course_name }}</h1>
+<p>{{ course.description }}</p>
+
+<h3>Materials:</h3>
+<ul>
+    {% for material in materials %}
+        <li>
+            <strong>{{ material.title }}</strong>
+            <div>{{ material.content|safe }}</div>
+            {% if material.pdf_file %}
+                <a href="{{ material.pdf_file.url }}" download>Download PDF</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

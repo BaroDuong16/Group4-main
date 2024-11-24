@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student_performance.performance_id }} Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Student Performance Details</h2>
+    <p><strong>Performance ID:</strong> {{ student_performance.performance_id }}</p>
+    <p><strong>User ID:</strong> {{ student_performance.user_id }}</p>
+    <p><strong>Course ID:</strong> {{ student_performance.course_id }}</p>
+    <p><strong>Quiz ID:</strong> {{ student_performance.quiz_id }}</p>
+    <p><strong>Assignment ID:</strong> {{ student_performance.assignment_id }}</p>
+    <p><strong>Score:</strong> {{ student_performance.score }}</p>
+    <p><strong>Feedbak:</strong> {{ student_performance.feedback }}</p>
+    <a href="{% url 'student_performance:student_performance_list' %}" class="btn btn-primary">Back to Student Performance List</a>
+</div>
+{% endblock %}

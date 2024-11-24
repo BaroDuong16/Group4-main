@@ -1,0 +1,13 @@
+[
+    {"id": "21", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "What is the output of the following code?\n\nint x = 10;\nSystem.out.println(x++);", "question_type": "MCQ", "points": "1"},
+    {"id": "22", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "Which of the following is a valid declaration of a String?\n\nString s = new String();", "question_type": "MCQ", "points": "1"},
+    {"id": "23", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "What will be the output of the following code?\n\nint a = 5;\nint b = 10;\nSystem.out.println(a + b);", "question_type": "MCQ", "points": "1"},
+    {"id": "24", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "Which loop is guaranteed to execute at least once in Java?", "question_type": "MCQ", "points": "1"},
+    {"id": "25", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "What is the correct syntax to declare an array in Java?", "question_type": "MCQ", "points": "1"},
+    {"id": "26", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "How do you declare a constant in Java?", "question_type": "MCQ", "points": "1"},
+    {"id": "27", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[1]);", "question_type": "MCQ", "points": "1"},
+    {"id": "28", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "What is the size of an `int` in Java?", "question_type": "MCQ", "points": "1"},
+    {"id": "29", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "What will be the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n    System.out.print(i);\n}", "question_type": "MCQ", "points": "1"},
+    {"id": "30", "quiz__quiz_title": "JPL_Quiz_03", "question_text": "Which keyword is used to exit a loop in Java?", "question_type": "MCQ", "points": "1"}
+  ]
+  

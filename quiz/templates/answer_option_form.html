@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container">
+    <h2>{% if answer_option %}Edit{% else %}Add{% endif %} Answer Option for Question "{{ question.question_text }}"</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" id="option_count" name="option_count" value="{{ question.answer_options.count }}">
+        <input type="hidden" id="removed_options" name="removed_options" value="">
+
+        <h3>Add/Edit Answer Options</h3>
+        <div id="answer-options-container">
+            {% for option in question.answer_options.all %}
+                <div class="form-group" id="option-group-{{ forloop.counter0 }}">
+                    <input type="hidden" name="option_id_{{ forloop.counter0 }}" value="{{ option.id }}">
+                    <label for="option_text_{{ forloop.counter0 }}">Answer {{ forloop.counter }}</label>
+                    <input type="text" name="option_text_{{ forloop.counter0 }}" class="form-control" value="{{ option.option_text }}" required>
+                    <label for="is_correct_{{ forloop.counter0 }}">Is Correct</label>
+                    <input type="checkbox" name="is_correct_{{ forloop.counter0 }}" {% if option.is_correct %}checked{% endif %}>
+                    <button type="button" class="btn btn-danger btn-sm remove-answer" data-index="{{ forloop.counter0 }}">Remove</button>
+                </div>
+            {% endfor %}
+        </div>
+        <a href="{% url 'quiz:question_detail' question.pk %}" class="btn btn-secondary">Back</a>
+        <button type="button" class="btn btn-secondary" id="add-answer">Add New Answer</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+        
+    </form>
+</div>
+
+<script>
+    let optionCount = {{ question.answer_options.count }};
+    let removedOptions = [];
+
+    document.getElementById('add-answer').addEventListener('click', addNewOption);
+
+    function addNewOption() {
+        const newOption = document.createElement('div');
+        newOption.classList.add('form-group');
+        newOption.id = `option-group-${optionCount}`;
+
+        newOption.innerHTML = `
+            <label for="option_text_${optionCount}">Answer ${optionCount + 1}</label>
+            <input type="text" name="option_text_${optionCount}" class="form-control" required>
+            <label for="is_correct_${optionCount}">Is Correct</label>
+            <input type="checkbox" name="is_correct_${optionCount}">
+            <button type="button" class="btn btn-danger btn-sm remove-answer" data-index="${optionCount}">Remove</button>
+        `;
+
+        document.getElementById('answer-options-container').appendChild(newOption);
+        optionCount++;
+        document.getElementById('option_count').value = optionCount;
+    }
+
+    document.getElementById('answer-options-container').addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-answer')) {
+        const index = e.target.getAttribute('data-index');
+        const optionId = e.target.closest('.form-group').querySelector('input[name^="option_id_"]').value; // Lấy ID từ input ẩn
+
+        removedOptions.push(optionId); // Thêm ID vào mảng removedOptions
+        document.getElementById(`option-group-${index}`).remove();
+
+        // Giảm optionCount và cập nhật giá trị trong input ẩn
+        optionCount--;
+        document.getElementById('option_count').value = optionCount;
+
+        // Cập nhật giá trị của input ẩn chứa các ID đã xóa
+        document.getElementById('removed_options').value = removedOptions.join(',');
+
+        // Cập nhật số thứ tự và tên của các trường input
+        updateAnswerNumbers();
+    }
+});
+
+
+    function updateAnswerNumbers() {
+        const answerGroups = document.querySelectorAll('#answer-options-container .form-group');
+        answerGroups.forEach((group, idx) => {
+            const label = group.querySelector('label:first-of-type');
+            label.textContent = `Answer ${idx + 1}`;
+            label.htmlFor = `option_text_${idx}`;
+
+            const inputText = group.querySelector('input[type="text"]');
+            inputText.name = `option_text_${idx}`;
+            inputText.id = `option_text_${idx}`;
+
+            const checkboxLabel = group.querySelector('label:last-of-type');
+            checkboxLabel.htmlFor = `is_correct_${idx}`;
+            
+            const checkbox = group.querySelector('input[type="checkbox"]');
+            checkbox.name = `is_correct_${idx}`;
+            checkbox.id = `is_correct_${idx}`;
+
+            group.id = `option-group-${idx}`;
+            const removeButton = group.querySelector('.remove-answer');
+            removeButton.setAttribute('data-index', idx);
+        });
+    }
+</script>
+
+{% endblock %}

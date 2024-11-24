@@ -1,0 +1,52 @@
+[
+    {"id": "81", "question__question_text": "What is the output of the following code?\n\nint x = 10;\nSystem.out.println(x++);", "option_text": "A) 10", "is_correct": "1"},
+    {"id": "82", "question__question_text": "What is the output of the following code?\n\nint x = 10;\nSystem.out.println(x++);", "option_text": "B) 11", "is_correct": "0"},
+    {"id": "83", "question__question_text": "What is the output of the following code?\n\nint x = 10;\nSystem.out.println(x++);", "option_text": "C) 0", "is_correct": "0"},
+    {"id": "84", "question__question_text": "What is the output of the following code?\n\nint x = 10;\nSystem.out.println(x++);", "option_text": "D) None of the above", "is_correct": "0"},
+    
+    {"id": "85", "question__question_text": "Which of the following is a valid declaration of a String?\n\nString s = new String();", "option_text": "A) String s = new String();", "is_correct": "1"},
+    {"id": "86", "question__question_text": "Which of the following is a valid declaration of a String?\n\nString s = new String();", "option_text": "B) String s = \"Hello\";", "is_correct": "1"},
+    {"id": "87", "question__question_text": "Which of the following is a valid declaration of a String?\n\nString s = new String();", "option_text": "C) Both A and B", "is_correct": "1"},
+    {"id": "88", "question__question_text": "Which of the following is a valid declaration of a String?\n\nString s = new String();", "option_text": "D) None of the above", "is_correct": "0"},
+  
+    {"id": "89", "question__question_text": "What will be the output of the following code?\n\nint a = 5;\nint b = 10;\nSystem.out.println(a + b);", "option_text": "A) 15", "is_correct": "1"},
+    {"id": "90", "question__question_text": "What will be the output of the following code?\n\nint a = 5;\nint b = 10;\nSystem.out.println(a + b);", "option_text": "B) 10", "is_correct": "0"},
+    {"id": "91", "question__question_text": "What will be the output of the following code?\n\nint a = 5;\nint b = 10;\nSystem.out.println(a + b);", "option_text": "C) 5", "is_correct": "0"},
+    {"id": "92", "question__question_text": "What will be the output of the following code?\n\nint a = 5;\nint b = 10;\nSystem.out.println(a + b);", "option_text": "D) 0", "is_correct": "0"},
+    
+    {"id": "93", "question__question_text": "Which loop is guaranteed to execute at least once in Java?", "option_text": "A) for loop", "is_correct": "0"},
+    {"id": "94", "question__question_text": "Which loop is guaranteed to execute at least once in Java?", "option_text": "B) while loop", "is_correct": "0"},
+    {"id": "95", "question__question_text": "Which loop is guaranteed to execute at least once in Java?", "option_text": "C) do-while loop", "is_correct": "1"},
+    {"id": "96", "question__question_text": "Which loop is guaranteed to execute at least once in Java?", "option_text": "D) None of the above", "is_correct": "0"},
+    
+    {"id": "97", "question__question_text": "What is the correct syntax to declare an array in Java?", "option_text": "A) int[] arr;", "is_correct": "1"},
+    {"id": "98", "question__question_text": "What is the correct syntax to declare an array in Java?", "option_text": "B) int arr[];", "is_correct": "1"},
+    {"id": "99", "question__question_text": "What is the correct syntax to declare an array in Java?", "option_text": "C) Both A and B", "is_correct": "1"},
+    {"id": "100", "question__question_text": "What is the correct syntax to declare an array in Java?", "option_text": "D) None of the above", "is_correct": "0"},
+    
+    {"id": "101", "question__question_text": "How do you declare a constant in Java?", "option_text": "A) final int x = 10;", "is_correct": "1"},
+    {"id": "102", "question__question_text": "How do you declare a constant in Java?", "option_text": "B) const int x = 10;", "is_correct": "0"},
+    {"id": "103", "question__question_text": "How do you declare a constant in Java?", "option_text": "C) static int x = 10;", "is_correct": "0"},
+    {"id": "104", "question__question_text": "How do you declare a constant in Java?", "option_text": "D) int x = 10;", "is_correct": "0"},
+    
+    {"id": "105", "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[1]);", "option_text": "A) 1", "is_correct": "0"},
+    {"id": "106", "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[1]);", "option_text": "B) 2", "is_correct": "1"},
+    {"id": "107", "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[1]);", "option_text": "C) 3", "is_correct": "0"},
+    {"id": "108", "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[1]);", "option_text": "D) 0", "is_correct": "0"},
+    
+    {"id": "109", "question__question_text": "What is the size of an `int` in Java?", "option_text": "A) 16 bits", "is_correct": "0"},
+    {"id": "110", "question__question_text": "What is the size of an `int` in Java?", "option_text": "B) 32 bits", "is_correct": "1"},
+    {"id": "111", "question__question_text": "What is the size of an `int` in Java?", "option_text": "C) 64 bits", "is_correct": "0"},
+    {"id": "112", "question__question_text": "What is the size of an `int` in Java?", "option_text": "D) None of the above", "is_correct": "0"},
+    
+    {"id": "113", "question__question_text": "What will be the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n    System.out.print(i);\n}", "option_text": "A) 01234", "is_correct": "1"},
+    {"id": "114", "question__question_text": "What will be the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n    System.out.print(i);\n}", "option_text": "B) 12345", "is_correct": "0"},
+    {"id": "115", "question__question_text": "What will be the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n    System.out.print(i);\n}", "option_text": "C) 54321", "is_correct": "0"},
+    {"id": "116", "question__question_text": "What will be the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n    System.out.print(i);\n}", "option_text": "D) 0", "is_correct": "0"},
+    
+    {"id": "117", "question__question_text": "Which keyword is used to exit a loop in Java?", "option_text": "A) break", "is_correct": "1"},
+    {"id": "118", "question__question_text": "Which keyword is used to exit a loop in Java?", "option_text": "B) continue", "is_correct": "0"},
+    {"id": "119", "question__question_text": "Which keyword is used to exit a loop in Java?", "option_text": "C) return", "is_correct": "0"},
+    {"id": "120", "question__question_text": "Which keyword is used to exit a loop in Java?", "option_text": "D) exit", "is_correct": "0"}
+  ]
+  

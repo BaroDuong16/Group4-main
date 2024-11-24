@@ -1,0 +1,9 @@
+<h2>Generated Question</h2>
+<p>{{ question }}</p>
+<p>{{ advice }}</p>
+{% if advice == "This question is unique enough. Would you like to add it to the quiz bank?" %}
+    <form method="post" action="{% url 'generate_question' %}">
+        {% csrf_token %}
+        <button type="submit">Add to Quiz Bank</button>
+    </form>
+{% endif %}

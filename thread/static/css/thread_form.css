@@ -1,0 +1,35 @@
+/* Style the form container */
+.card {
+    background-color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* Customize form input fields */
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+/* Input fields focus effect */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Customize the submit button */
+.btn-primary {
+    background-color: #1877f2;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #145dbf;
+}

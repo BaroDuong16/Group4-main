@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Thread List{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f8f9fa; /* Light background for contrast */
+    }
+    .thread-container {
+        display: grid;
+        grid-template-columns: 1fr 4fr 1fr; /* Adjusted for layout to make the main content wider */
+        gap: 20px;
+        width: 100%; /* Make sure the container fills the full width of the screen */
+    }
+    .course-list, .main-content, .recent-activity {
+        background-color: #ffffff; /* White background for contrast */
+        border-radius: 5px; /* Rounded corners */
+        padding: 15px; /* Padding around the content */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+    .course-list {
+        border-right: 1px solid #ccc;
+        padding-right: 20px;
+    }
+    .course-list h5 {
+        font-weight: bold;
+        margin-bottom: 15px; /* Spacing below the heading */
+    }
+    .course-list ul {
+        list-style: none; /* Remove bullet points */
+        padding: 0; /* Remove default padding */
+    }
+    .course-list li {
+        margin-bottom: 10px; /* Spacing between list items */
+    }
+    .course-list a {
+        text-decoration: none; /* Remove underline */
+        color: #007bff; /* Bootstrap primary color */
+    }
+    .course-list a:hover {
+        text-decoration: underline; /* Underline on hover */
+    }
+    .search-bar {
+        margin-bottom: 20px;
+    }
+    .main-content h2 {
+        margin-bottom: 20px; /* Spacing below the heading */
+    }
+    .table {
+        background-color: #ffffff; /* White background for the table */
+        border-radius: 5px; /* Rounded corners */
+        overflow: hidden; /* Round corners on the table */
+    }
+    .table th {
+        background-color: #007bff; /* Bootstrap primary color for header */
+        color: white; /* White text for contrast */
+    }
+    .table td {
+        vertical-align: middle; /* Center the text vertically */
+    }
+    .recent-activity {
+        border-left: 1px solid #ccc; /* Optional: Adds a border to separate */
+        padding-left: 20px;
+    }
+    .recent-activity h5 {
+        font-weight: bold;
+        margin-bottom: 15px; /* Spacing below the heading */
+    }
+    .recent-activity-section {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .pagination {
+        margin-top: 20px; /* Space above pagination */
+    }
+    .container {
+        margin-left: 0;
+        margin-right: 0;
+        max-width: 100%; /* Ensure the container stretches the full width */
+    }
+</style>
+
+<div class="container mt-5 thread-container">
+    <!-- Left side: Course list -->
+    <div class="course-list">
+        <h5>Browse Courses</h5>
+        <ul>
+            <li><a href="{% url 'thread:thread_list' %}">All</a></li>
+            {% for course in courses %}
+                <li><a href="{% url 'thread:thread_list_by_course' course.id %}">{{ course.course_name }}</a></li>
+            {% empty %}
+                <li>No courses available</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Right side: Thread list -->
+    <div class="main-content">
+        <h2 class="text-center mb-4">Thread List{% if course %} for {{ course.course_name }}{% endif %}</h2>
+        <form method="GET" action="{% url 'thread:thread_list' %}" class="form-inline search-bar justify-content-center">
+            <input type="text" name="q" class="form-control mr-sm-2" placeholder="Search threads..." value="{{ query|default:'' }}">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+        {% if threads %}
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Thread Title</th>
+                    <th>Course</th>
+                    <th>Created By</th>
+                    <th>Total Likes</th>
+                    <th>Total Loves</th>
+                    <th>Total Comments</th>
+                    <th>Total Interactions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for thread in threads %}
+                <tr>
+                    <td>{{ forloop.counter0|add:threads.start_index }}</td>
+                    <td>
+                        <a href="{% url 'thread:thread_detail' thread.pk %}" class="text-primary font-weight-bold">
+                            {{ thread.thread_title }}
+                        </a>
+                    </td>
+                    <td>{{ thread.course.course_name }}</td>
+                    <td>
+                        <a href="{% url 'user:user_detail' thread.created_by.pk %}">{{ thread.created_by }}</a>
+                    </td>
+                    <td>{{ thread.total_likes }}</td>
+                    <td>{{ thread.total_loves }}</td>
+                    <td>{{ thread.total_comments }}</td>
+                    <td>{{ thread.total_interactions }}</td>
+                    <td>
+                        <a href="{% url 'thread:update_thread' thread.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'thread:delete_thread' thread.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Thread Title</th>
+                    <th>Course</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4" class="text-center">No threads available for this course.</td>
+                </tr>
+            </tbody>
+        </table>
+        {% endif %}
+        
+        <div class="text-center">
+            <a href="{% url 'thread:create_thread' %}" class="btn btn-primary">Add New Thread</a>
+        </div>
+
+        <!-- Pagination controls -->
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if threads.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&q={{ query|urlencode }}" aria-label="First">
+                            <span aria-hidden="true">&laquo; First</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threads.previous_page_number }}&q={{ query|urlencode }}" aria-label="Previous">
+                            <span aria-hidden="true">&lsaquo; Previous</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                <!-- Page Number Links -->
+                {% for num in threads.paginator.page_range %}
+                    {% if num == threads.number %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&q={{ query|urlencode }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if threads.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threads.next_page_number }}&q={{ query|urlencode }}" aria-label="Next">
+                            <span aria-hidden="true">Next &rsaquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ threads.paginator.num_pages }}&q={{ query|urlencode }}" aria-label="Last">
+                            <span aria-hidden="true">Last &raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Right side: Recent Activity -->
+    <div class="recent-activity">
+        <h5>Recent Activity</h5>
+        <div class="recent-activity-section" style="max-height: 300px; overflow-y: auto;">
+            <ul class="list-group">
+                {% for activity in recent_activities %}
+                <li class="list-group-item">
+                    <small>@{{ activity.created_by }} posted on <strong>{{ activity.course.course_name }}</strong> {{ activity.created|timesince }} ago</small>
+                </li>
+                {% empty %}
+                <li class="list-group-item">No recent activity.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

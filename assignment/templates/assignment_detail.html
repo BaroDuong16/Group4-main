@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assignment.assignment_id }} Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Assignment Details</h2>
+    <p><strong>Assignment ID:</strong> {{ assignment.assignment_id }}</p>
+    <p><strong>Assignment Name:</strong> {{ assignment.assignment_name }}</p>
+    <p><strong>Start Date:</strong> {{ assignment.start_date}}</p>
+    <p><strong>End Date:</strong> {{ assignment.end_date }}</p>
+    
+    <a href="{% url 'assignment:assignment_list' %}" class="btn btn-primary">Back to Assignment List</a>
+</div>
+{% endblock %}

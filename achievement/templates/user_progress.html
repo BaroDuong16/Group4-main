@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}  
+{% block title %}AI Insights{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/achievement.css' %}">
+<main class="container">
+    {% include "achievement_tab.html" %}
+    <div class="card">
+        <h2>User Progress</h2>
+        <p><strong>Name:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Total Courses:</strong> {{ course_count }}</p>
+        <p><strong>Completed Courses:</strong> {{ completed }}</p>
+        {% if not percent_complete == 0 %}
+        <div class="progress-container">
+            <div class="progress-bar-progress" style="width: {{ percent_complete }}%"> <center>{{ percent_complete }}%</center> </div>
+        </div>
+        {% else %}
+        <div class="progress-container">
+            <center style="color: red;">0%</center>
+        </div>
+        {% endif %}
+    </div>
+
+    {% for course in page_obj_pro %}
+        <div class="course-container">
+            <div class="course-info">
+                <div class="course-icon">
+                    <img src='https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://d2j5ihb19pt1hq.cloudfront.net/certificates/cert-course.png?auto=format%2Ccompress&dpr=2&h=72'>
+                </div>
+                <div class="course-details">
+                    <p class="course-title" style="padding-right: 0px;">{{ course.course.course_name }}</p>
+                    {% if not course.progress_percentage == 0 %}
+                    <div class="progress-container" style="width: 90vh;">
+                        <div class="progress-bar-progress" style="width: {{ course.progress_percentage }}%"> <center>{{ course.progress_percentage }}%</center> </div>
+                    </div>
+                    {% else %}
+                    <div class="progress-container" style="width: 90vh;">
+                        <center style="color: red;">0%</center>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- <button class="add-linkedin">Add to LinkedIn</button> -->
+            <a href="{% url 'course:course_detail' course.course.id %}" class="add-linkedin">Go to Course</a>
+        </div>
+    {% empty %}
+        <p>No courses found.</p>
+    {% endfor %}
+
+    <div class="pagination">
+            <span class="step-links">
+
+                {% if page_obj_pro.has_previous %}
+                    <a href="?page=1">&laquo; First</a>
+                    <a href="?page={{ page_obj_pro.previous_page_number }}">Previous</a>
+                {% else %}
+                    <span class="disabled">&laquo; First</span>
+                    <span class="disabled">Previous</span>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ page_obj_pro.number }} of {{ page_obj_pro.paginator.num_pages }}.
+                </span>
+
+                {% if page_obj_pro.has_next %}
+                    <a href="?page={{ page_obj_pro.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj_pro.paginator.num_pages }}">Last &raquo;</a>
+                {% else %}
+                    <span class="disabled">Next</span>
+                    <span class="disabled">Last &raquo;</span>
+                {% endif %}
+
+            </span>
+    </div>
+</main>
+
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% load static %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Course,Add New Course" }}{% endblock %}
+
+{% block content %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+</head>
+<body id="course-form">
+<div class="container">
+    <h2 class="text-2xl font-semibold text-teal-600 mb-4 main-color-text">{{ form.instance.pk|yesno:"Edit Course,Add New Course" }}</h2>
+    <form method="post" class="space-y-4" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="course_name" class="block text-sm font-medium mb-1">{{ course_form.course_name.label }}</label>
+                {{ course_form.course_name|add_class:"w-full p-2 border border-gray-300 rounded" }}
+            </div>
+            <div class="form-group">
+                <label for="course_code" class="block text-sm font-medium mb-1">{{ course_form.course_code.label }}</label>
+                {{ course_form.course_code|add_class:"w-full p-2 border border-gray-300 rounded" }}
+            </div>
+            <div class="form-group">
+                <label for="creator" class="block text-sm font-medium mb-1">{{ course_form.creator.label }}</label>
+                {{ course_form.creator|add_class:"w-full p-2 border border-gray-300 rounded" }}
+            </div>
+            <div class="form-group">
+                <label for="instructor" class="block text-sm font-medium mb-1">{{ course_form.instructor.label }}</label>
+                {{ course_form.instructor|add_class:"w-full p-2 border border-gray-300 rounded" }}
+            </div>
+            <div class="form-group">
+                <label for="{{ course_form.image.id_for_label }}" class="block text-sm font-medium mb-1">{{ course_form.image.label }}</label>
+                {{ course_form.image|add_class:"w-full p-2 border border-gray-300 rounded" }}
+            </div>
+        </div>
+        <div class="description-container">
+            <label for="description" class="block text-lg font-bold mb-2">{{ course_form.description.label }}</label>
+            {{ course_form.description|add_class:"w-full p-2 border border-gray-300 rounded description-input" }}
+        </div>
+
+        <!-- Session and Prerequisite Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-xl font-semibold mb-4 main-color-text">Session Information</h3>
+                <div class="form-group-inline">
+                    <div class="form-group">
+                        <label for="session_name" class="block text-lg font-medium mb-2">{{ session_form.session_name.label }}</label>
+                        {{ session_form.session_name|add_class:"w-full p-2 border border-gray-300 rounded" }}
+                    </div>
+                    <div class="form-group">
+                        <label for="session_quantity" class="block text-lg font-medium mb-2">{{ session_form.session_quantity.label }}</label>
+                        {{ session_form.session_quantity|add_class:"w-full p-2 border border-gray-300 rounded" }}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-4 main-color-text">Prerequisite Courses</h3>
+                <div class="mb-4">
+                    <select name="prerequisite_courses[]" class="w-full p-2 border border-gray-300 rounded select2" multiple>
+                        {% for course in all_courses %}
+                            <option value="{{ course.id }}">{{ course.course_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="button-group justify-end mt-6">
+            <button type="submit" class="btn main-color px-4 py-2 rounded">Save</button>
+            <a href="{% url 'course:course_list' %}" class="btn btn-secondary px-4 py-2 rounded">Back to Course List</a>
+        </div>
+    </form>
+</div>
+</body>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select prerequisite courses",
+            allowClear: true
+        });
+    });
+</script>
+{% endblock %}

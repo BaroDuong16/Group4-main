@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Course Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-4">Quiz Information</h3>
+    <div class="row">
+        <div class="col">
+            <p><strong>Title: </strong>{{ quiz.quiz_title }}</p>
+            <p><strong>Description: </strong>{{ quiz.quiz_description }}</p>
+            <p><strong>Total Mark: </strong>{{ quiz.total_mark }}</p>
+            <p><strong>Mark To Pass</strong>: {{ quiz.mark_to_pass }}</p>
+        </div>
+        <div class="col">
+            <p><strong>Created by: </strong>{{ quiz.created_by.full_name }}</p>
+            <p><strong>Created At: </strong>{{ quiz.created_at }}</p>
+            <p><strong>Updated at: </strong>{{ quiz.updated_at }}</p>
+        </div>
+    </div>
+    <a href="{% url 'course_Truong:quiz_edit' course.pk sub_course.pk quiz.pk%}" style="width: 5rem;"
+        class="btn btn-primary">Edit</a>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th style="width: 5%;" scope="col">#</th>
+                <th style="width: 95%;" scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question, answers in questions_and_answers.items %}
+            <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                <td>
+                    <h5><strong>Question: </strong>{{question.question_text}}</h5>
+                    <p><strong>Type: </strong>{{question.question_type}}</p>
+                    <p><strong>Points: </strong>{{question.points}}</p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;" scope="col">#</th>
+                                <th style="width: 70%;" scope="col">Answer</th>
+                                <th style="width: 15%;" scope="col">Is Correct</th>
+                                <th style="width: 10%;" scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for answer in answers %}
+                            <tr>
+                                <th scope="row">{{forloop.counter}}</th>
+                                <td>{{answer.option_text}}</td>
+                                <td>{{answer.is_correct}}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
+                                            data-toggle="dropdown" aria-expanded="false">
+                                            ...
+                                        </a>
+                                        <div class="dropdown-menu">
+                                            <a href="{% url 'course_Truong:answer_edit' course.pk sub_course.pk quiz.pk question.pk answer.pk %}"
+                                                class="dropdown-item">Edit</a>
+                                            <a href="{% url 'course_Truong:answer_delete' course.pk sub_course.pk quiz.pk question.pk answer.pk %}"
+                                                class="dropdown-item">Delete</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'course_Truong:answer_add' course.pk sub_course.pk quiz.pk question.pk%}" class="btn btn-primary">Add
+                        Answer</a>
+                    <hr>
+                    <a href="{% url 'course_Truong:question_edit' course.pk sub_course.pk quiz.pk question.pk%}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'course_Truong:question_delete' course.pk sub_course.pk quiz.pk question.pk%}" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'course_Truong:question_add' course.pk sub_course.pk quiz.pk%}" class="btn btn-primary">Add Question</a>
+
+
+    <hr>
+    <a href="{% url 'course_Truong:sub_course_list' course.pk %}" class="btn btn-secondary">Back to sub course List</a>
+    <a href="{% url 'course_Truong:quiz_delete' course.pk sub_course.pk quiz.pk%}" class="btn btn-danger">Delete This
+        Quiz!</a>
+</div>
+{% endblock %}

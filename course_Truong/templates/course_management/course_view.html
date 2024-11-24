@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Course Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  {% include "nav_tab.html" %}
+  <div class="container-fluid mt-4">
+    <a class="card mb-3" style="text-decoration: none; color: black;" href="#">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img class="w-100" src="{{ course.image.url }}" alt="...">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title">{{course.course_name}}</h5>
+            <p class="card-text">{{course.description}}</p>
+            <p class="card-text"><small class="text-muted">Updated: {{course.modified_at|date:"Y-m-d"}}</small></p>
+          </div>
+        </div>
+      </div>
+    </a>
+    <a href="{% url 'course_Truong:course_edit' course.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'course_Truong:course_list' %}" class="btn btn-secondary">Back</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+<p>Are you sure you want to delete this message?</p>
+<p>{{ message.message }}</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+</form>

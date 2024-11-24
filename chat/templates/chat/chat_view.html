@@ -1,0 +1,442 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if other_user %}
+        {{ other_user.username }} - Message Center
+    {% elif group %}
+        {{ group.name }} - Group Chat
+    {% else %}
+        Message Center
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- User List Section -->
+        <div class="col-md-3">
+            <div class="user-list-container">
+                <!-- Search Bar -->
+                <div class="search-bar mb-4">
+                    <form method="GET" action="{% url 'chat:user_list' %}" class="d-flex justify-content-center">
+                        <input type="text" name="q" class="form-control w-75" placeholder="Search users..." value="{{ search_query }}">
+                        <button type="submit" class="btn btn-primary ml-2">Search</button>
+                    </form>
+                </div>
+
+                <div class="user-list mb-5">
+                    <ul class="list-group">
+                        {% for user in users %}
+                            <li class="list-group-item d-flex align-items-center justify-content-between py-3">
+                                <div class="user-info d-flex align-items-center">
+                                    <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3">
+                                        {{ user.username|slice:":1" }} <!-- Initial of the username -->
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'chat:chat_view' username=user.username %}" class="text-dark font-weight-bold">
+                                            {{ user.username }}
+                                        </a>
+                                        <div class="text-muted">{{ user.email }}</div>
+                                    </div>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-center text-muted">No users found matching your search.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Group Chat List -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="text-center">Group Chats</h3>
+                    <a href="{% url 'chat:create_group_chat' %}" class="btn btn-sm btn-success">Create Group</a>
+                </div>
+
+                <div class="group-chat-list">
+                    <ul class="list-group">
+                        {% for group in group_chats %}
+                            <li class="list-group-item d-flex align-items-center justify-content-between py-3">
+                                <div class="group-info">
+                                    <a href="{% url 'chat:chat_view' group_id=group.id %}" class="text-dark font-weight-bold">{{ group.name }}</a>
+                                    <div class="text-muted">Created by {{ group.created_by.username }}</div>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-center text-muted">You are not part of any group chats yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="col-md-6">
+            <div class="chat-box-container">
+                {% if group %}
+                    <h1 class="text-center">{{ group.name }}</h1>
+
+                    <!-- Group Chat Messages -->
+                    <div class="mt-4">
+                        <div class="chat-box">
+                            <ul class="list-group mb-4">
+                                {% for message in messages %}
+                                    <li class="list-group-item {% if message.sender == user %}sent{% else %}received{% endif %}">
+                                        <div class="message-content">
+                                            <strong>{{ message.sender.username }}:</strong>
+                                            <p class="message-text">{{ message.message }}</p>
+                                            <small class="text-muted">({{ message.timestamp|date:"M d, Y h:i A" }})</small>
+
+                                            {% if message.sender == user %}  <!-- Show edit/delete options for the sender -->
+                                                <div class="message-actions mt-2">
+                                                    <a href="{% url 'chat:edit_message' message.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                                    <form method="POST" action="{% url 'chat:delete_message' message.id %}" style="display:inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                {% empty %}
+                                    <li class="list-group-item no-messages">No messages yet. Start the conversation!</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Form to send a new message to the group -->
+                    <form method="POST" class="mb-4" id="messageForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <textarea id="messageInput" name="message" rows="3" class="form-control message-input" placeholder="Type your message..." required></textarea>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary send-btn">Send Message</button>
+                        </div>
+                    </form>
+
+                {% elif other_user %}
+                    <h1 class="text-center">{{ other_user.username }}</h1>
+
+                    <!-- Chat messages -->
+                    <div class="mt-4">
+                        <div class="chat-box">
+                            <ul class="list-group mb-4">
+                                {% for message in messages %}
+                                    <li class="list-group-item {% if message.sender == user %}sent{% else %}received{% endif %}">
+                                        <div class="message-content">
+                                            <strong>{{ message.sender.username }}:</strong>
+                                            <p class="message-text">{{ message.message }}</p>
+                                            <small class="text-muted">({{ message.timestamp|date:"M d, Y h:i A" }})</small>
+                                            {% if message.sender == user %}  <!-- Show edit/delete options for the sender -->
+                                                <div class="message-actions mt-2">
+                                                    <a href="{% url 'chat:edit_message' message.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                                    <form method="POST" action="{% url 'chat:delete_message' message.id %}" style="display:inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                {% empty %}
+                                    <li class="list-group-item no-messages">No messages yet. Start the conversation!</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Form to send a new message -->
+                    <form method="POST" class="mb-4" id="messageForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="sender" value="{{ user.username }}">
+                        <input type="hidden" name="receiver" value="{{ other_user.username }}">
+
+                        <div class="form-group">
+                            <textarea id="messageInput" name="message" rows="3" class="form-control message-input" placeholder="Type your message..." required></textarea>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary send-btn">Send Message</button>
+                        </div>
+                    </form>
+
+                {% else %}
+                    <div class="ml-4">
+                        <h2 class="text-center text-muted">Select a user or group to start chatting.</h2>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Group Members and Add Member Section -->
+        {% if group %}
+        <div class="col-md-3">
+            <h3 class="text-left">Group Members</h3>
+            <div class="member-management">
+                <h4>Current Members:</h4>
+                <ul class="list-group mb-3">
+                    {% for member in group.members.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ member.username }}
+                            {% if group.created_by == user %} <!-- Only show "Remove" option for group creator -->
+                                <form method="POST" action="{% url 'chat:remove_member_from_group' group.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="member" value="{{ member.username }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-center text-muted">No members in this group.</li>
+                    {% endfor %}
+                </ul>
+
+                <h4>Add Member:</h4>
+                <form method="POST" action="{% url 'chat:add_member_to_group' group.id %}">
+                    {% csrf_token %}
+                    <select name="members" class="form-control" multiple required>
+                        {% for user in users %}
+                            <option value="{{ user.username }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-success">Add Members</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var chatBox = document.querySelector('.chat-box');
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;  // Automatically scroll to the bottom if chat box exists
+        }
+
+        // Get the message input and form
+        var messageInput = document.getElementById('messageInput');
+        var messageForm = document.getElementById('messageForm');
+
+        // Listen for the Enter key
+        messageInput.addEventListener('keydown', function (event) {
+            // Check if the key pressed is Enter (key code 13)
+            if (event.key === 'Enter' && !event.shiftKey) { // Shift + Enter allows for new lines
+                event.preventDefault(); // Prevent the default action (new line)
+                messageForm.submit(); // Submit the form
+            }
+        });
+    });
+</script>
+
+
+
+
+
+<style>
+   
+   /* General styles */
+.container {
+    max-width: 1200px; /* Adjust as needed */
+    margin: 0 auto;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.user-list-container {
+    flex: 1; /* Allow this section to take up space */
+    padding-right: 20px; /* Add spacing between the user list and chat */
+    width: 300px; /* Adjust width as needed */
+    margin-right: 20px; /* Space between the user list and chat box */
+}
+
+.chat-box-container {
+    flex: 2; /* Allow this section to take up more space */
+}
+
+h1, h2, h3 {
+    color: #4b4b4b;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 20px;
+}
+
+/* Chat Box Styling */
+.chat-box {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    overflow-y: auto;
+    border: 1px solid #dcdcdc;
+    padding: 15px;
+    background-color: #ffffff; /* White background */
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.list-group-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 15px;
+    max-width: 65%; /* Limit message width */
+    background-color: #f0f0f0; /* Light gray background for message items */
+    border: none;
+    border-bottom: 1px solid #e9ecef; /* Add a subtle border for separation */
+}
+
+.no-messages {
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+}
+
+/* Received message styling */
+.received {
+    background-color: #ffffff; /* White background for received messages */
+    align-self: flex-start;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* More rounded corners */
+}
+
+/* Sent message styling */
+.sent {
+    background-color: #007bff; /* Messenger blue */
+    color: rgb(255, 255, 255); /* White text for better contrast */
+    align-self: flex-end;
+    text-align: right;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* More rounded corners */
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-text {
+    margin: 0;
+    padding: 5px 0;
+}
+
+.list-group-item small {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* User Info Styling */
+.user-info {
+    max-width: 100%; /* Prevent overflow */
+    overflow: hidden; /* Prevent overflow */
+    white-space: nowrap; /* Prevent wrapping */
+    text-overflow: ellipsis; /* Show ellipsis for overflowing text */
+}
+
+/* Form Styling */
+.message-input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px; /* More rounded */
+    resize: none;
+    font-family: 'Arial', sans-serif;
+    max-width: 100%; /* Prevent overflow */
+    overflow: hidden; /* Prevent overflow */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.send-btn {
+    background-color: #007bff; /* Messenger blue */
+    color: white; /* Ensures text is readable */
+    padding: 10px 30px;
+    border-radius: 25px; /* More rounded */
+    font-weight: bold;
+    border: none; /* Removes border for a cleaner look */
+}
+
+.send-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.message-actions {
+    margin-top: 10px;
+}
+
+.message-actions button {
+    margin-left: 5px;
+}
+
+/* User List and Group Chat Styling */
+.search-bar {
+    display: flex;
+    justify-content: center;
+}
+
+.form-control {
+    border-radius: 30px; /* More rounded */
+    padding: 10px 20px;
+    max-width: 100%; /* Prevent overflow */
+    overflow: hidden; /* Prevent overflow */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.btn-primary {
+    border-radius: 30px; /* More rounded */
+    padding: 10px 20px;
+}
+
+.list-group-item:hover {
+    background-color: #e9ecef; /* Light gray on hover */
+    transition: background-color 0.3s ease;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: #007bff; /* Messenger blue */
+    color: white; /* Ensures the initials are readable */
+    border-radius: 50%; /* Rounded avatar */
+    display: flex; /* Center initials */
+    align-items: center; /* Center initials */
+    justify-content: center; /* Center initials */
+    margin-right: 10px; /* Spacing between avatar and text */
+    flex-shrink: 0;
+}
+
+a.text-dark {
+    text-decoration: none;
+}
+
+a.text-dark:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+.btn-outline-primary {
+    border-color: #007bff; /* Messenger blue */
+    color: #007bff; /* Messenger blue */
+    border-radius: 30px; /* More rounded */
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff; /* Messenger blue */
+    color: white; /* White text on hover */
+}
+
+.btn-success {
+    border-radius: 30px; /* More rounded */
+    padding: 5px 20px;
+    font-size: 14px;
+}
+</style>
+{% endblock %}

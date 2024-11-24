@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mt-4">
+    <!-- Nút Back -->
+    <a href="{% url 'reports:report_dashboard' %}" class="btn btn-secondary mb-3">Back to Reports</a>
+</div>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_overview_report' %}">User Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:student_id_report' %}">Student ID</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:role_report' %}">Role</a>
+    </li>   
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_statistics_report' %}">User Statistics</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:login_frequency_report' %}">Login Frequency</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_duration_login' %}">User Duration Login</a>
+    </li>
+</ul>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Number of students per semester</h1>
+
+    <!-- Canvas for Chart -->
+    <div class="d-flex justify-content-center">
+        <canvas id="studentPieChart" style="max-width: 600px; max-height: 600px;"></canvas>
+    </div>
+
+    <!-- Bảng tổng kết -->
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Student Group</th>
+                <th>Number of Students</th>
+                <th>Percentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for summary in cohort_summary %}
+                <tr>
+                    <td>{{ summary.label }}</td>
+                    <td>{{ summary.count }}</td>
+                    <td>{{ summary.percentage|floatformat:2 }}%</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal to display student details -->
+    <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentDetailsLabel">Student Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="studentDetailsBody">
+                    <!-- Student details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const ctx = document.getElementById('studentPieChart').getContext('2d');
+    const labels = {{ labels|safe }};  // Nhãn từ views.py
+    const data = {{ data|safe }};  // Dữ liệu từ views.py
+
+    const studentPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Percentage of Students by Student Code',
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Student Enrollment Percentage by Student Code'
+                }
+            },
+        }
+    });
+</script>
+{% endblock %}

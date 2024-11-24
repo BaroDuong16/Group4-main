@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Analytics,Add New Analytics" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Analytics,Add New Analytics" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ form.average_score.label_tag }}
+            {{ form.average_score|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.completion_rate.label_tag }}
+            {{ form.completion_rate|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.predicted_performance.label_tag }}
+            {{ form.predicted_performance|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.user_id.label_tag }}
+            {{ form.user_id|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.course_id.label_tag }}
+            {{ form.course_id|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'performance_analytics:PerformanceAnalytics_list' %}" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>
+{% endblock %}

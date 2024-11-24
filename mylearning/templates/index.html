@@ -1,0 +1,86 @@
+{% extends 'basePortal.html' %}
+{% load static %}
+{% block title %}My Learning{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'mylearning.css' %}">
+<div class="container bg-light my-4 p-4 rounded shadow-sm">
+    <h1 class="mb-3">My Learning</h1>
+    <!-- <div class="d-flex align-items-center">
+        <p class="me-2 text-muted mb-0">
+            <small>87hr 36min watch</small>
+        </p>
+        <i class="fa-solid fa-circle-info text-muted"></i>
+        <a href="#" class="link-primary ms-2">View all activity</a>
+    </div> -->
+    <!-- Include the tabs here -->
+    {% include "mylearning_tabs.html" %}
+
+</div>
+
+<main class="container">
+    <div class="row overflow-auto" style="max-height: 600px;">
+        {% for course in courses %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm position-relative rounded-3 border-0">
+                <a href="{% url 'student_portal:course_content_no_session' course.id %}">
+                <!-- Course Image -->
+                    {% if course.image_url %}
+                        <img 
+                            title="Click here to learn" 
+                            src="{{ course.image_url }}" 
+                            class="card-img-top rounded-top-3" 
+                            alt="{{ course.course_name }}" 
+                            style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <img 
+                            title="Click here to learn 1111" 
+                            src="{% static 'course/images/chotbg.png' %}" 
+                            alt="Default Image" 
+                            class="card-img-top rounded-top-3" 
+                            style="height: 200px;  object-fit: cover;">
+                    {% endif %}
+                    
+                </a>
+                <!-- More Options Icon -->
+                <div class="position-absolute top-0 end-0 m-3">
+                    <a href="#" class="text-secondary">
+                        <i class="fa-solid fa-ellipsis-vertical fs-5"></i>
+                    </a>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column">
+                    <!-- Course Title -->
+                    <h5 class="card-title text-dark mb-1">{{ course.title }}</h5>
+                    <p class="text-muted mb-2">{{ course.content_type }}</p>
+
+                    <!-- Progress Bar -->
+                    <div class="progress mb-2" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ course.completion_percentage }}%;" aria-valuenow="{{ course.completion_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="text-muted">{{ course.completion_percentage }}% complete</small>
+
+                    <div class="d-flex flex-column flex-grow-1 justify-content-end">
+                        <div>
+                            {% for star in course.stars %}
+                                {% if star == 1 %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-muted"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        <a href="{% url 'student_portal:course_content_no_session' course.id %}" class="btn btn-primary">
+                            <i class="fas fa-book-open me-2"></i> <!-- Book open icon -->
+                            Study
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ type }} Feedback Detail
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ type }} Feedback Detail</h2>
+
+    {% if type == "Instructor" %}
+        <p><strong>Instructor Feedback Criteria:</strong></p>
+        <ul>
+            <li>Course Knowledge: {{ feedback.course_knowledge }}</li>
+            <li>Communication Skills: {{ feedback.communication_skills }}</li>
+            <li>Approachability: {{ feedback.approachability }}</li>
+            <li>Engagement: {{ feedback.engagement }}</li>
+            <li>Professionalism: {{ feedback.professionalism }}</li>
+        </ul>
+    {% elif type == "Course" %}
+        <p><strong>Course Feedback Criteria:</strong></p>
+        <ul>
+            <li>Course Material: {{ feedback.course_material }}</li>
+            <li>Clarity of Explanation: {{ feedback.clarity_of_explanation }}</li>
+            <li>Course Structure: {{ feedback.course_structure }}</li>
+            <li>Practical Applications: {{ feedback.practical_applications }}</li>
+            <li>Support Materials: {{ feedback.support_materials }}</li>
+        </ul>
+    {% elif type == "Training Program" %}
+        <p><strong>Training Program Feedback Criteria:</strong></p>
+        <ul>
+            <li>Relevance: {{ feedback.relevance }}</li>
+            <li>Organization: {{ feedback.organization }}</li>
+            <li>Learning Outcomes: {{ feedback.learning_outcomes }}</li>
+            <li>Resources: {{ feedback.resources }}</li>
+            <li>Support: {{ feedback.support }}</li>
+        </ul>
+    {% endif %}
+
+    <p><strong>Average Rating:</strong> {{ feedback.average_rating }}</p>
+    <p><strong>Comments:</strong> {{ feedback.comments }}</p>
+    <p><strong>Submitted on:</strong> {{ feedback.created_at }}</p>
+
+    <a href="{% url 'feedback:feedback_list' %}" class="btn btn-secondary">Back to Feedback List</a>
+</div>
+{% endblock %}

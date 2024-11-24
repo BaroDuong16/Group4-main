@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% load course_filters %}
+{%block extra_css%}
+<style>
+    .container {
+        background-color: #ffffff; /* Set to white */
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    h2 {
+        color: #009999;
+        font-weight: bold;
+    }
+
+    .form-group label {
+        color: #009999;
+        font-weight: bold;
+    }
+
+    .form-control {
+        border: 1px solid #009999;
+        border-radius: 4px;
+    }
+
+    .table {
+        background-color: #f5f7f9;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .table th, .table td {
+        border-bottom: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #e0e0e0;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .table tr:hover {
+        background-color: #009999;
+    }
+
+    .btn {
+        background-color: #009999;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-weight: bold;
+    }
+
+    .pagination .page-link {
+        color: #009999;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #009999;
+        border-color: #009999;
+    }
+    .table-container {
+        background-color: #f5f7f9;
+        padding: 20px;
+        border-radius: 8px;
+    }
+</style>
+{%endblock%}
+{% block content %}
+<div class="container mt-4">
+    <h2>Discussion{% if selected_course_id %} for {{ courses|get_selected_course_name:selected_course_id }}{% endif %}</h2>
+
+    <!-- Filter Form -->
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="course">Search for a Course:</label>
+                    <input type="text" id="courseSearch" class="form-control mb-2" placeholder="Search for a course...">
+                    <select name="course_id" id="course" class="form-control" size="5" onchange="this.form.submit()">
+                        <option value="">All Courses</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}" {% if course.id == selected_course_id %}selected{% endif %}>
+                            {{ course.course_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="creator">Search for a Creator:</label>
+                    <input type="text" id="creatorSearch" class="form-control mb-2" placeholder="Search for a creator...">
+                    <select name="creator_id" id="creator" class="form-control" size="5" onchange="this.form.submit()">
+                        <option value="">All Creators</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}" {% if user.id == selected_creator_id %}selected{% endif %}>
+                            {{ user.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Add Question Button -->
+    <div class="mb-3">
+        <a href="{% url 'forum:create_question' %}" class="btn btn-success">Add Question</a>
+    </div>
+
+    <!-- Display question list -->
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tên Course</th>
+                    <th>Time</th>
+                    <th>Creator</th>
+                    <th>Title</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in page_obj %}
+                <tr>
+                    <td>{{ question.course.course_name }}</td>
+                    <td>{{ question.created_at|date:"d/m/Y" }}</td>
+                    <td>{{ question.user.username }}</td>
+                    <td><a href="{% url 'forum:question_detail' question.pk %}">{{ question.title }}</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No questions available for the selected criteria.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination controls -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if selected_course_id %}course_id={{ selected_course_id }}&{% endif %}{% if selected_creator_id %}creator_id={{ selected_creator_id }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if selected_course_id %}course_id={{ selected_course_id }}&{% endif %}{% if selected_creator_id %}creator_id={{ selected_creator_id }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const courseSearch = document.getElementById('courseSearch');
+    const courseSelect = document.getElementById('course');
+    const creatorSearch = document.getElementById('creatorSearch');
+    const creatorSelect = document.getElementById('creator');
+    const dateRangeInput = document.getElementById('dateRange');
+
+    // Hide the select elements initially
+    courseSelect.style.display = 'none';
+    creatorSelect.style.display = 'none';
+
+    // Show the select element when the input is focused
+    courseSearch.addEventListener('focus', function() {
+        courseSelect.style.display = 'block';
+    });
+
+    creatorSearch.addEventListener('focus', function() {
+        creatorSelect.style.display = 'block';
+    });
+
+    // Hide the select element when the input loses focus
+    courseSearch.addEventListener('blur', function() {
+        setTimeout(() => courseSelect.style.display = 'none', 100);
+    });
+
+    creatorSearch.addEventListener('blur', function() {
+        setTimeout(() => creatorSelect.style.display = 'none', 100);
+    });
+
+    courseSearch.addEventListener('keyup', function() {
+        const filter = courseSearch.value.toLowerCase();
+        const options = courseSelect.options;
+
+        for (let i = 0; i < options.length; i++) {
+            const optionText = options[i].text.toLowerCase();
+            options[i].style.display = optionText.includes(filter) ? '' : 'none';
+        }
+    });
+
+    creatorSearch.addEventListener('keyup', function() {
+        const filter = creatorSearch.value.toLowerCase();
+        const options = creatorSelect.options;
+
+        for (let i = 0; i < options.length; i++) {
+            const optionText = options[i].text.toLowerCase();
+            options[i].style.display = optionText.includes(filter) ? '' : 'none';
+        }
+    });
+
+    // Initialize date range picker
+    $(dateRangeInput).daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+            cancelLabel: 'Clear'
+        }
+    });
+
+    $(dateRangeInput).on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+        document.getElementById('start_date').value = picker.startDate.format('YYYY-MM-DD');
+        document.getElementById('end_date').value = picker.endDate.format('YYYY-MM-DD');
+        this.form.submit();
+    });
+
+    $(dateRangeInput).on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+        document.getElementById('start_date').value = '';
+        document.getElementById('end_date').value = '';
+        this.form.submit();
+    });
+
+    document.getElementById('end_date').addEventListener('change', function() {
+        this.form.submit();
+    });
+
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+
+    startDateInput.addEventListener('change', function() {
+        this.form.submit();
+    });
+
+    endDateInput.addEventListener('change', function() {
+        this.form.submit();
+    });
+});
+</script>
+{%endblock%}
+{% endblock %}

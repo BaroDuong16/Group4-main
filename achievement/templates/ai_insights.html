@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load form_filters %}
+{% load static %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/achievement.css' %}">
+    
+</head>
+<body>
+    <div class="container">
+        {% include "achievement_tab.html" %}
+            {% if page_ai_insights %}
+            <div class="container mt-3">
+                
+                <form method="post" enctype="multipart/form-data">  <!-- Added enctype for file uploads -->
+                    
+                    {% csrf_token %}
+                        <div class="form-group">
+                            {{ filter_form.course.label_tag }}
+                            {{ filter_form.course|add_class:"form-control" }}                                        
+                        </div>
+                        <p>
+                        <button type="submit" class="btn btn-primary" title="View Filtered Insights">
+                            Show Insights
+                        </button>  
+                        {% if not is_valid %}
+                        <span style="color: red;">Invalid Input</span>
+                        {% endif %}
+                        </p>  
+                </form>
+                
+            </div>
+            <div class="container mt-3 grid" style="margin-top: 10px; padding-bottom: 20px;">
+                {% for ai_insight in page_ai_insights %}
+                    <div class="card">
+                        <h3>{{ ai_insight.course }}</h3>
+                        <ul>
+                            {% if ai_insight.insight_type == 'Warning' %}
+                            <li>Insight Type: <span class="badge-warning">{{ ai_insight.insight_type }}</span></li>
+                            {% elif ai_insight.insight_type == 'Compliment' %}
+                            <li>Insight Type: <span class="badge-comliment">{{ ai_insight.insight_type }}</span></li>
+                            {% elif ai_insight.insight_type == 'Info' %}
+                            <li>Insight Type: <span class="badge-info">{{ ai_insight.insight_type }}</span></li>
+                            {% else %}
+                            <li>Insight Type: <span class="badge-undefined">{{ ai_insight.insight_type }}</span></li>
+                            {% endif %}
+                            <li>Insight Text: {{ ai_insight.insight_text }}</li>
+                            <li>Created At: {{ ai_insight.created_at }}</li>
+                        </ul>
+                        <a href="{% url 'course:course_detail' ai_insight.course.id %}" class="btn btn-primary">Go to course {{ ai_insight.course }}</a>
+                    </div>
+                {% endfor %}
+                </div>
+            <div class="pagination">
+                <span class="step-links">
+                    <a href="?page=1">&laquo; First</a>
+                    {% if page_ai_insights.has_previous %}
+                        <a href="?page={{ page_ai_insights.previous_page_number }}">Previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_ai_insights.number }} of {{ page_ai_insights.paginator.num_pages }}
+                    </span>
+
+                    {% if page_ai_insights.has_next %}
+                        <a href="?page={{ page_ai_insights.next_page_number }}">Next</a>
+                    {% endif %}
+                    <a href="?page={{ page_ai_insights.paginator.num_pages }}">Last &raquo;</a>
+                </span>
+            </div>
+            <div class="container mt-3" style="padding-bottom: 10px;">
+                <h5>Overall Chart and Information</h5>
+                <div class="grid-chart">
+                <div class="card">
+                    <canvas id="myChart" width="400" height="100" style="max-height: 30vh;"></canvas>
+                </div>
+                <div class="card">
+                    <span>hello</span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <div class="container mt-3">
+                <center>There is none of your insights to show here. If you think there is an error, contact: ...</center>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+
+</body>
+<script>
+const labels = {{ labels|safe }};
+const data = {{ data|safe }};
+const chart_name = '{{ chart_name }}';
+</script>
+<script src="{% static 'js/achievement.js' %}"></script>
+
+
+{% endblock %}

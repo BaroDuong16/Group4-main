@@ -1,0 +1,7 @@
+{% if sub_module.video_url %}
+<iframe src="{{sub_module.video_url}}" class="w-100 h-75" frameborder="0" allowfullscreen></iframe>
+<hr>
+{% endif %}
+<h2 class="mb-3">{{ sub_module.title }}</h2>
+<hr>
+{{ sub_module.html_content |safe }}

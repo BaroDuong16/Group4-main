@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{{ title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Tag fields container -->
+        <div id="tag-fields">
+            <!-- Tag Name Label -->
+            <div class="mb-1">
+                <label for="id_name">Tag Name</label>
+            </div>
+
+            <!-- Tag Name Input Field (Full width) -->
+            <div class="mb-2">
+                {{ form.name|add_class:"form-control w-100" }}  <!-- Apply form-control and w-100 classes -->
+            </div>
+
+            <!-- Topic Label -->
+            <div class="mb-1" style="margin-top: 20px;">
+                <label for="id_topic">Topic</label>
+            </div>
+
+            <!-- Topic Dropdown Field (Full width) -->
+            <div class="mb-2">
+                {{ form.topic|add_class:"form-control w-100" }}  <!-- Apply form-control and w-100 classes -->
+            </div>
+        </div>
+
+        <!-- Submit and back buttons -->
+        <div class="form-group d-flex align-items-center mt-4">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'course:topic_tag_list' %}" class="btn btn-secondary ms-3">Back to Tag List</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

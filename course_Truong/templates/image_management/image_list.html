@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Course Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  {% include "nav_tab.html" %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th class="col-1">#</th>
+        <th class="col-5">First</th>
+        <th class="col-6">Last</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for image in images %}
+
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><img src="{{image.image.url}}" alt="" class="img-thumbnail" style="width: 60%;"></td>
+        <td>
+          <input type="text" value="{{image.image.url}}" id="image_link_{{ image.image.pk }}" disabled>
+          <button onclick="copyLink('image_link_{{ image.image.pk }}')">Copy Link</button>
+          <br>
+          <a href="{% url 'course_Truong:image_delete' course.pk image.pk %}" class="btn btn-danger">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+
+  <a href="{% url 'course_Truong:image_add' course.pk%}" class="btn btn-primary">Add Image</a>
+  {% comment %} <a href="{% url 'course_Truong:course_list' %}" class="btn btn-secondary">Back</a> {% endcomment %}
+</div>
+
+<script>
+  function copyLink(id) {
+    var copyText = document.getElementById(id);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // Cho mobile devices
+    document.execCommand("copy");
+    alert("Copied the link: " + copyText.value);
+  }
+</script>
+{% endblock %}

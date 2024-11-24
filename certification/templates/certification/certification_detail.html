@@ -1,0 +1,21 @@
+<!-- templates/certification/certification_detail.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ certification.name }}</h2>
+<p><strong>Description:</strong> {{ certification.description }}</p>
+<p><strong>Awarded Date:</strong> {{ certification.awarded_date }}</p>
+<p><strong>Course:</strong> {{ certification.course.course_name }}</p>
+
+{% if certification.certificate_file %}
+    <h3>Certificate File</h3>
+    <a href="{{ certification.certificate_file.url }}" class="btn btn-primary" download>Download Certificate</a>
+{% elif certification.certificate_html %}
+    <h3>Certificate Preview</h3>
+    <div class="certificate-preview" style="border: 1px solid #ddd; padding: 20px; margin-top: 10px;">
+        {{ certification.certificate_html|safe }}
+    </div>
+{% else %}
+    <p>No certificate available.</p>
+{% endif %}
+<a href="{% url 'certification:certification_list' %}" class="btn btn-secondary">Back to Certifications</a>
+{% endblock %}

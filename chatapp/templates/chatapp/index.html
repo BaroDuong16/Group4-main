@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block extra_js %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+
+    <!-- Loading Static Files -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'chatapp/style.css' %}">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body, html {
+          height: 100%;
+          margin: 0;
+        }
+
+        .chat-container {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .messages-box {
+          flex: 1;
+          overflow-y: auto;
+          padding-right: 10px;
+        }
+
+        .messages-list {
+          padding-left: 0;
+          margin-bottom: 0;
+        }
+
+        .message {
+          margin-bottom: 15px;
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .message-text {
+          padding: 10px;
+          border-radius: 5px;
+          margin: 0;
+        }
+
+        .sent {
+          background-color: #dcf8c6;
+          align-self: flex-end;
+        }
+
+        .received {
+          background-color: #f1f0f0;
+          align-self: flex-start;
+        }
+
+        .message-timestamp {
+          font-size: 0.75rem;
+          color: gray;
+          margin-top: 5px;
+          text-align: right;
+        }
+
+        .typing-indicator {
+          font-style: italic;
+          color: gray;
+          margin-bottom: 15px;
+        }
+
+        /* Custom code output styling */
+        .code-output {
+          background-color: #f5f5f5;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          padding: 10px;
+          margin-top: 15px;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .code-output pre {
+          margin: 0;
+        }
+
+        .message-form {
+          display: flex;
+          padding: 10px;
+          background-color: #f8f9fa;
+          border-top: 1px solid #e0e0e0;
+        }
+
+        .message-input {
+          flex: 1;
+          border-radius: 0;
+          border-right: none;
+          padding: 10px;
+        }
+
+        .btn-send {
+          border-radius: 0;
+        }
+
+        /* Scroll to bottom */
+        .messages-box {
+          scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-center my-4">Chatbot App for Study Website</h1>
+
+        <div class="chat-container">
+            <div class="messages-box border rounded p-3 mb-3">
+                <ul class="list-unstyled messages-list">
+                    <!-- Example Initial AI Chatbot Message -->
+                    <li class="message received">
+                        <div class="message-text border rounded p-2">
+                            <b>AI Chatbot</b>
+                            <div class="message-content">Hi there! How can I help with your studies today?</div>
+                            <div class="message-timestamp">{{ now|date:"H:i:s" }}</div>
+                        </div>
+                    </li>
+
+                    <!-- Rendering messages dynamically -->
+                    {% for chat in chats %}
+                    {% if chat.user == request.user %}
+                    <li class="message sent">
+                        <div class="message-text border rounded p-2">
+                            <b>You</b>
+                            <div class="message-content">{{ chat.message }}</div>
+                            <div class="message-timestamp">{{ chat.timestamp|date:"H:i:s" }}</div>
+                        </div>
+                    </li>
+                    <li class="message received">
+                        <div class="message-text border rounded p-2">
+                            <b>AI Chatbot</b>
+                            <div class="message-content">{{ chat.response }}</div>
+                            <div class="message-timestamp">{{ chat.response_timestamp|date:"H:i:s" }}</div>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    <li class="typing-indicator" style="display: none;">AI Chatbot is typing...</li>
+                </ul>
+
+                <!-- Code Output Box for Gemini -->
+                <div id="codeOutput" class="code-output d-none">
+                    <pre><code id="codeContent" class="language-python"></code></pre>
+                </div>
+            </div>
+
+            <form class="message-form" id="userInput">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" class="form-control message-input" id="textInput" placeholder="Type your message...">
+                    <button type="submit" class="btn btn-primary btn-send" id="buttonInput">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript for sending and receiving messages -->
+    <script>
+        const messagesList = document.querySelector('.messages-list');
+        const messageForm = document.querySelector('.message-form');
+        const messageInput = document.querySelector('.message-input');
+        const typingIndicator = document.querySelector('.typing-indicator');
+        const messagesBox = document.querySelector('.messages-box');
+        const codeOutput = document.getElementById('codeOutput');
+        const codeContent = document.getElementById('codeContent');
+
+        // Scrolls to the bottom of the chat when a new message is added
+        function scrollToBottom() {
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        }
+
+        // Handling the form submit event
+        messageForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            getUserResponse();
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function formatResponse(response) {
+            let formattedResponse = response.replace(/\*\s\*\*(.*?)\*\*/g, '\n**$1**');
+            formattedResponse = formattedResponse.replace(/\*\*(.*?)\*\*\s\*/g, '**$1**\n');
+            formattedResponse = formattedResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedResponse = formattedResponse.replace(/\n/g, '<br>');
+            formattedResponse = formattedResponse.replace(/```(.*?)```/gs, '<div class="code-box"><pre><code class="language-none">$1</code></pre></div>');
+            return formattedResponse;
+        }
+
+        function getUserResponse() {
+            const message = messageInput.value.trim();
+            if (message.length === 0) return;
+
+            const userMessageItem = document.createElement('li');
+            userMessageItem.classList.add('message', 'sent');
+            userMessageItem.innerHTML = `<div class="message-text border rounded p-2">
+                                            <b>You</b>
+                                            <div class="message-content">${message}</div>
+                                            <div class="message-timestamp">${new Date().toLocaleTimeString()}</div>
+                                         </div>`;
+            messagesList.appendChild(userMessageItem);
+            messageInput.value = '';
+
+            scrollToBottom();
+
+            typingIndicator.style.display = 'block';
+
+            $.ajax({
+                url: '/chatapp/getUserResponse',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                data: { message: message },
+                success: function (data) {
+                    typingIndicator.style.display = 'none';
+
+                    const formattedResponse = formatResponse(data.response);
+
+                    const chatbotMessageItem = document.createElement('li');
+                    chatbotMessageItem.classList.add('message', 'received');
+                    chatbotMessageItem.innerHTML = `<div class="message-text border rounded p-2">
+                                                        <b>AI Chatbot</b>
+                                                        <div class="message-content">${formattedResponse}</div>
+                                                        <div class="message-timestamp">${new Date().toLocaleTimeString()}</div>
+                                                    </div>`;
+                    messagesList.appendChild(chatbotMessageItem);
+
+                    if (data.code_output) {
+                        codeContent.textContent = data.code_output;
+                        codeOutput.classList.remove('d-none');
+                        Prism.highlightElement(codeContent); // Highlight the new code
+                    }
+
+                    scrollToBottom();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            Prism.highlightAll();
+            scrollToBottom();
+        });
+    </script>
+{% endblock %}
+</body>
+</html>

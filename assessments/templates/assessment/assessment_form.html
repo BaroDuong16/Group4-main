@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Assessment{% endblock %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+</head>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">{% if assessment %}Edit Assessment{% else %}Create New Assessment{% endif %}</h2>
+
+    {% if assessment.id %}
+    <a href="{% url 'assessment:take_assessment' assessment_id=assessment.id %}" class="btn btn-secondary">Prievew Assessment</a>
+    
+    {% endif %}
+    <form method="POST" id="assessment-form" class="mb-5">
+        {% csrf_token %}
+        <!-- Assessment Details Section -->
+        <div class="card mb-6">
+            <div class="card-header bg-primary text-white">
+                <h4>Assessment Details</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="id_assessment_type" class="form-label">Assessment Type</label>
+                        {{ form.assessment_type }}
+                        {% if form.assessment_type.errors %}
+                            <div class="text-danger">{{ form.assessment_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_title" class="form-label">Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_course" class="form-label">Course</label>
+                        {{ form.course }}
+                        {% if form.course.errors %}
+                            <div class="text-danger">{{ form.course.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_course" class="form-label"> </label>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Tab Section for Exercises, Questions and Settings -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h4>Select Exercises/Questions/Settings</h4>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="exerciseQuestionTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="exercises-tab" data-bs-toggle="tab" href="#exercises" role="tab" aria-controls="exercises" aria-selected="true">Exercises</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="questions-tab" data-bs-toggle="tab" href="#questions" role="tab" aria-controls="questions" aria-selected="false">Questions</a>
+                    </li>
+                    <li class="nav-item" role="presentation"> 
+                        <a class="nav-link" id="settings-tab" data-bs-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
+                    </li>
+                    
+                </ul>
+                               
+                <div class="tab-content mt-3" id="exerciseQuestionTabContent">
+                    <!-- Exercises Tab -->
+                    <div class="tab-pane fade show active" id="exercises" role="tabpanel" aria-labelledby="exercises-tab">
+                        <div class="row">
+                            <div class="col-md-12">  <!-- Wrap both columns in a single column for search -->
+                                <div class="mb-3">
+                                    <label for="search-exercises" class="form-label"></label>   
+                                    <div class="input-group">   
+                                        <span class="input-group-text">🔍</span> <!-- Biểu tượng kính lúp -->
+                                        <input type="text" id="search-exercises" class="form-control" placeholder="Search for exercises..." onkeyup="filterExercises()">
+                                    </div>                                                               
+                                </div>
+                            </div>  
+                            <!-- Exercise List Section -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="search-exercises" class="form-label">Exercises</label>                           
+                                </div>
+                                <div class="exercise-list" id="exercise-list" style="height: 300px; overflow-y: auto; border: 1px solid #f5ebeb;">
+                                    {% for exercise in exercises %}
+                                        <div class="d-flex align-items-center justify-content-between exercise-item border mb-1 p-2 cursor-pointer" data-exercise-id="{{ exercise.id }}">
+                                            <input type="checkbox" name="exercises" value="{{ exercise.id }}" id="exercise-{{ exercise.id }}"
+                                                {% if exercise.id in selected_exercises %}checked{% endif %}>
+                                            <label for="exercise-{{ exercise.id }}" class="me-2">{{ exercise.title }}</label>
+                                
+                                            <!-- Nút biểu tượng mắt -->
+                                            <button type="button" class="view-button btn btn-link text-secondary" 
+                                                onmouseover="if (!this.classList.contains('active')) { this.classList.remove('text-secondary'); this.classList.add('text-primary'); }" 
+                                                onmouseout="if (!this.classList.contains('active')) { this.classList.remove('text-primary'); this.classList.add('text-secondary'); }"
+                                                onclick="toggleViewButton(this, {{ exercise.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Exercise Preview Section -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="mb-3">
+                                        <label for="search-exercises2" class="form-label">Preview Selected Exercise</label>                                       
+                                    </div>                            
+                                    <div id="exercise-content" class="border p-2" style="height: 300px; overflow-y: auto;">
+                                        <p>Select an exercise from the list to preview its content here.</p>                                                                    
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Questions Tab -->
+                    <div class="tab-pane fade" id="questions" role="tabpanel" aria-labelledby="questions-tab">
+                        <div class="row">
+                            <!-- Question List Section -->
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="search-questions" class="form-label"></label>   
+                                    <div class="input-group">   
+                                        <span class="input-group-text">🔍</span> 
+                                        <input type="text" id="search-questions" class="form-control" placeholder="Search for questions..." onkeyup="filterQu()">
+                                    </div>                                                               
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="search-questions" class="form-label">Questions</label>
+                                </div>
+                                <div class="question-content" id="question-content" style="height: 300px; overflow-y: auto; border: 1px solid #ccc;">
+                                    {% for question in questions %}
+                                        <div class="question-item d-flex justify-content-between align-items-center" style="cursor: pointer;">
+                                            <label for="question-{{ question.id }}">{{ forloop.counter }}. {{ question.question_text }}</label>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="addQuestion('{{ question.id }}', '{{ question.question_text }}')" aria-label="Add Question">
+                                                <i class="fas fa-plus"></i> <!-- Font Awesome Plus Icon -->
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                           <!-- Selected Questions Section -->
+                            <div class="col-md-6">  
+                                <div class="mb-3">
+                                    <label for="search-questions" class="form-label">Selected Exercises</label>
+                                </div>                                 
+                                <ul id="selected-questions-list" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; list-style-type: disc;">
+                                    {% if selected_questions %}
+                                        {% for question in selected_questions %}
+                                            <li class="selected-question-item d-flex justify-content-between align-items-center" style="cursor: pointer;" data-id="{{ question.id }}">
+                                                <span class="question-text">{{ forloop.counter }}. {{ question.question_text }}</span>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestion('{{ question.id }}')" aria-label="Remove Question">
+                                                    <i class="fas fa-minus"></i> <!-- Font Awesome Minus Icon -->
+                                                </button>
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li>No questions selected yet.</li>
+                                    {% endif %}
+                                </ul>
+                                <input type="hidden" name="selected_questions" id="selected-questions" value="{% for question in selected_questions %}{{ question.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                               
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Settings Tab -->
+                    <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                        <div id="assessment-settings-content">
+                            <div class="form-group">
+                                <label for="id_total_score">Total Score:</label>
+                                {{ form.total_score }}
+                                {% if form.total_score.errors %}
+                                    <div class="text-danger">{{ form.total_score.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_qualify_score">Minimum Score:</label>
+                                {{ form.qualify_score }}
+                                {% if form.qualify_score.errors %}
+                                    <div class="text-danger">{{ form.qualify_score.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_time_limit">Time Limit:</label>
+                                {{ form.time_limit }}
+                                {% if form.time_limit.errors %}
+                                    <div class="text-danger">{{ form.time_limit.errors }}</div>
+                                {% endif %}
+                            </div>
+                             
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Save Assessment</button>
+            <a href="{% url 'assessment:assessment_list' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </form>
+</div>
+
+<div id="fullscreen-preview" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-white" style="z-index: 1050;">
+    <!-- Nội dung sẽ được chèn vào đây -->
+</div>
+
+<script>
+
+// Function to filter exercises in the list
+function filterExercises() {
+    const input = document.getElementById('search-exercises').value.toLowerCase();
+    const exercises = document.querySelectorAll('.exercise-item');
+    exercises.forEach(exercise => {
+        const label = exercise.querySelector('label').textContent.toLowerCase();
+        exercise.style.display = label.includes(input) ? 'block' : 'none';
+    });
+}
+
+function filterQuestions() {
+    const input = document.getElementById('search-questions').value.toLowerCase(); // Get search input
+    const questions = document.querySelectorAll('.question-item'); // Select all question items
+
+    console.log("Search Input:", input); // Log the search input for debugging
+
+    // Iterate through each question item
+    questions.forEach(question => {
+        const label = question.querySelector('label').textContent.toLowerCase();
+        question.style.display = label.includes(input) ? 'block' : 'none';
+       
+        // Check if the questionText includes the input value
+        if (label.toLowerCase().includes(input.toLowerCase().trim())) {
+            console.log("Match Found:", label); // Log each question text
+            question.style.display = 'block'; // Show the question if it matches
+        } else {
+            console.log("No Match:", label); // Log each question text
+            question.style.display = 'none'; // Hide the question if it doesn't match
+        }
+
+    });
+}
+
+function addQuestion(id, text) {
+    // Get the selected questions div and input field
+    const selectedQuestionsList = document.getElementById('selected-questions-list');
+    const selectedQuestionsInput = document.getElementById('selected-questions');
+
+    // Split the value into an array of selected question IDs
+    let selectedQuestions = selectedQuestionsInput.value ? selectedQuestionsInput.value.split(',') : [];
+
+    // Check if this question is already added
+    if (!selectedQuestions.includes(id)) {
+        // Create the question item element
+        const questionItem = document.createElement('li');
+        questionItem.classList.add('selected-question-item', 'd-flex', 'justify-content-between', 'align-items-center');
+        questionItem.setAttribute('data-id', id);
+        questionItem.innerHTML = `
+            <span>${text}</span>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestion('${id}')">
+                <i class="fas fa-minus"></i> <!-- Font Awesome Minus Icon -->
+            </button>
+        `;
+
+        // Add the question to the right section
+        selectedQuestionsList.appendChild(questionItem);
+
+        // Add the question ID to the array
+        selectedQuestions.push(id);
+        
+        // Update the hidden input with the selected question IDs (comma-separated)
+        selectedQuestionsInput.value = selectedQuestions.join(',');
+        
+        // Debugging log to check the hidden input value
+        console.log("Selected Questions (after addition):", selectedQuestionsInput.value);
+    } else {
+        console.log("Question already added:", id);
+    }
+}
+
+// Function to remove a question
+function removeQuestion(id) {
+    // Get the selected questions div and input field
+    const selectedQuestionsList = document.getElementById('selected-questions-list');
+    const selectedQuestionsInput = document.getElementById('selected-questions');
+
+    // Remove the question from the right section
+    const questionItem = selectedQuestionsList.querySelector(`[data-id='${id}']`);
+    if (questionItem) {
+        questionItem.remove();
+    }
+
+    // Update the hidden input to remove the question ID
+    let selectedQuestions = selectedQuestionsInput.value.split(',');
+    selectedQuestions = selectedQuestions.filter(qid => qid !== id);
+    selectedQuestionsInput.value = selectedQuestions.join(',');
+
+    // If no questions left, display a message
+    if (selectedQuestions.length === 0) {
+        selectedQuestionsList.innerHTML = '<li>No questions selected yet.</li>';
+    }
+
+    // Update numbering
+    updateNumbering();
+}
+  
+
+
+ // Function to filter selected questions based on the search input
+function filterSelectedQuestions() {
+    const searchInput = document.getElementById('search-selected-questions').value.toLowerCase();
+    const questionItems = document.querySelectorAll('#selected-questions-list .selected-question-item');
+    
+    questionItems.forEach(item => {
+        const questionText = item.querySelector('.question-text').textContent.toLowerCase();
+        item.style.display = questionText.includes(searchInput) ? '' : 'none';  // Show or hide based on the search input
+    });
+}
+
+
+
+
+fullscreenPreview.appendChild(closeFullscreenButton);
+
+function viewExercise(exerciseId) {
+    const exerciseContent = document.getElementById('exercise-content');
+    const fullscreenPreview = document.getElementById('fullscreen-preview');
+    
+    // Use a data attribute to track the currently displayed exercise ID
+    const displayedExerciseId = exerciseContent.dataset.exerciseId;
+
+    if (displayedExerciseId == exerciseId) {
+        exerciseContent.innerHTML = '<p>Select an exercise from the list to preview its content here.</p>';
+        delete exerciseContent.dataset.exerciseId; // Clear the data attribute
+        return;
+    }
+
+    fetch("{% url 'assessment:get_exercise_content' 0 %}".replace('0', exerciseId))
+        .then(response => {
+            if (!response.ok) {
+                console.error("Fetch error:", response.status, response.statusText); 
+                exerciseContent.innerHTML = `<p>Error loading exercise ${exerciseId}: ${response.status} ${response.statusText}</p>`;
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            exerciseContent.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 0;">Exercise ${exerciseId}: ${data.title}</h3>
+                    <span id="extend-button" class="ms-auto" style="display: inline-block; transform: rotate(135deg);">↔</span>
+                </div>
+                <p>${data.content}</p>
+                `;
+            
+            exerciseContent.dataset.exerciseId = exerciseId; // Set the data attribute
+            const extendButton = document.getElementById('extend-button');
+
+            extendButton.addEventListener('click', (event) => {
+                event.preventDefault(); 
+
+                fullscreenPreview.innerHTML = `
+                    <div class="d-flex justify-content-center align-items-center w-100 h-100 bg-light" style="opacity: 0.8;">
+                    <div class="fullscreen-preview-content p-4 bg-white" style="border-radius: 5px; position: relative; max-width: 80%; max-height: 80%; overflow-y: auto;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 style="margin-bottom: 0; font-size: 1.2rem;">Exercise ${exerciseId}: ${data.title}</h3> <!-- Điều chỉnh kích thước ở đây -->
+                            <span id="close-fullscreen" aria-label="Close" style="cursor: pointer; font-size: 1.5rem;">×</span>
+                        </div>
+                        <p>${data.content}</p>
+                    </div>
+                </div>
+                `;
+
+                fullscreenPreview.classList.remove('d-none');
+
+                const closeBtn = document.getElementById('close-fullscreen');
+                closeBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    fullscreenPreview.classList.add('d-none');
+                });
+
+                fullscreenPreview.addEventListener('click', (event) => {
+                    if (event.target === fullscreenPreview) {
+                        fullscreenPreview.classList.add('d-none');
+                    }
+                });
+
+                fullscreenPreview.classList.remove('d-none');
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching exercise content:', error);
+            exerciseContent.innerHTML = `<p>Error loading exercise ${exerciseId}. See console for details.</p>`;
+            delete exerciseContent.dataset.exerciseId; // Clear in case of error
+        });
+}
+
+
+// Hàm để chuyển đổi trạng thái nút và gọi viewExercise
+function toggleViewButton(button, exerciseId) {
+        const isActive = button.classList.contains("active");
+
+        if (isActive) {
+            // Nếu đã active, thì reset về trạng thái ban đầu
+            button.classList.remove("active", "text-primary");
+            button.classList.add("text-secondary");
+            viewExercise(null); // Đóng nội dung
+        } else {
+            // Nếu chưa active, thì hiển thị nội dung
+            button.classList.add("active", "text-primary");
+            button.classList.remove("text-secondary");
+            viewExercise(exerciseId); // Hiển thị nội dung
+        }
+    }
+// Add active class to exercise-item (No changes needed here)
+const exerciseItems = document.querySelectorAll('.exercise-item');
+exerciseItems.forEach(item => {
+    item.addEventListener('click', function(event) {
+        if (event.target.tagName !== 'BUTTON' ) {
+            exerciseItems.forEach(otherItem => otherItem.classList.remove('selected'));
+            this.classList.add('selected');
+        }
+    });
+});
+
+</script>
+{% endblock %}

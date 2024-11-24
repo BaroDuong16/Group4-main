@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Randomized Question View{% endblock %}
+
+{% block content %}
+<style>
+    #info-icon {
+  cursor: default; /* Sets the cursor to the default pointer */
+}
+
+#tooltip {
+  /* ... other tooltip styles ... */
+  visibility: hidden;
+  /* ... other tooltip styles ... */
+}
+
+#info-icon:hover #tooltip {
+  visibility: visible;
+}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=info" />
+<div class="container mt-4">
+    <h2>Randomized Question View - {{course.course_code}}</h2>
+    <div class="mt-3">
+        <form method="post">
+            {% csrf_token %}
+            <p>
+            <button type="submit" class="btn btn-primary" name="reload">
+                <a method="post" title="Randomized Again" data-toggle="tooltip">
+                    <i class="fas fa-file-export"></i> Randomize Questions Again
+                </a>
+            </button>
+            {% if is_add %}
+            <button type="submit" class="btn btn-secondary" name="export-json">
+                <a method="post" title="Export Randomized Questions to Previous Add Quiz Page" data-toggle="tooltip">
+                    <i class="fas fa-file-export"></i> Export to Add Quiz Page
+                </a>
+            </button>
+            {% else %}
+                <button type="submit" class="btn btn-secondary" name="export-json">
+                    <a method="post" title="Export Randomized Questions to JSON" data-toggle="tooltip">
+                        <i class="fas fa-file-export"></i> Export JSON
+                    </a>
+                </button>
+                <a class="btn btn-secondary" id="info-icon">
+                    <i class="fa fa-info-circle"></i>
+                </a>
+                <span id="tooltip">JSON Format: [{"question":..., "options":..., "correct":..., "id":..., "question_type":...},{...}]</span>
+            {% endif %}
+            </p>
+        </form>
+    </div>
+    <div class="mt-3">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Questions</th>
+                    <th>Question Type</th>
+                    <th>Answer Options</th>
+                    <th>Key</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in question_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ question.question }}</td>
+                    <td>{{ question.question_type }}</td>
+                    <td>
+                        <ul>
+                            {% for option in question.options %}
+                            <li>
+                                {{ option }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        {% for key in question.correct %}
+                        <ul>
+                            <li>
+                                {{key}}
+                            </li>
+                        </ul>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    const infoIcon = document.getElementById('info-icon');
+    const tooltip = document.getElementById('tooltip');
+
+    infoIcon.addEventListener('mouseover', () => {
+        tooltip.textContent = 'JSON Format: [{"question":..., "options":..., "correct":..., "id":..., "question_type":...},{...}]'; // Change the tooltip text
+        tooltip.style.visibility = 'visible';
+    });
+
+    infoIcon.addEventListener('mouseout', () => {
+        tooltip.style.visibility = 'hidden';
+    });
+</script>
+{% endblock %}

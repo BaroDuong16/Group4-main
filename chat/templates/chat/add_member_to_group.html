@@ -1,0 +1,13 @@
+<h2>Add Members to Group: {{ group.name }}</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="members">Select Members:</label>
+    <select name="members" id="members" multiple>
+        {% for user in users %}
+            <option value="{{ user.username }}">{{ user.username }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Add Members</button>
+</form>
+
+<a href="{% url 'chat:group_chat_view' group.id %}">Back to Group Chat</a>

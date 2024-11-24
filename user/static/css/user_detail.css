@@ -1,0 +1,82 @@
+body {
+    background-color: #F8F9FA; /* Màu nền nhẹ hơn để tạo sự tương phản tốt hơn với các phần tử khác */
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    object-fit: cover; 
+    border-radius: 50%;
+}
+
+.bg-white {
+    background-color: #ffffff; /* Đặt màu nền thành trắng */
+}
+
+.btn-outline-primary {
+    color: #007bff; /* Màu xanh cho nút */
+    border: 2px solid #007bff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff; /* Màu nền khi hover */
+    color: #fff; /* Màu chữ trắng khi hover */
+}
+
+.card-header strong {
+    font-weight: bold; 
+    font-size: 1.5rem; 
+}
+
+.list-group-item {
+    border: none; 
+    position: relative; 
+    background-color: transparent; /* Nền trong suốt */
+}
+
+/* Thay đổi màu cho biểu tượng khi hover */
+.list-group-item:hover .blink-icon {
+    color: #BBDEFB; /* Màu xanh nhẹ khi hover */
+}
+
+/* Giữ nguyên màu chữ */
+.list-group-item a {
+    color: black; /* Màu chữ mặc định */
+    text-decoration: none; /* Bỏ gạch chân */
+}
+
+.list-group-item:hover a {
+    color: black; /* Giữ nguyên màu chữ khi hover */
+}
+
+.sidebar {
+    position: sticky; 
+    top: 150px; 
+    height: calc(100vh - 80px); 
+    overflow-y: auto; 
+}
+
+.menu-item {
+    font-size: 1.2rem; 
+    font-weight: bold;
+}
+
+/* Thêm shadow cho các bảng */
+.table {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+
+.card-body {
+    font-size: 1.20rem; 
+    text-align: left; /* Căn trái nội dung */
+}
+
+.activity-log {
+    max-height: 300px;
+    overflow-y: auto;
+}

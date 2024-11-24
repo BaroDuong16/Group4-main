@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="my-4">{{ form_title }}</h2>
+
+<form method="post" enctype="multipart/form-data" class="bg-light p-4 border rounded">  <!-- Thêm enctype -->
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_title">Title</label>
+        {{ form.title }}
+    </div>
+    <div class="form-group">
+        <label for="id_message">Message</label>
+        {{ form.message }}
+    </div>
+    <div class="form-group">
+        <label for="id_file">Attach File</label>
+        {{ form.file }}
+    </div>
+    <button type="submit" class="btn btn-primary">{{ button_text }}</button>
+    <a href="{% url 'notifications_list' %}" class="btn btn-secondary">Back to Notifications</a>
+</form>
+{% endblock %}

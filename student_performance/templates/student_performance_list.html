@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Performance List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Student Performance List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Performance ID</th>
+                <th>User ID</th>
+                <th>Course ID</th>
+                <th>Quiz ID</th>
+                <th>Assignment ID</th>
+                <th>Score</th>
+                <th>Feedback</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for performance in student_performances %}
+            <tr>
+                <td>{{ performance.performance_id }}</td>
+                <td>{{ performance.user_id }}</td>
+                <td>{{ performance.course_id }}</td>
+                <td>{{ performance.quiz_id }}</td>
+                <td>{{ performance.assignment_id }}</td>
+                <td>{{ performance.score }}</td>
+                <td>{{ performance.feedback }}</td>
+                <td>
+                    <a href="{% url 'student_performance:student_performance_detail' performance.performance_id %}" class="btn btn-info btn-sm">Details</a>
+                    <a href="{% url 'student_performance:student_performance_edit' performance.performance_id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'student_performance:student_performance_delete' performance.performance_id %}" class="btn btn-danger btn-sm">Delete</a>
+
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'student_performance:student_performance_add' %}" class="btn btn-primary">Add New Student Performance</a>
+</div>
+{% endblock %}

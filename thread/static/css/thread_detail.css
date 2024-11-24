@@ -1,0 +1,42 @@
+/* thread_detail.css */
+
+/* General card styling */
+.card {
+    border: none; /* Remove default border */
+    border-radius: 8px; /* Rounded corners for the main card */
+}
+
+/* Specific styling for the comments section cards */
+.comments-section .card {
+    border: 1px solid #e0e0e0; /* Light border for comment cards */
+    border-radius: 8px; /* Ensure comment cards also have rounded corners */
+    background-color: #f9f9f9; /* Light gray background for comment cards */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for comment cards */
+.comments-section .card:hover {
+    background-color: #f1f1f1; /* Darker gray on hover */
+}
+
+/* Styling for comment text */
+.comment-text {
+    font-size: 14px; /* Font size for comment text */
+    line-height: 1.5; /* Line height for readability */
+}
+
+/* Styling for the reactions section */
+.reactions {
+    margin-top: 10px; /* Space above reactions */
+}
+
+/* Button styling for reactions */
+.btn-outline-primary,
+.btn-outline-danger {
+    border-radius: 20px; /* Rounded edges for buttons */
+}
+
+/* Ensures consistent margin for the comments */
+.comment-card {
+    margin-bottom: 15px; /* Space between comments */
+}

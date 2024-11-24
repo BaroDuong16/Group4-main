@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <h1 class="mb-4 text-center">Learning Management System </h1>
+    {% for group in module_groups %}
+    <div class="mb-5">
+        <h2 class="text-primary mb-3">{{ group.name }}</h2>  
+
+        <div class="row">
+            {% for module in modules %}
+                {% if module.module_group == group %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <!-- Bọc nội dung card trong thẻ a để tạo liên kết -->
+                        <a href="{% url module.module_url %}" class="text-decoration-none text-dark">
+                            <div class="card-body text-center d-flex flex-column justify-content-center" style="height: 180px; width: 100%; overflow: hidden;">
+                                <!-- Module Icon -->
+                                <div class="icon mb-3">
+                                    <i class="{{ module.icon }} fa-3x" style="color: #2196F3;"></i> <!-- Thay đổi màu icon -->
+                                </div>
+
+                                <!-- Module Name -->
+                                <h5 class="card-title" style="font-size: 1.5rem;">{{ module.module_name }}</h5>
+
+                                
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div> 
+
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">Your Dashboard</h1>
+
+    <!-- Enrolled Courses Section -->
+    <div class="course-grid mb-6">
+        <h2 class="text-primary mb-4">Courses You're Learning</h2>
+        {% for course in page_obj %}
+        <div class="course-card bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-4">
+            <div class="course-card-body">
+                <div class="course-image-container">
+                    {% if course.image %}
+                        <img src="{{ course.image.url }}" alt="{{ course.course_name }}" class="course-image">
+                    {% else %}
+                        <img src="{% static 'course/images/chotbg.png' %}" alt="Default Image" class="course-image">
+                    {% endif %}
+                </div>
+                <div class="course-details">
+                    <h2 class="text-xl font-bold mb-2 main-color-text">{{ course.course_name }}</h2>
+                    <p class="text-gray-700 mb-4">{{ course.description|truncatewords:20 }}</p>
+                    {% if not is_instructor %}
+                        <div class="relative pt-1 mb-4">
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                                <div style="width: {{ course.completion_percent }}%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center main-color"></div>
+                            </div>
+                            <span class="absolute top-0 left-0 text-xs font-semibold main-color-text">{{ course.completion_percent }}%</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="course-card-footer">
+                <a href="{% url 'course:course_detail' course.id %}" class="btn main-color btn-sm" title="View Details">
+                    <i class="fas fa-eye"></i>
+                </a>
+                {% if user.is_superuser or course.instructor == user %}
+                    <a href="{% url 'course:course_edit' course.id %}" class="btn btn-warning btn-sm ms-2" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'course:course_delete' course.id %}" class="btn btn-danger btn-sm ms-2" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                    <a href="{% url 'course:toggle_publish' course.pk %}" class="btn btn-warning btn-sm ms-2" style="background-color:#097969 !important;">
+                        {% if course.published %}
+                            Unpublish
+                        {% else %}
+                            Publish
+                        {% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-4">
+            No courses found.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s; /* Thay đổi thời gian cho các hiệu ứng */
+    }
+
+    .card:hover {
+        transform: scale(1.03); /* Phóng to thẻ một chút */
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Thêm bóng đổ khi hover */
+    }
+</style>
+{% endblock %}

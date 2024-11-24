@@ -1,0 +1,35 @@
+<!-- assign_training_programs.html -->
+{% extends 'base.html' %}
+
+{% block title %}Assign Training Programs to {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title">Assign Training Programs to <strong>[{{ user.username }}]</strong></h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3"> <!-- Changed from form-group to mb-3 -->
+                    <label for="trainingPrograms" class="form-label fw-bold"> <!-- Changed font-weight-bold to fw-bold -->
+                        Select Training Programs
+                    </label>
+                    <div class="form-check">
+                        {{ form.training_programs }}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Save Changes
+                    </button>
+                    <a href="{% url 'user:user_list' %}" class="btn btn-secondary ms-2"> <!-- Changed ml-2 to ms-2 for margin -->
+                        <i class="fas fa-arrow-left"></i> Back to User List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

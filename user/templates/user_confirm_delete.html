@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2>Confirm delete</h2>
+        </div>
+        <div class="card-body">
+            <p>Are you want to delete123123123 "<strong>{{ user.username }}</strong>" ?</p>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <a href="{% url 'user:user_list' %}" class="btn btn-secondary">Close</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

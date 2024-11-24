@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+{% load assessment_tags %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Assessment Details Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>{{ assessment.title }}</h2>
+            <a href="{% url 'assessment:assessment_edit' assessment.pk %}" class="btn btn-sm btn-outline-secondary float-right">Edit</a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <p><strong>Course:</strong> {{ assessment.course }}<br>
+                    <strong>Assessment Type:</strong> {{ assessment.assessment_type }}</p>
+                </div>
+        
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <p><strong>Due Date:</strong> {{ assessment.due_date|date:"F d, Y" }}<br>
+                    <strong>Total Score:</strong> {{ assessment.total_score }}</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Two-Column Layout for Exercises and Questions -->
+    <div class="row mb-4">
+        <!-- Exercises Section -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Exercises</h3>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    <ul class="list-group">
+                        {% for exercise in assessment.exercises.all %}
+                        <li class="list-group-item">
+                           
+                            <a href="{% url 'exercises:exercise_detail' exercise.id assessment.id %}" target="_blank">{{ exercise.title }}</a>
+                            
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">No exercises assigned.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions Section -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Multiple Choice</h3>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    <ul class="list-group">
+                        {% for question in assessment.questions.all %}
+                        <li class="list-group-item">{{ forloop.counter }}. {{ question.question_text }}</li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">No questions assigned.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Invited Candidates Section at the Bottom -->
+     
+    <div class="card">
+        <div class="card-header">
+            <h3>Invited Candidates</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Candidate</th>
+                        <th>Email</th>
+                        <th>Invitation Date</th>
+                        <th>Expiration Date</th>
+                        <th>Quiz Score</th>
+                        <th>Assignment Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for candidate in invited_candidates %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ candidate.email }}</td>
+                        <td>{{ candidate.email }}</td>
+                        <td>{{ candidate.invitation_date }}</td>
+                        <td>{{ candidate.expiration_date }}</td>
+                        
+                        <!-- Use the custom filter here -->
+                     
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No candidates have been invited yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+
+
+    <a href="{% url 'assessment:assessment_list' %}" class="btn btn-secondary mt-4">Back to Assessments</a>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ progress_notification.user }} Notification Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Notification Details</h2>
+    <p><strong>Username:</strong> {{ progress_notification.user }}</p>
+    <p><strong>Course:</strong> {{ progress_notification.course }}</p>
+    <p><strong>Notification Message:</strong> {{ progress_notification.notification_message }}</p>
+    <a href="{% url 'progress_notification:progress_notification_list' %}" class="btn btn-primary">Back to Notifications List</a>
+</div>
+{% endblock %}

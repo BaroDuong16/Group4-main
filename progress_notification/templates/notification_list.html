@@ -1,0 +1,18 @@
+<a href="{% url 'progress_notification:progress_notification_list' %}" style="color: black;">
+    <h1>Notifications</h1>
+</a>
+<ul>
+    {% for notification in notifications %}
+    <a href="{% url 'course:course_detail' notification.course.id %}" style="color: black;">
+        <strong>{{notification.course}}</strong>
+    </a>
+    <li>
+        {{ notification.notification_message }} - {{ notification.notification_date }}
+        {% if not notification.is_read %}
+            <strong>(Unread)</strong>
+        {% endif %}
+    </li>
+    {% empty %}
+        <li>No notifications.</li>
+    {% endfor %}
+</ul>

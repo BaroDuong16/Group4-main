@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_filters %}
+{% block title %}Thread Form{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Include the custom CSS for this form -->
+    <link rel="stylesheet" href="{% static 'css/thread_form.css' %}">
+
+    <!-- Thread form container -->
+    <div class="card p-4 mb-4 shadow-sm" style="border-radius: 10px;">
+        <div class="card-body">
+            <h2 class="text-center mb-4" style="font-weight: 500;">Create a New Thread</h2>
+
+            <!-- Set enctype to multipart/form-data to handle file uploads -->
+            <form method="POST" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Add form fields with Bootstrap styling -->
+                <div class="form-group mb-3">
+                    <label for="thread_title" class="form-label" style="font-weight: bold;">Thread Title</label>
+                    {{ form.thread_title|add_class:"form-control" }}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="thread_content" class="form-label" style="font-weight: bold;">Content</label>
+                    {{ form.thread_content|add_class:"form-control" }}
+                </div>
+
+                <!-- Add course selection dropdown -->
+                <div class="form-group mb-3">
+                    <label for="course" class="form-label" style="font-weight: bold;">Course</label>
+                    {{ form.course|add_class:"form-control" }}
+                </div>
+
+                <!-- Add image upload field -->
+                <div class="form-group mb-3">
+                    <label for="image" class="form-label" style="font-weight: bold;">Upload Image (optional)</label>
+                    {{ form.image|add_class:"form-control-file" }} <!-- Image upload field -->
+                </div>
+
+                <!-- Customize submit button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px 0; font-size: 16px;">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

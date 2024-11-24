@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custome_filters %}
+
+{% block title %}Department Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mt-3">
+        <div class="card-body">
+            <h1 class="text-center mb-4">Department Details</h1>
+            <table class="table table-bordered table-striped">
+                <tbody>
+                    <tr>
+                        <th scope="row">Name</th>
+                        <td>{{ department.name }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Location</th>
+                        <td>{{ department.location.name }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Address</th>
+                        <td>{{ department.location.address }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Department's Users</th>
+                        <td>
+                            <div class="row">
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        {% for user in department.users.all %}
+                                            {% if forloop.counter0|divisibleby:2 %}
+                                                <li>{{ user.username }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        {% for user in department.users.all %}
+                                            {% if not forloop.counter0|divisibleby:2 %}
+                                                <li>{{ user.username }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Department's Courses</th>
+                        <td>
+                            <div class="row">
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        {% for course in department.courses.all %}
+                                            {% if forloop.counter0|divisibleby:2 %}
+                                                <li>{{ course.course_name }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        {% for course in department.courses.all %}
+                                            {% if not forloop.counter0|divisibleby:2 %}
+                                                <li>{{ course.course_name }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="btn-group mt-3">
+                <a href="{% url 'department:department_update' department.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'department:department_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

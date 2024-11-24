@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Course Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% include "course_management/nav_tab.html" %}
+    <div class="row">
+        <div class="col-2">
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                {% for quiz in quizzes %}
+                <button class="nav-link {% if forloop.counter == 1 %}active{% endif %} text-left w-100 text-truncate"
+                    id="quiz_id_{{ quiz.pk }}_tab" data-toggle="pill" data-target="#quiz_id_{{ quiz.pk }}" type="button"
+                    role="tab" aria-controls="quiz_id_{{ quiz.pk }}"
+                    aria-selected="{% if forloop.counter == 1 %}true{% else %}false{% endif %}">
+                    {{ quiz.quiz_title }}
+                </button>
+
+                {% endfor %}
+
+            </div>
+        </div>
+        <div class="col-10">
+            <div class="tab-content" id="v-pills-tabContent">
+                {% for quiz in quizzes %}
+                <div class="tab-pane fade show {% if forloop.counter == 1 %}active{% endif %} pl-4"
+                    id="quiz_id_{{ quiz.pk }}" role="tabpanel" aria-labelledby="quiz_id_{{ quiz.pk }}_tab"
+                    style="border-left: solid 1px black;">
+
+                    <h3 class="mb-4">Quiz Information</h3>
+                    <p><strong>Title</strong>: {{ quiz.quiz_title }}</p>
+                    <p><strong>Description</strong>: {{ quiz.quiz_description }}</p>
+                    <p><strong>Total Mark</strong>: {{ quiz.total_mark }}</p>
+                    <p><strong>Created by</strong>: {{ quiz.created_by.full_name }}</p>
+                    <p><strong>Created At</strong>: {{ quiz.created_at }}</p>
+                    <p><strong>Updated at</strong>: {{ quiz.updated_at }}</p>
+
+                    <a href="{% url 'course_Truong:quiz_detail' course.pk quiz.pk%}" style="width: 5rem;"
+                        class="btn btn-primary">Edit</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'course_Truong:quiz_add' course.pk%}" class="btn btn-primary">Add Quiz</a>
+    <a href="{% url 'course_Truong:course_list' %}" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}

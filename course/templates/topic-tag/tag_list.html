@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Tags</h2>
+<a href="{% url 'course:tag_add' %}" class="btn btn-primary mb-3">Add New Tag</a>
+
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Tag Name</th>
+                <th>Topic</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tag in tags %}
+                <tr>
+                    <td>{{ tag.name }}</td>
+                    <td>{{ tag.topic.name }}</td>
+                    <td>
+                        <a href="{% url 'course:tag_edit' tag.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'course:tag_delete' tag.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this tag?');">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

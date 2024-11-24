@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">{{ title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <div id="topics-container">
+            <!-- Đầu tiên hiển thị một ô nhập topic -->
+            <div class="form-group topic-input mb-2">
+                <input type="text" name="topics[]" placeholder="Enter topic name" class="form-control"/>
+            </div>
+        </div>
+
+        <!-- Nút "Add another topic" để thêm nhiều topic -->
+        <button type="button" onclick="addTopicInput()" class="btn btn-secondary mt-2">Add another topic</button>
+
+        <!-- Nút Save và Back to Topic List -->
+        <div class="form-group d-flex mt-4">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="{% url 'course:topic_tag_list' %}" class="btn btn-secondary ms-4" style="margin-left: 0.5cm;">Back to Topic List</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function addTopicInput() {
+        // Lấy container của các ô nhập topic
+        let container = document.getElementById('topics-container');
+
+        // Tạo ô nhập topic mới
+        let newInput = document.createElement('div');
+        newInput.classList.add('form-group', 'topic-input', 'mb-2');
+
+        // Gán HTML cho ô nhập mới
+        newInput.innerHTML = '<input type="text" name="topics[]" placeholder="Enter topic name" class="form-control"/>';
+
+        // Thêm ô nhập mới vào container
+        container.appendChild(newInput);
+    }
+</script>
+{% endblock %}

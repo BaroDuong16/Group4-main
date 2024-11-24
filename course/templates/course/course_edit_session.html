@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% load static %}
+
+{% block title %}Edit {{ course.course_name }}{% endblock %}
+
+{% block content %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+</head>
+<body id="edit-form">
+<div class="custom-container mx-auto p-8 bg-white rounded-lg shadow-xl">
+    <h2 class="text-2xl font-semibold text-teal-600 mb-4 main-color-text">Edit {{ course.course_name }}</h2>
+        <div class="tab-container">
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'Tab1')">Detail</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab2')">Sessions</button>
+                <button class="tablinks" onclick="openTab(event, 'Tab3')">Topic-Tags</button>
+                {% if sessions %}
+                    <button class="tablinks" onclick="openTab(event, 'Tab4')">Course Materials</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="post" class="space-y-4" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Tab1 (Detail) - Link to course_edit_detail -->
+        <div id="Tab1" class="tabcontent"></div>
+
+        <!-- Tab2 (Session) - Session Form -->
+        <div id="Tab2" class="tabcontent">
+            <!-- Warning message -->
+            <div class="alert alert-warning" role="alert">
+                Note: You can't delete sessions that have materials.
+            </div>
+            <!-- First column: Sessions -->
+            <div class="form-group" style="flex: 1;">
+                <h3>Manage Sessions</h3>
+                <div style="display: flex; flex-direction: column;">
+                <ul id="sessions-container" class="sortable" style="padding: 0; list-style-type: None;">
+                    {% for session in sessions %}
+                        <li class="session-item" data-id="{{ session.id }}">
+                            <input type="text" name="session_names" value="{{ session.name }}" class="form-control">
+                            <input type="hidden" name="session_ids" value="{{ session.id }}">
+                            {% if session.materials.count == 0 %}
+                                <button type="button" class="delete-session" data-id="{{ session.id }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                <input type="hidden" name="delete_session_ids" id="delete-session-ids">
+                <input type="hidden" name="session_order" id="session-order">
+                </div>
+
+                <!-- Add New Sessions -->
+                <div id="new-sessions-container"></div>
+                <button type="button" id="add-new-session" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="Tab3" class="tabcontent"></div>
+
+        <!-- Tab4 (Course Materials) -->
+        <div id="Tab4" class="tabcontent"></div>
+
+        <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" style="background-color: #389bb0; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; margin-right: 10px;">
+                Save
+            </button>
+            <a href="{% url 'course:course_list' %}" style="background-color: gray; color: white; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; text-decoration: none;">
+                Return to Course List
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        if (tabName === 'Tab1') {
+            var courseId = {{ course.pk }};
+            localStorage.setItem("activeTab", "Tab1");
+            window.location.href = `/course/edit/${courseId}/details/`;
+        } else if (tabName === 'Tab3') {
+            var courseId = {{ course.pk }};
+            localStorage.setItem("activeTab", "Tab3");
+            window.location.href = `/course/edit/${courseId}/topic-tags/`;
+
+        } else if (tabName === 'Tab4') {
+            var courseId = {{ course.pk }};
+            var firstSessionId = {{ first_session_id|default:"null" }}; // ID của session đầu tiên, nếu có
+            localStorage.setItem("activeTab", "Tab4");
+            window.location.href = `/course/${courseId}/content/edit/${firstSessionId}/`;
+        } else {
+            // Hiển thị tab được chọn và gán lớp "active" cho nút nhấn
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+
+            // Lưu lại tab đang hoạt động trong localStorage để giữ trạng thái khi tải lại trang
+            localStorage.setItem("activeTab", tabName);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let savedTab = localStorage.getItem("activeTab") || "Tab1"; // Default to Tab1 (Session)
+        let defaultTabButton = document.querySelector(`.tablinks[onclick="openTab(event, '${savedTab}')"]`);
+
+        if (defaultTabButton) {
+            defaultTabButton.click();
+        }
+    });
+    $(document).ready(function() {
+        $("#sessions-container").sortable({
+            handle: ".drag-handle", // Use a specific handle for dragging
+            update: function(event, ui) {
+                // Update the session order when the order is changed
+                let order = $(this).sortable('toArray', { attribute: 'data-id' });
+                $("#session-order").val(order.join(','));
+            }
+        });
+
+        // Make sure the sessions can be dragged
+        $(".session-item").each(function() {
+            $(this).prepend('<span class="drag-handle" style="cursor: move;">☰</span>'); // Add a drag handle
+        });
+
+        // Handle adding new sessions
+        let newSessionCount = 0;
+        $('#add-new-session').click(function() {
+            newSessionCount++;
+            const newSessionHtml = `
+                <div class="session-item new-session">
+                    <input type="text" name="new_session_names" class="form-control" placeholder="New Session Name">
+                    <button type="button" class="delete-session">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            $('#new-sessions-container').append(newSessionHtml);
+        });
+
+        $('#new-sessions-container').on('click', '.delete-session', (function() {
+            $(this).closest('.session-item').remove();
+        }));
+
+        // Event delegation for deleting sessions
+        $('#sessions-container').on('click', '.delete-session', function() {
+            const sessionId = $(this).data('id');
+            if (sessionId) {
+                // Append to hidden input for deletion
+                $('#delete-session-ids').val(function(i, val) {
+                    return val + (val ? ',' : '') + sessionId;
+                });
+            }
+            $(this).closest('.session-item').remove(); // Remove the session from the UI
+        });
+    });
+</script>
+{% endblock %}

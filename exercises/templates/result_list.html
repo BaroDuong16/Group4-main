@@ -1,0 +1,10 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h2>Your Submissions</h2>
+<ul>
+    {% for submission in submissions %}
+        <li>{{ submission.exercise.title }} - Score: {{ submission.score }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

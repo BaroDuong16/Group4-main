@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Collaboration Groups
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Collaboration Groups</h1>
+
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Group Name</th>
+                    <th>Subject</th>
+                    <th>Created By</th>
+                    <th>Date Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group in collaboration_groups %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ group.group_name }}</td>
+                        <td>{{ group.course }}</td>
+                        <td>{{ group.created_by }}</td>
+                        <td>{{ group.created_at|date:"F j, Y" }}</td>
+                        <td>
+                            {% if user in group.members.all %}
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'collaboration_group:check_members' group.id %}" class="btn btn-info btn-sm">Check Members</a>
+                                    <a href="{% url 'collaboration_group:leave_group' group.id %}" class="btn btn-danger btn-sm">Leave Group</a>
+                                </div>
+                            {% else %}
+                                <form method="POST" action="{% url 'collaboration_group:join_group' group.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-sm">Join Group</button>
+                                </form>
+                            {% endif %}
+                            {% if user == group.created_by %}
+                                <a href="{% url 'collaboration_group:manage_group' group.id %}" class="btn btn-secondary btn-sm">Manage Group</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No collaboration groups available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'collaboration_group:collaboration_group_add' %}" class="btn btn-success btn-lg">Add New Group</a>
+        </div>
+    </div>
+{% endblock %}

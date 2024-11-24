@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Add Assessment{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Create New Assessment</h2>
+
+    <form method="POST" id="assessment-form" class="mb-5">
+        {% csrf_token %}
+
+        <!-- Assessment Details Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4>Assessment Details</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Title</label>
+                            {{ form.title }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_course" class="form-label">Course</label>
+                            {{ form.course }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_assessment_type" class="form-label">Assessment Type</label>
+                            {{ form.assessment_type }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_total_score" class="form-label">Total Score</label>
+                            {{ form.total_score }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="id_due_date" class="form-label">Due Date</label>
+                            {{ form.due_date }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercises Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h4>Select Exercises</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Exercise List Section -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="search-exercises" class="form-label">Search Exercises</label>
+                            <input type="text" id="search-exercises" class="form-control" placeholder="Search for exercises..." onkeyup="filterExercises()">
+                        </div>
+                        <div class="exercise-list" id="exercise-list" style="height: 300px; overflow-y: auto; border: 1px solid #ccc;">
+                            {% for exercise in exercises %}
+                                <div class="exercise-item" style="cursor: pointer;">
+                                    <input type="checkbox" name="exercises" value="{{ exercise.id }}" id="exercise-{{ exercise.id }}">
+                                    <label for="exercise-{{ exercise.id }}">{{ exercise.title }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Exercise Preview Section -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="search-exercises" class="form-label">Search Exercises</label>
+                            <input type="text" id="search-exercises111" class="form-control" placeholder="Search for exercises..." onkeyup="filterExercises()">
+                        </div>
+                        <div id="exercise-content" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                            <p>Select an exercise from the list to preview its content here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Save Assessment</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Function to filter exercises in the list
+    function filterExercises() {
+        const input = document.getElementById('search-exercises').value.toLowerCase();
+        const exercises = document.querySelectorAll('.exercise-item');
+        exercises.forEach(exercise => {
+            const label = exercise.querySelector('label').textContent.toLowerCase();
+            exercise.style.display = label.includes(input) ? 'block' : 'none';
+        });
+    }
+</script>
+{% endblock %}

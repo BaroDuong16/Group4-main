@@ -1,0 +1,37 @@
+<div class="accordion my-2" id="accordion_sub_module">
+    {% for sub_module in sub_modules %}
+    <div class="card">
+      <div class="card-header" id="sub_module_heading_{{ sub_module.pk }}">
+        <h2 class="mb-0">
+          <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#sub_module_collapse_{{ sub_module.pk }}" aria-expanded="false" aria-controls="sub_module_collapse_{{ sub_module.pk }}">
+            {{ module.order }}.{{ sub_module.order }}) {{ sub_module.title }}
+          </button>
+        </h2>
+      </div>
+      <div id="sub_module_collapse_{{ sub_module.pk }}" class="collapse" aria-labelledby="sub_module_heading_{{ sub_module.pk }}" data-parent="#accordion_sub_module">
+        <div class="card-body">
+            <h4 class="mb-4">Sub Module Information</h4>
+            <div class="row">
+                <div class="col-7">
+                    <p><strong>Title</strong>: {{ sub_module.title }}</p>
+                </div>
+                <div class="col-5">
+                    <p><strong>Created At</strong>: {{ sub_module.created_at }}</p>
+                    <p><strong>Updated at</strong>: {{ sub_module.updated_at }}</p>
+                </div>
+            </div>
+            <a href="{% url 'course_Truong:sub_module_edit' course.pk sub_course.pk module.pk sub_module.pk%}" style="width: 7rem;"
+                        class="btn btn-primary">Edit</a>
+            <a href="{% url 'course_Truong:module_move_up' course.pk sub_course.pk module.pk%}" style="width: 7rem;"
+                        class="btn btn-success">Move Up</a>
+            <a href="{% url 'course_Truong:module_move_down' course.pk sub_course.pk module.pk%}" style="width: 7rem;"
+                        class="btn btn-warning">Move Down</a>
+            <a href="{% url 'course_Truong:sub_module_delete' course.pk sub_course.pk module.pk sub_module.pk%}" style="width: 7rem;"
+                        class="btn btn-danger">Delete</a>
+            <hr>
+            
+        </div>
+      </div>
+    </div>
+{% endfor %}
+</div> 

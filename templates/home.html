@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<div class="jumbotron bg-primary text-white text-center py-5">
+    <div class="container">
+        <h1 class="display-4">Welcome to the LMS System</h1>
+        <p class="lead">A platform for managing quizzes, assessments, and users. Teachers can create quizzes, and students can take them and view their scores.</p>
+        <hr class="my-4 bg-white">
+        <p>Get started by logging in or registering an account.</p>
+        <a class="btn btn-light btn-lg mx-2" href="{% url 'login' %}" role="button">Login</a>
+        <a class="btn btn-outline-light btn-lg mx-2" href="{% url 'user:register' %}" role="button">Register</a>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <i class="fas fa-chalkboard-teacher fa-3x mb-3 text-primary"></i>
+                    <h5 class="card-title">Teachers</h5>
+                    <p class="card-text">Create quizzes and coding exercises. Review and grade students' submissions.</p>
+                    <a href="#" class="btn btn-primary">Learn More</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <i class="fas fa-user-graduate fa-3x mb-3 text-success"></i>
+                    <h5 class="card-title">Students</h5>
+                    <p class="card-text">Take quizzes and coding exercises. View your scores and improve your skills.</p>
+                    <a href="#" class="btn btn-success">Get Started</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <i class="fas fa-user-cog fa-3x mb-3 text-danger"></i>
+                    <h5 class="card-title">Admins</h5>
+                    <p class="card-text">Manage users, roles, and permissions. Oversee all quizzes and assessments.</p>
+                    <a href="#" class="btn btn-danger">Admin Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

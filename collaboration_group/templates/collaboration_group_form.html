@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Collaboration Group Form
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center">Collaboration Group Form</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Please fill in the details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {% for field in form %}
+                            <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
+                            <div class="input-group mb-3">
+                                {{ field }}  <!-- Render the multi-select field -->
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                            {% if field.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for error in field.errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'collaboration_group:collaboration_group_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

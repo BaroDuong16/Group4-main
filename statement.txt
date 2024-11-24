@@ -1,0 +1,36 @@
+django-admin startproject myproject
+
+This CKEditor 4.16.0 version is not secure. 
+Consider upgrading to the latest one, 4.25.0-lts.
+
+python3 manage.py startapp assessments
+
+python manage.py makemigrations
+
+python manage.py migrate
+
+python3 manage.py createsuperuser
+
+python3 manage.py collectstatic
+
+python manage.py runserver
+
+pip freeze > requirements.txt
+
+
+find . -path "*/migrations/*.py" ! -name "__init__.py" -delete
+
+
+windows:  Get-ChildItem -Path . -Recurse -Filter "*.py" | Where-Object { $_.Name -ne "__init__.py" -and $_.FullName -like "*migrations*" } | Remove-Item
+
+UPDATE subject_lesson
+SET content = REPLACE(content, 'height="500"', 'height="800px"')
+WHERE content LIKE '%<iframe%';
+
+UPDATE subject_lesson
+SET content = REPLACE(content, 'sandbox=""', '')
+WHERE content LIKE '%<iframe%';
+
+{{ forloop.counter }}
+
+python3 manage.py startapp student_portal

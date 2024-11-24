@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Discussion Report Dashboard</h1>
+
+    <div class="stats">
+        <h2>General Stats</h2>
+        <p>Total Threads: {{ total_threads }}</p>
+        <p>Total Comments: {{ total_comments }}</p>
+    </div>
+
+    <div class="reactions-section">
+        <h2>Thread Reactions Breakdown</h2>
+        <ul>
+            {% for reaction in thread_reactions %}
+            <li>{{ reaction.reaction_type }}: {{ reaction.count }}</li>
+            {% endfor %}
+        </ul>
+
+        <h2>Comment Reactions Breakdown</h2>
+        <ul>
+            {% for reaction in comment_reactions %}
+            <li>{{ reaction.reaction_type }}: {{ reaction.count }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="top-threads">
+        <h2>Top 5 Threads by Comments</h2>
+        <ul>
+            {% for thread in top_threads %}
+            <li>{{ thread.thread_title }} - {{ thread.comment_count }} comments</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

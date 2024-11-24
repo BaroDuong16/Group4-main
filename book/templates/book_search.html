@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+    function toggleDescription(button) {
+        const cardBody = button.closest('.card-body');
+        const shortDescription = cardBody.querySelector('.short-description');
+        const fullDescription = cardBody.querySelector('.full-description');
+    
+        // Toggle display of short and full descriptions
+        if (fullDescription.style.display === "none") {
+            fullDescription.style.display = "block";
+            shortDescription.style.display = "none";
+            button.innerText = "See less"; // Change button text to "See less"
+        } else {
+            fullDescription.style.display = "none";
+            shortDescription.style.display = "block";
+            button.innerText = "See more"; // Change button text back to "See more"
+        }
+    }
+    </script>
+ 
+<!-- Book Search Section -->
+<div class="text-center my-5 p-4 bg-success rounded shadow">
+    <h1 class="text-white mb-4">Book Search</h1>
+
+    <form method="GET" action="{% url 'book:book_search' %}" class="d-inline-block">
+        <div class="input-group mb-3 justify-content-center">
+            <input type="text" name="q" placeholder="Search for books..." required class="form-control" aria-label="Book search input" style="max-width: 400px;">
+            <button type="submit" class="btn btn-light">Search</button>
+        </div>
+
+        <!-- Radio buttons for selecting book type -->
+        <div class="d-flex justify-content-center mb-3">
+            <div class="form-check me-3">
+                <input type="radio" id="free" name="book_type" value="free" class="form-check-input" {% if request.GET.book_type == "free" or not request.GET.book_type %}checked{% endif %}>
+                <label for="free" class="form-check-label text-white">Free Books</label>
+            </div>
+
+            <div class="form-check">
+                <input type="radio" id="paid" name="book_type" value="paid" class="form-check-input" {% if request.GET.book_type == "paid" %}checked{% endif %}>
+                <label for="paid" class="form-check-label text-white">Paid Books</label>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+<!-- Book Results Section -->
+<div class="container mt-4">
+    {% if query %}
+        <h2>Book Search Results for "{{ query }}"</h2>
+    {% endif %}
+
+    <div class="row">
+        {% for book in books %}
+        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+            <div class="card" style="border-radius: 10px; height: 400px;">
+                <img src="{{ book.thumbnail }}" class="card-img-top" alt="Book cover of {{ book.title }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ book.title }}</h5>
+            
+                    <!-- Short Description -->
+                    <p class="card-text short-description" style="max-height: 100px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                        <!-- Add your short description here -->
+                    </p>
+            
+                    <strong>Published Date:</strong> {{ book.publishedDate }}
+                    <!-- Button Container -->
+                    <div class="d-flex justify-content-between mt-auto">
+                        <!-- See more button -->
+                        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#bookModal{{ book.id }}">
+                            See more
+                        </button>
+
+                        <a href="{{ book.infoLink }}" target="_blank" class="btn btn-secondary">Read more</a>
+
+                        {% if book.previewLink %}
+                            <a href="{{ book.previewLink }}" target="_blank" class="btn btn-secondary">Read Preview</a>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- Modal for Book Details -->
+            <div class="modal fade" id="bookModal{{ book.id }}" tabindex="-1" aria-labelledby="bookModalLabel{{ book.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="bookModalLabel{{ book.id }}">{{ book.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <strong>Author(s):</strong> {{ book.authors|join:", " }}<br>
+                            <strong>Description:</strong> {{ book.description }}<br>
+                            <strong>Publisher:</strong> {{ book.publisher }}<br>
+                            <strong>Published Date:</strong> {{ book.publishedDate }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        {% endfor %}
+    </div>
+    
+    
+</div>
+
+<!-- Pagination Controls -->
+<div class="text-center mt-4">
+    <div>
+        {% if books.has_previous %}
+            <a href="?q={{ query|urlencode }}&book_type={{ book_type }}&page=1" class="btn btn-outline-primary">&laquo; First</a>
+            <a href="?q={{ query|urlencode }}&book_type={{ book_type }}&page={{ books.previous_page_number }}" class="btn btn-outline-primary">Previous</a>
+        {% else %}
+            <span class="btn btn-outline-secondary disabled">&laquo; First</span>
+            <span class="btn btn-outline-secondary disabled">Previous</span>
+        {% endif %}
+
+        {% comment %} Dynamic pagination range {% endcomment %}
+        {% for page_num in paginator.page_range %}
+            {% if page_num >= books.number|add:-5 and page_num <= books.number|add:5 %}
+                {% if page_num == books.number %}
+                    <strong class="btn btn-outline-secondary disabled">{{ page_num }}</strong>  <!-- Highlight current page -->
+                {% else %}
+                    <a href="?q={{ query|urlencode }}&book_type={{ book_type }}&page={{ page_num }}" class="btn btn-outline-primary">{{ page_num }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if books.has_next %}
+            <a href="?q={{ query|urlencode }}&book_type={{ book_type }}&page={{ books.next_page_number }}" class="btn btn-outline-primary">Next</a>
+            <a href="?q={{ query|urlencode }}&book_type={{ book_type }}&page={{ paginator.num_pages }}" class="btn btn-outline-primary">Last &raquo;</a>
+        {% else %}
+            <span class="btn btn-outline-secondary disabled">Next</span>
+            <span class="btn btn-outline-secondary disabled">Last &raquo;</span>
+        {% endif %}
+    </div>
+</div>
+
+    
+
+{% endblock %}

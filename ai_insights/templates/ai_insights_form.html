@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Insight,Add New Insight" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Insight,Add New Insight" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.user.label_tag }}
+            {{ form.user|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.course.label_tag }}
+            {{ form.course|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.insight_text.label_tag }}
+            {{ form.insight_text|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.insight_type.label_tag }}
+            {{ form.insight_type|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'ai_insights:ai_insights_list' %}" class="btn btn-secondary">Back to AI Insights List</a>
+    </form>
+</div>
+{% endblock %}

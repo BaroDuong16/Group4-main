@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% block title %}{% if form.instance.pk %}Edit Course{% else %}Add New Course{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.title.label_tag }}
+            {{ form.title|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.video_url.label_tag }}
+            {{ form.video_url|add_class:"form-control" }}
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <h2>HTML Content</h2>
+                <hr>
+                <div class="form-group">
+                    {{ form.html_content.label_tag }}
+                    {{ form.html_content| add_class:"form-control" }}
+                </div>
+            </div>
+            {% if form.instance.pk %}
+            <div class="col">
+                <h2>Preview HTML Content</h2>
+                <hr>
+                <div class="container" style="border: solid 1px black;">
+                    {{ form.instance.html_content|safe }}
+
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'course_Truong:sub_course_list' course_pk %}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+
+</div>
+{% endblock %}

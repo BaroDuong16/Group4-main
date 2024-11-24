@@ -1,0 +1,140 @@
+<!-- course_list.html -->
+{% extends 'basePortal.html' %}
+{%load static%}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<style>
+    .text-warning {
+    color: #ffc107 !important; /* Bootstrap's yellow color */
+}
+</style>
+<h1 class="mb-4">Available Courses</h1>
+<form method="get" class="form-inline mb-3 d-flex align-items-end">
+    <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search courses" value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search">Search</i>
+        </button>
+    </div>
+</form>
+
+<div class="row">
+    {% for course in courses %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-light">
+            <div class="ratio ratio-16x9"> <!-- Aspect Ratio Wrapper -->
+                <a href="{% url 'student_portal:course_content_no_session' course.id %}">
+                    {% if course.image %}
+                        <img title="Click here to learn" src="{{ course.image.url }}" class="card-img-top" alt="{{ course.course_name }}" style="object-fit: cover;">
+                    {% else %}
+                        <img title="Click here to learn" src="{% static 'course/images/chotbg.png' %}" alt="Default Image" class="card-img-top" style="object-fit: cover;">
+                    {% endif %}
+                </a>
+            </div>            
+            
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ course.course_name }}</h5>
+                <p class="card-text flex-grow-1">{{ course.description|truncatewords:20 }}</p>
+
+                <!-- Star Rating Display -->
+                <div class="ms-2 mt-2">
+                    <div class="d-flex align-items-center">
+                        <strong>Rating:</strong>
+                        {% for i in "12345"|make_list %}
+                            {% if course.average_rating|floatformat:1|add:"0.0" >= i %}
+                                <i class="fas fa-star text-warning"></i> <!-- Full Yellow Star -->
+                            {% else %}
+                                <i class="far fa-star text-muted"></i> <!-- Empty Star -->
+                            {% endif %}
+                        {% endfor %}
+                        <span class="ms-2">({{ course.average_rating|floatformat:1 }} / 5)</span>
+                    </div>
+                </div>
+                <div class="mt-auto text-center">
+                    <!-- Button to view course details if user is not enrolled -->
+                    <a href="{% url 'student_portal:course_detail' course.id %}" class="btn btn-secondary">
+                        <i class="fas fa-info-circle me-2"></i> <!-- Info icon -->
+                        View Details
+                    </a>
+                    {% if course.user_enrolled %}
+                        <!-- Button to go directly to course content if user is enrolled -->
+                        <a href="{% url 'student_portal:course_content_no_session' course.id %}" class="btn btn-primary">
+                            <i class="fas fa-book-open me-2"></i> <!-- Book open icon -->
+                            Study
+                        </a>
+                    {% endif %}    
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if courses.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="First">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ courses.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% endif %}
+
+        {% for num in courses.paginator.page_range %}
+            {% if num == courses.number %}
+                <li class="page-item active">
+                    <a class="page-link" href="#">{{ num }}</a>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if courses.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ courses.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ courses.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Last">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Recommended Courses Section -->
+<h2 class="mt-5 mb-4">Recommended Courses</h2>
+<div class="row">
+    {% for recommended_course in recommended_courses %}
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-light">
+            <div class="ratio ratio-16x9"> <!-- Aspect Ratio Wrapper -->
+                {% if course.image %}
+                    <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.course_name }}" style="object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'course/images/chotbg.png' %}" alt="Default Image" class="card-img-top" alt="Placeholder Image" style="object-fit: cover;">
+                {% endif %}
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ recommended_course.course_name }}</h5>
+                <p class="card-text flex-grow-1">{{ recommended_course.description|truncatewords:20 }}</p>
+                <div class="mt-auto">
+                    <a href="{% url 'student_portal:course_detail' recommended_course.id %}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

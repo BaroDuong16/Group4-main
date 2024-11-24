@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xóa Phòng Ban</title>
+</head>
+<body>
+    <h1>Xác Nhận Xóa Phòng Ban</h1>
+    <p>Bạn có chắc chắn muốn xóa phòng ban này: <strong>{{ department.name }}</strong> không?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Xóa</button>
+    </form>
+    <a href="{% url 'department:department_detail' department.pk %}">Hủy</a>
+</body>
+</html>

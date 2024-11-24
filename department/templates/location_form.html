@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load user_form_filters %}
+
+{% block title %}
+    {% if form.instance.pk %}Edit Location{% else %}Create Location{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="card shadow-lg p-4 bg-gradient-light rounded">
+        <h2 class="text-center text-primary fw-bold mb-4">
+            {% if form.instance.pk %}
+                <i class="fas fa-edit"></i> Edit Location
+            {% else %}
+                <i class="fas fa-plus"></i> Create Location
+            {% endif %}
+        </h2>
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <strong>Invalid Form</strong>
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group mb-3">
+                <label class="h5">{{ form.name.label }}</label> 
+                {{ form.name|add_class:"form-control form-control-lg" }}
+                {% if form.name.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.name.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="h5">{{ form.address.label }}</label> 
+                {{ form.address|add_class:"form-control form-control-lg" }}
+                {% if form.address.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.address.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg me-2">Save</button>
+                <a href="{% url 'department:location_list' %}" class="btn btn-outline-dark btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

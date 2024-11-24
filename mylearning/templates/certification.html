@@ -1,0 +1,27 @@
+{% extends 'basePortal.html' %}
+{% load static %}
+{% block title %}My Learning{% endblock %}
+
+{% block content %}
+
+<div class="container bg-light my-4 p-4 rounded shadow-sm">
+    <h1 class="mb-3">My Learning</h1>
+    <!-- Include the tabs here -->
+    {% include "mylearning_tabs.html" %}
+</div>
+
+<main class="container">
+    <div class="row overflow-auto" style="max-height: 600px;">
+        <div class="col-md-12">
+            {% for certification in certifications %}
+                <div class="p-3 border rounded bg-light">
+                    {{ certification.generated_html_content|safe }}
+                </div>
+            {% empty %}
+                <p>You have no certifications yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+
+{% endblock %}

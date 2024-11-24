@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.course_name }} - {{ sub_course.title }}{{ quiz.quiz_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row" style="height: 90vh;">
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-9 px-4 d-flex flex-column" style="height: 90vh;">
+            <div class="flex-grow-1" style="overflow-y: auto; overflow-x: hidden;">
+                <div class="vh-100">
+                    {% if type %}
+                        {% if type == "preview" %}
+                            {% include "course_operations/quiz_preview.html" %}
+                        {% elif type == "do" %}
+                        {% include "course_operations/do_preview_quiz.html" %}
+                        {% endif %}
+                    {% else %}
+                        {% include "course_operations/learning_view.html" %}
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <nav class="col-md-3 d-none d-md-block sidebar" style="height: 90vh; overflow-y: auto;">
+            <div class="sidebar-sticky">
+                <div>
+                    {% include "course_operations/list_course_content.html" %}
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('sub_module_{{sub_module.pk}}').scrollIntoView({ behavior: 'smooth' });
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('quiz_{{quiz.pk}}').scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+<!-- templates/certification/certification_form.html -->
+{% extends 'base.html' %}
+{% load form_filters %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{% if form.instance.pk %}Edit Certification{% else %}Add Certification{% endif %}</h2>
+
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="certificateOption">{{ form.certificate_option.label }}</label><br>
+            {% for option in form.certificate_option %}
+                <div class="form-check form-check-inline">
+                    {{ option.tag }} {{ option.choice_label }}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div id="fileField" class="form-group">
+            <label for="id_certificate_file">{{ form.certificate_file.label }}</label>
+            {{ form.certificate_file|add_class:"form-control" }}
+        </div>
+        
+        <div id="htmlField" class="form-group">
+            <label for="id_certificate_html">{{ form.certificate_html.label }}</label>
+            {{ form.certificate_html|add_class:"form-control" }}
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="id_name">{{ form.name.label }}</label>
+                {{ form.name|add_class:"form-control" }}
+            </div>
+            <div class="form-group col-md-6">
+                <label for="id_course">{{ form.course.label }}</label>
+                {{ form.course|add_class:"form-control" }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_description">{{ form.description.label }}</label>
+            {{ form.description|add_class:"form-control" }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_awarded_date">{{ form.awarded_date.label }}</label>
+            {{ form.awarded_date|add_class:"form-control" }}
+        </div>
+
+        <div class="form-check">
+            {{ form.awarded|add_class:"form-check-input" }}
+            <label class="form-check-label" for="id_awarded">{{ form.awarded.label }}</label>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Save</button>
+        <a href="{% url 'certification:certification_list' %}" class="btn btn-secondary mt-3">Cancel</a>
+    </form>
+</div>
+
+<script>
+    // JavaScript to toggle fields based on radio selection
+    document.addEventListener("DOMContentLoaded", function() {
+        const certificateOptionRadios = document.querySelectorAll('input[name="certificate_option"]');
+        const fileField = document.getElementById("fileField");
+        const htmlField = document.getElementById("htmlField");
+
+        function toggleFields() {
+            if (document.querySelector('input[name="certificate_option"]:checked').value === 'upload') {
+                fileField.style.display = 'block';
+                htmlField.style.display = 'none';
+            } else {
+                fileField.style.display = 'none';
+                htmlField.style.display = 'block';
+            }
+        }
+
+        certificateOptionRadios.forEach(radio => {
+            radio.addEventListener('change', toggleFields);
+        });
+        
+        toggleFields();  // Initial call to set the correct fields
+    });
+</script>
+{% endblock %}

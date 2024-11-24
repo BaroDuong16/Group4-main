@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ analytic.analytics_id }} Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>User Details</h2>
+    <p><strong>Analytic ID:</strong> {{ analytic.analytics_id }}</p>
+    <p><strong>User ID:</strong> {{ analytic.user_id }}</p>
+    <p><strong>Course ID:</strong> {{ analytic.course_id }}</p>
+    <p><strong>Average Score:</strong> {{ analytic.average_score }}</p>
+    <p><strong>Completion Rate:</strong> {{ analytic.completion_rate }}</p>
+    <p><strong>Predicted Performance:</strong> {{ analytic.predicted_performance }}</p>
+    <a href="{% url 'performance_analytics:PerformanceAnalytics_list' %}" class="btn btn-primary">Back to User List</a>
+</div>
+{% endblock %}

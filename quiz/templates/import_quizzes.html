@@ -1,0 +1,11 @@
+<form method="POST" action="{% url 'quiz:import_quizzes' %}" enctype="multipart/form-data" class="d-inline">
+    {% csrf_token %}
+    <div class="input-group">
+        <input type="file" name="file" accept=".json,.csv" class="form-control" required>
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">
+                <i class="fas fa-file-import"></i> Import
+            </button>
+        </div>
+    </div>
+</form>

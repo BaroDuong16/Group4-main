@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reorder Materials - {{ course.course_name }}{% endblock %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+</head>
+<body id="reorder-material">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<div class="container mt-5">
+    <h1 style="color: #389bb0;">Reorder Materials for Course: {{ course.course_name }}</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="row">
+            <!-- Session Selection Dropdown (Left) -->
+            <div class="col-md-3">
+                <h3>Select Session</h3>
+                <select name="session_id" id="session-select" onchange="this.form.submit()" class="form-control form-control-sm" style="width: 100%; max-width: 200px;">
+                    <option value="" disabled>Select a session</option>
+                    {% for session in sessions %}
+                        <option value="{{ session.id }}"
+                                {% if session.id|stringformat:"s" == selected_session_id %}
+                                    selected
+                                {% endif %}>
+                            {{ session.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <!-- Materials List (Right) -->
+            <div class="col-md-9">
+                <h3>Reorder Materials</h3>
+                <ul id="materials-list" class="list-group mb-3">
+                    {% for material in materials %}
+                        <li class="list-group-item" data-id="{{ material.id }}">
+                            <span>{{ material.title }}</span>
+                            <span class="material-handle">☰</span>
+                            <input type="hidden" name="order_{{ material.id }}" id="order_{{ material.id }}" value="{{ material.order }}">
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Buttons aligned with "Select Session" -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="d-flex">
+                    <button type="submit" class="btn btn-primary mr-2" name="order">Update Order</button>
+                    <a href="{% url 'course:course_edit_detail' course.id %}" class="btn btn-secondary">Back to Course Details</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('materials-list');
+    var sortable = Sortable.create(el, {
+        handle: '.material-handle',
+        animation: 150,
+        onEnd: function() {
+            // Update the order after drag and drop
+            var items = el.getElementsByTagName('li');
+            for (var i = 0; i < items.length; i++) {
+                var id = items[i].getAttribute('data-id');
+                document.getElementById('order_' + id).value = i + 1;
+            }
+        }
+    });
+});
+</script>
+</body>
+{% endblock %}

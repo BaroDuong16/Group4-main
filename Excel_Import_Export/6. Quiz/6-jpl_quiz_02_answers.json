@@ -1,0 +1,243 @@
+[
+    {
+      "id": "41",
+      "question__question_text": "What is the index of the first element in an array in Java?",
+      "option_text": "0",
+      "is_correct": "1"
+    },
+    {
+      "id": "42",
+      "question__question_text": "What is the index of the first element in an array in Java?",
+      "option_text": "1",
+      "is_correct": "0"
+    },
+    {
+      "id": "43",
+      "question__question_text": "What is the index of the first element in an array in Java?",
+      "option_text": "-1",
+      "is_correct": "0"
+    },
+    {
+      "id": "44",
+      "question__question_text": "What is the index of the first element in an array in Java?",
+      "option_text": "None of the above",
+      "is_correct": "0"
+    },
+    {
+      "id": "45",
+      "question__question_text": "How do you declare an array of integers in Java?",
+      "option_text": "int[] arr;",
+      "is_correct": "1"
+    },
+    {
+      "id": "46",
+      "question__question_text": "How do you declare an array of integers in Java?",
+      "option_text": "int arr[];",
+      "is_correct": "0"
+    },
+    {
+      "id": "47",
+      "question__question_text": "How do you declare an array of integers in Java?",
+      "option_text": "ArrayList<int> arr;",
+      "is_correct": "0"
+    },
+    {
+      "id": "48",
+      "question__question_text": "How do you declare an array of integers in Java?",
+      "option_text": "int arr = new int[10];",
+      "is_correct": "0"
+    },
+    {
+      "id": "49",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[2]);",
+      "option_text": "3",
+      "is_correct": "1"
+    },
+    {
+      "id": "50",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[2]);",
+      "option_text": "2",
+      "is_correct": "0"
+    },
+    {
+      "id": "51",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[2]);",
+      "option_text": "1",
+      "is_correct": "0"
+    },
+    {
+      "id": "52",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {1, 2, 3};\nSystem.out.println(arr[2]);",
+      "option_text": "0",
+      "is_correct": "0"
+    },
+    {
+      "id": "53",
+      "question__question_text": "Which loop is guaranteed to execute at least once?",
+      "option_text": "do-while loop",
+      "is_correct": "1"
+    },
+    {
+      "id": "54",
+      "question__question_text": "Which loop is guaranteed to execute at least once?",
+      "option_text": "for loop",
+      "is_correct": "0"
+    },
+    {
+      "id": "55",
+      "question__question_text": "Which loop is guaranteed to execute at least once?",
+      "option_text": "while loop",
+      "is_correct": "0"
+    },
+    {
+      "id": "56",
+      "question__question_text": "Which loop is guaranteed to execute at least once?",
+      "option_text": "foreach loop",
+      "is_correct": "0"
+    },
+    {
+      "id": "57",
+      "question__question_text": "What is the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n  System.out.print(i + \" \");\n}\n",
+      "option_text": "0 1 2 3 4 ",
+      "is_correct": "1"
+    },
+    {
+      "id": "58",
+      "question__question_text": "What is the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n  System.out.print(i + \" \");\n}\n",
+      "option_text": "1 2 3 4 5 ",
+      "is_correct": "0"
+    },
+    {
+      "id": "59",
+      "question__question_text": "What is the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n  System.out.print(i + \" \");\n}\n",
+      "option_text": "5 ",
+      "is_correct": "0"
+    },
+    {
+      "id": "60",
+      "question__question_text": "What is the output of the following code?\n\nfor (int i = 0; i < 5; i++) {\n  System.out.print(i + \" \");\n}\n",
+      "option_text": "None of the above",
+      "is_correct": "0"
+    },
+    {
+      "id": "61",
+      "question__question_text": "What is the length of the following array?\n\nint[] arr = new int[10];",
+      "option_text": "10",
+      "is_correct": "1"
+    },
+    {
+      "id": "62",
+      "question__question_text": "What is the length of the following array?\n\nint[] arr = new int[10];",
+      "option_text": "0",
+      "is_correct": "0"
+    },
+    {
+      "id": "63",
+      "question__question_text": "What is the length of the following array?\n\nint[] arr = new int[10];",
+      "option_text": "1",
+      "is_correct": "0"
+    },
+    {
+      "id": "64",
+      "question__question_text": "What is the length of the following array?\n\nint[] arr = new int[10];",
+      "option_text": "None of the above",
+      "is_correct": "0"
+    },
+    {
+      "id": "65",
+      "question__question_text": "How do you access the last element of an array called 'arr'?",
+      "option_text": "arr[arr.length - 1]",
+      "is_correct": "1"
+    },
+    {
+      "id": "66",
+      "question__question_text": "How do you access the last element of an array called 'arr'?",
+      "option_text": "arr[arr.length]",
+      "is_correct": "0"
+    },
+    {
+      "id": "67",
+      "question__question_text": "How do you access the last element of an array called 'arr'?",
+      "option_text": "arr[arr.size() - 1]",
+      "is_correct": "0"
+    },
+    {
+      "id": "68",
+      "question__question_text": "How do you access the last element of an array called 'arr'?",
+      "option_text": "None of the above",
+      "is_correct": "0"
+    },
+    {
+      "id": "69",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {4, 5, 6};\nSystem.out.println(arr.length);",
+      "option_text": "3",
+      "is_correct": "1"
+    },
+    {
+      "id": "70",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {4, 5, 6};\nSystem.out.println(arr.length);",
+      "option_text": "2",
+      "is_correct": "0"
+    },
+    {
+      "id": "71",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {4, 5, 6};\nSystem.out.println(arr.length);",
+      "option_text": "6",
+      "is_correct": "0"
+    },
+    {
+      "id": "72",
+      "question__question_text": "What will be the output of the following code?\n\nint[] arr = {4, 5, 6};\nSystem.out.println(arr.length);",
+      "option_text": "None of the above",
+      "is_correct": "0"
+    },
+    {
+      "id": "73",
+      "question__question_text": "Which statement correctly initializes a two-dimensional array in Java?",
+      "option_text": "int[][] arr = new int[3][4];",
+      "is_correct": "1"
+    },
+    {
+      "id": "74",
+      "question__question_text": "Which statement correctly initializes a two-dimensional array in Java?",
+      "option_text": "int arr[][] = new int[3][4];",
+      "is_correct": "0"
+    },
+    {
+      "id": "75",
+      "question__question_text": "Which statement correctly initializes a two-dimensional array in Java?",
+      "option_text": "int arr = new int[3][4];",
+      "is_correct": "0"
+    },
+    {
+      "id": "76",
+      "question__question_text": "Which statement correctly initializes a two-dimensional array in Java?",
+      "option_text": "None of the above",
+      "is_correct": "0"
+    },
+    {
+      "id": "77",
+      "question__question_text": "What is the result of this code snippet?\n\nint sum = 0;\nfor (int i = 1; i <= 5; i++) {\n  sum += i;\n}\nSystem.out.println(sum);",
+      "option_text": "15",
+      "is_correct": "1"
+    },
+    {
+      "id": "78",
+      "question__question_text": "What is the result of this code snippet?\n\nint sum = 0;\nfor (int i = 1; i <= 5; i++) {\n  sum += i;\n}\nSystem.out.println(sum);",
+      "option_text": "10",
+      "is_correct": "0"
+    },
+    {
+      "id": "79",
+      "question__question_text": "What is the result of this code snippet?\n\nint sum = 0;\nfor (int i = 1; i <= 5; i++) {\n  sum += i;\n}\nSystem.out.println(sum);",
+      "option_text": "20",
+      "is_correct": "0"
+    },
+    {
+      "id": "80",
+      "question__question_text": "What is the result of this code snippet?\n\nint sum = 0;\nfor (int i = 1; i <= 5; i++) {\n  sum += i;\n}\nSystem.out.println(sum);",
+      "option_text": "None of the above",
+      "is_correct": "0"
+    }
+  ]
+  

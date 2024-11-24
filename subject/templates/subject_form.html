@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Subject,Add New Subject" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Subject,Add New Subject" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Subject Name Field -->
+        <div class="form-group">
+            {{ form.name.label_tag }}
+            {{ form.name|add_class:"form-control" }}
+        </div>
+        
+        <!-- Subject Code Field (Newly Added) -->
+        <div class="form-group">
+            {{ form.code.label_tag }}
+            {{ form.code|add_class:"form-control" }}
+        </div>
+        
+        <!-- Subject Description Field -->
+        <div class="form-group">
+            {{ form.description.label_tag }}
+            {{ form.description|add_class:"form-control" }}
+        </div>
+        
+        <!-- Save and Back Buttons -->
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'subject:subject_list' %}" class="btn btn-secondary">Back to Subject List</a>
+    </form>
+</div>
+{% endblock %}

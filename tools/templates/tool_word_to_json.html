@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .custom-button {
+        border: 1px solid rgb(53, 37, 142); 
+        color: blue; 
+        padding: 5px 5px; 
+        background-color: rgb(224, 217, 217); 
+        cursor: pointer; 
+        font-size: 14px; 
+    }
+    .custom-button:hover {
+        background-color: lightblue; 
+    }
+    .drop-zone {
+        border: 2px dashed rgb(53, 37, 142);
+        border-radius: 20px;
+        padding: 60px;
+        text-align: center;
+        background-color: #f8f8f8;
+        cursor: pointer;
+    }
+    .drop-zone.dragover {
+        background-color: #667dae; 
+    }
+    .file-list {
+        margin-top: 10px;
+        list-style-type: none;
+        padding: 0;
+    }
+    .file-list li {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+    .text-right {
+        text-align: right; 
+    }
+    .title {
+        border: 2px solid rgb(125, 44, 9);
+        font-size: 20px;
+        background-color: rgb(236, 116, 90);
+    }
+    .remove-button {
+        background: none; 
+        border: none; 
+        color: rgb(32, 25, 125); 
+        font-size: 18px; 
+        cursor: pointer; 
+        margin-left: 10px;
+    }
+    .remove-button:hover {
+        color: darkred; 
+    }
+</style>
+
+<div class="card card-header title">
+    <h1 class="text-center">Convert Word Files to JSON</h1>
+</div>
+<div class="card card-body">
+    <form method="post" enctype="multipart/form-data" id="upload-form">
+        {% csrf_token %}
+        <div class="drop-zone" id="drop-zone">
+            Drag your Word (.docx) file here!
+        </div>
+        <input type="file" name="files" id="file-input" multiple style="display: none;">
+        <ul class="file-list" id="file-list"></ul>
+        <div class="text-right">
+            <button type="submit" class="custom-button">Convert</button>
+        </div>
+    </form>
+</div>
+<div class="d-flex justify-content-end" style="margin-right: 20px;">
+    <a href="{% url 'tools:view_tools' %}" class="btn btn-link">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+    let filesArray = [];
+    const validExtensions = ['.docx'];
+
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const droppedFiles = e.dataTransfer.files;
+        addFilesToArray(droppedFiles);
+    });
+    fileInput.addEventListener('change', () => {
+        addFilesToArray(fileInput.files);
+    });
+
+    function addFilesToArray(newFiles) {
+        for (let i = 0; i < newFiles.length; i++) {
+            const ext = newFiles[i].name.split('.').pop().toLowerCase();
+            if (!validExtensions.includes('.' + ext)) {
+                alert(`The file '${newFiles[i].name}' is invalid! Please upload Word files (.docx) only.`);
+                continue;
+            }
+            if (!filesArray.some(file => file.name === newFiles[i].name)) {
+                filesArray.push(newFiles[i]);
+            }
+        }
+        updateFileList();
+    }
+
+    function updateFileList() {
+        fileList.innerHTML = '';
+        filesArray.forEach((file, index) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = file.name;
+            const removeButton = document.createElement('button');
+            removeButton.textContent = '×';
+            removeButton.classList.add('remove-button');
+            removeButton.addEventListener('click', () => {
+                filesArray.splice(index, 1);
+                updateFileList();
+                updateFileInput();
+            });
+            listItem.appendChild(removeButton);
+            fileList.appendChild(listItem);
+        });
+        updateFileInput();
+    }
+
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        filesArray.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+    }
+</script>
+{% endblock %}

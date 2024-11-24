@@ -1,0 +1,20 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/bell.css' %}">
+
+<script>
+    const notificationCountUrl = "{% url 'progress_notification:unread_notification_count' %}";
+    const notificationListUrl = "{% url 'progress_notification:notification_list' %}";
+</script>
+<script src="{% static 'js/bell.js' %}"></script>
+
+<a class="nav-link notification-btn" href="javascript:void(0);">
+    <i class="fas fa-bell"></i>
+    <span class="notification-count">0</span> <!-- Initial default value -->
+
+    <!-- Notification dropdown (hidden by default) -->
+    <div class="notification-dropdown">
+        <ul class="notification-list">
+            <li>Loading notifications...</li> <!-- Initial default text -->
+        </ul>
+    </div>
+</a>

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% block title %}Upload course{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% load form_filters %}
+
+    <h1>Upload Existed Course</h1>
+
+    <div class="mt-4 ">
+        <form method="POST" enctype="multipart/form-data" >
+            {% csrf_token %}
+                <div class="form-group">
+                    CSV File:
+                    <input type="file" name="json_data" class="" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

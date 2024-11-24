@@ -1,0 +1,302 @@
+{% extends 'user_summary.html' %}
+
+{% block title %}User Progress{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Existing styles remain unchanged */
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        /* padding: 20px; */
+        background-color: #f0f0f0;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+        color: #333;
+    }
+    .tabs {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    .tab {
+        padding: 10px 20px;
+        background-color: #e0e0e0;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .tab:hover {
+        background-color: #d0d0d0;
+    }
+    .tab.active {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .card {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .badge {
+        display: inline-block;
+        padding: 3px 7px;
+        background-color: #2196F3;
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+    }
+    
+    /* New styles for progress bar */
+    .progress-container {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+        margin: 10px 0;
+        height: 25px;
+    }
+    .progress-bar-progress {
+        height: 100%;
+        background-color: #4CAF50;
+        width: 0%; /* Initial width; will be set dynamically */
+        border-radius: 5px;
+        transition: width 0.4s ease;
+    }
+
+    /* Existing "My Courses" styles */
+    .course-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+    .course-info {
+        display: flex;
+        align-items: center;
+    }
+    .course-icon {
+        width: 50px;
+        height: 50px;
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        margin-right: 15px;
+    }
+    .course-icon img {
+    max-width: 100%;  /* Giới hạn chiều rộng của ảnh không vượt quá phần tử cha */
+    height: 100%;     /* Chiều cao tự động điều chỉnh theo tỷ lệ */
+    object-fit: fill; /* Đảm bảo ảnh vừa khít với phần tử cha */
+    display: block;   /* Loại bỏ khoảng trống dưới ảnh do inline elements */
+    }
+    .course-details {
+        margin-left: 10px;
+    }
+    .course-title {
+        font-size: 18px;
+        color: #0056b3;
+    }
+    .course-title:hover {
+        text-decoration: underline;
+    }
+    .institution {
+        font-size: 14px;
+        color: #888;
+    }
+    .grade {
+        font-size: 14px;
+        color: #000;
+    }
+    .add-linkedin {
+        background-color: #0077b5;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .add-linkedin:hover {
+        background-color: #005a87;
+    }
+
+    /* New styles for pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .pagination button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        margin: 0 4px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+    .pagination button:hover {
+        background-color: #45a049;
+    }
+    .pagination button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    .pagination-info {
+        margin: 0 10px;
+    }
+    .hidden {
+        display: none;
+    }
+    .collapsible-content, .pagination {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.5s ease, opacity 0.5s ease;
+    }
+
+    .collapsible-content.show, .pagination.show {
+        max-height: 1000px; /* Adjust this value based on your content */
+        opacity: 1;
+    }
+
+    .toggle-section {
+        color: #0056b3;
+        cursor: pointer; /* Thay đổi con trỏ thành hình bàn tay khi hover */
+    }
+
+    /* Hiệu ứng gạch chân khi di chuột */
+    .toggle-section:hover {
+        text-decoration: underline;
+    }
+    
+
+</style>
+
+<body>
+    <div class="container">
+       {{block.super}}
+
+        <div id="progress" class="tab-content active">
+            <div class="card">
+                <h2>User Progress</h2>
+                <p><strong>Name:</strong> {{user.username}}</p>
+                <p><strong>Email:</strong> {{user.email}}</p>
+                <p><strong>Total Courses:</strong> {{course_count}}</p>
+                <p><strong>Completed Courses:</strong> {{completed}}</p>
+                {% if not percent_complete == 0 %}
+                <div class="progress-container">
+                    <div class="progress-bar-progress" style="width: {{percent_complete}}%"> <center>{{percent_complete}}%</center> </div> <!-- Set the width dynamically -->
+                </div>
+                {% else %}
+                <div class="progress-container">
+                    <center style="color: red;">0%</center> 
+                </div>
+                {% endif %}
+            </div>
+
+
+            <div id="myCoursesContent" class="collapsible-content show">
+                {% for course in page_obj_pro %}
+                    <div class="course-container">
+                        <div class="course-info">
+                            <div class="course-icon">
+                                <img src='https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/https://d2j5ihb19pt1hq.cloudfront.net/certificates/cert-course.png?auto=format%2Ccompress&dpr=2&h=72'>
+                            </div>
+                            <div class="course-details">
+                                <p class="course-title" style="padding-right: 10px;">{{course.course.name}}</p>
+                                {% if not course.progress_percentage == 0 %}
+                                <div class="progress-container" style="width: 90vh;">
+                                    <div class="progress-bar-progress" style="width: {{course.progress_percentage}}%"> <center>{{course.progress_percentage}}%</center> </div>
+                                </div>
+                                {% else %}
+                                <div class="progress-container" style="width: 90vh;">
+                                    <center style="color: red;"> 0% </center>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button class="add-linkedin">Add to LinkedIn</button>
+                    </div>
+                {% empty %}
+                    <p>No courses found.</p>
+                {% endfor %}
+            
+                <!-- Phần phân trang để di chuyển giữa các trang -->
+                <div class="pagination show">
+                    <span class="step-links">
+                        <!-- Nút "First" và "Previous" -->
+                        {% if page_obj_pro.has_previous %}
+                            <a href="?page=1">&laquo; First</a>
+                            <a href="?page={{ page_obj_pro.previous_page_number }}">Previous</a>
+                        {% else %}
+                            <span class="disabled">&laquo; First</span>
+                            <span class="disabled">Previous</span>
+                        {% endif %}
+                
+                        <!-- Hiển thị số trang hiện tại -->
+                        <span class="current">
+                            Page {{ page_obj_pro.number }} of {{ page_obj_pro.paginator.num_pages }}.
+                        </span>
+                
+                        <!-- Nút "Next" và "Last" -->
+                        {% if page_obj_pro.has_next %}
+                            <a href="?page={{ page_obj_pro.next_page_number }}">Next</a>
+                            <a href="?page={{ page_obj_pro.paginator.num_pages }}">Last &raquo;</a>
+                        {% else %}
+                            <span class="disabled">Next</span>
+                            <span class="disabled">Last &raquo;</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            
+        </div>
+
+
+    <script>
+        // Existing tab switching function
+        function openTab(evt, tabName) {
+            var i, tabContent, tabLinks;
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+            tabLinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+    </script>
+</body>
+</html>
+
+{% endblock %}

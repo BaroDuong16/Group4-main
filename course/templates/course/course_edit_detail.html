@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% load static %}
+
+{% block title %}Edit {{ course.course_name }}{% endblock %}
+
+{% block content %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+</head>
+<body id="edit-form">
+<div class="custom-container mx-auto p-8 bg-white rounded-lg shadow-xl">
+    <h2 class="text-2xl font-semibold text-teal-600 mb-4 main-color-text">Edit {{ course.course_name }}</h2>
+    <div class="tab-container">
+        <div class="tab">
+            <!-- Tab thật "Detail" -->
+            <button class="tablinks" onclick="openTab(event, 'Tab1')">Detail</button>
+            <!-- Tab giả dùng liên kết -->
+            <button class="tablinks" onclick="openTab(event, 'Tab2')">Sessions</button>
+            <button class="tablinks" onclick="openTab(event, 'Tab3')">Topic-Tags</button>
+            {% if sessions %}
+            <button class="tablinks" onclick="openTab(event, 'Tab4')">Course Materials</button>
+            {% endif %}
+        </div>
+    </div>
+    
+    <form method="post" class="space-y-4" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Nội dung của Tab "Detail" -->
+        <div id="Tab1" class="tabcontent">
+            <div class="form-row">
+                <div class="form-group">
+                    {{ course_form.course_name.label_tag }}
+                    {{ course_form.course_name|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    {{ course_form.course_code.label_tag }}
+                    {{ course_form.course_code|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    {{ course_form.creator.label_tag }}
+                    {{ course_form.creator|add_class:"form-control" }}
+                </div>
+                <div class="form-group">
+                    {{ course_form.instructor.label_tag }}
+                    {{ course_form.instructor|add_class:"form-control" }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    {{ course_form.description.label_tag }}
+                    {{ course_form.description|add_class:"form-control description-input" }}
+                </div>
+                <div class="form-group">
+                    <h3>Course Image</h3>
+                    {% if course.image %}
+                        <img src="{{ course.image.url }}" alt="{{ course.course_name }}" style="max-width: 200px;">
+                        <br>
+                        <input type="hidden" name="delete_image" value="on">
+                        <button type="submit" name="action" value="delete_image" class="btn btn-danger">Clear Image</button>
+                    {% else %}
+                        <p>No image uploaded yet.</p>
+                    {% endif %}
+                    <br>
+                    {{ course_form.image.label_tag }}
+                    <input type="file" name="image" class="form-control-file" id="id_image">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <h3>Prerequisite Courses</h3>
+                    <div class="mb-4">
+                        <select name="prerequisite_courses" class="w-full p-2 border border-gray-300 rounded select2" multiple>
+                            {% if prerequisites %}
+                                {% for prereq in prerequisites %}
+                                    <option value="{{ prereq.id }}" selected>{{ prereq.course_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                            {% for course in all_courses %}
+                                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <input type="hidden" name="deleted_prerequisite_ids" id="delete-prerequisite-ids">
+                </div>
+            </div>
+        </div>
+        
+        <div id="Tab2" class="tabcontent"></div>
+        
+        <!-- Nội dung của Tab3: Topic-Tags -->
+        <div id="Tab3" class="tabcontent"></div>
+        
+        <!-- Nội dung của Tab4: Course Materials -->
+        <div id="Tab4" class="tabcontent"> </div>
+        <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" style="background-color: #389bb0; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; margin-right: 10px;">
+                Save
+            </button>
+            <a href="{% url 'course:course_list' %}" style="background-color: gray; color: white; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; text-decoration: none;">
+                Return to Course List
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+    function openTab(evt, tabName) {
+        // Tắt tất cả các tab trước khi bật tab được chọn
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Xóa lớp "active" của tất cả các tab
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        if (tabName === 'Tab2') {
+            var courseId = {{ course.pk }};
+            localStorage.setItem("activeTab", "Tab2");
+            window.location.href = `/course/edit/${courseId}/sessions/`;
+        } else if (tabName === 'Tab3') {
+            var courseId = {{ course.pk }};
+            localStorage.setItem("activeTab", "Tab3");
+            window.location.href = `/course/edit/${courseId}/topic-tags/`;
+
+        } else if (tabName === 'Tab4') {
+            var courseId = {{ course.pk }};
+            var firstSessionId = {{ first_session_id|default:"null" }}; // ID của session đầu tiên, nếu có
+            localStorage.setItem("activeTab", "Tab4");
+            window.location.href = `/course/${courseId}/content/edit/${firstSessionId}/`;
+        } else {
+            // Hiển thị tab được chọn và gán lớp "active" cho nút nhấn
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+
+            // Lưu lại tab đang hoạt động trong localStorage để giữ trạng thái khi tải lại trang
+            localStorage.setItem("activeTab", tabName);
+        }
+    }
+
+    // Tự động mở tab đã lưu trong localStorage khi tải lại trang, mặc định là Tab1
+    document.addEventListener("DOMContentLoaded", function() {
+        let savedTab = localStorage.getItem("activeTab") || "Tab1";
+        let defaultTabButton = document.querySelector(`.tablinks[onclick="openTab(event, '${savedTab}')"]`);
+
+        if (defaultTabButton) {
+            defaultTabButton.click();
+        }
+    });
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select prerequisite courses",
+            allowClear: true
+        }).on('select2:unselect', function (e) {
+            // Handle the unselection event to mark the prerequisite for deletion
+            const courseId = e.params.data.id;
+            $('#delete-prerequisite-ids').val(function(i, val) {
+                return val + (val ? ',' : '') + courseId;
+            });
+        });
+    });
+</script>
+{% endblock %}

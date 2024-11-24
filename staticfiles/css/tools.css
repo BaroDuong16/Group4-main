@@ -1,0 +1,57 @@
+.custom-button {
+    border: 1px solid rgb(53, 37, 142); /* Tạo viền màu đen bao quanh */
+    color: blue; /* Chữ có màu xanh dương */
+    padding: 5px 5px; /* Tạo khoảng cách giữa chữ và viền */
+    background-color: rgb(224, 217, 217); /* Nền trắng */
+    cursor: pointer; /* Đổi con trỏ chuột thành dạng pointer khi hover */
+    font-size: 14px; /* Kích thước chữ */
+}
+
+.custom-button:hover {
+    background-color: lightblue; /* Màu nền thay đổi khi hover */
+}
+
+.drop-zone {
+    border: 2px dashed rgb(53, 37, 142);
+    border-radius: 20px;
+    padding: 60px;
+    text-align: center;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.drop-zone.dragover {
+    background-color: #667dae; /* Thay đổi màu nền khi kéo tệp qua */
+}
+
+.file-list {
+    margin-top: 10px;
+    list-style-type: none;
+    padding: 0;
+}
+
+.file-list li {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.text-right {
+    text-align: right; /* Căn chỉnh sang bên phải */
+}
+.title {
+    border: 2px solid rgb(125, 44, 9);
+    font-size: 20px;
+    background-color: rgb(236, 116, 90);
+}
+.remove-button {
+background: none; /* Không có nền */
+border: none; /* Không có viền */
+color: rgb(32, 25, 125); /* Màu chữ */
+font-size: 18px; /* Kích thước chữ */
+cursor: pointer; /* Đổi con trỏ chuột thành dạng pointer khi hover */
+margin-left: 10px; /* Khoảng cách giữa tên tệp và nút xóa */
+}
+
+.remove-button:hover {
+color: darkred; /* Thay đổi màu chữ khi hover */
+}

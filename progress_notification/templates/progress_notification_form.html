@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Notification,Add New Notification" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Notification,Add New Notification" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.user.label_tag }}
+            {{ form.user|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.course.label_tag }}
+            {{ form.course|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.notification_message.label_tag }}
+            {{ form.notification_message|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'progress_notification:progress_notification_list' %}" class="btn btn-secondary">Back to Progress Notification List</a>
+    </form>
+</div>
+{% endblock %}

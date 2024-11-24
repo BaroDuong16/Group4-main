@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Delete Thread{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <link rel="stylesheet" href="{% static 'css/thread_confirm_delete.css' %}">
+    <h2 class="text-danger mb-4">Are you sure you want to delete "{{ thread.thread_title }}"?</h2>
+    
+    <form method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+    <a href="{% url 'thread:thread_list' %}" class="btn btn-secondary ml-3">Cancel</a>
+</div>
+{% endblock %}

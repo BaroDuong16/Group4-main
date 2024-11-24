@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Reading Material{% endblock %}
+
+{% block content %}
+<div class="content-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <h1 style=" margin: 0; margin-bottom: 20px;">EDIT READING MATERIAL: {{ reading_material.title }}</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 15px; font-size: 18px; font-weight: bold;">
+            <label for="{{ form.title.id_for_label }}">Title:</label>
+            <div style="margin-top: 5px;">
+                {{ form.title }}  <!-- Render the title field -->
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px; font-size: 18px; font-weight: bold;">
+            <label for="{{ form.content.id_for_label }}">Content:</label>
+            <div style="margin-top: 5px;">
+                {{ form.content }}  <!-- Render the content field -->
+            </div>
+        </div>
+
+        <!-- Material Type Dropdown -->
+        <div style="margin-bottom: 15px; font-size: 18px; font-weight: bold;">
+            <label for="material_type">Material Type:</label>
+            <select name="material_type" class="form-control" style="margin-top: 5px;">
+                {% for key, value in material_types %}
+                    <option value="{{ key }}" {% if key == current_material_type %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <!-- Go back :)) -->
+        <a href="{% url 'course:course_content_edit' course.pk sessions.0.id %}" class="btn btn-secondary" style="margin-left: 10px;">Back</a>
+    </form>
+
+    <style>
+        input[type="text"], textarea {
+            width: 100%;  /* Make the input fields take the full width */
+            max-width: 400px;  /* Set a max width */
+            box-sizing: border-box;  /* Include padding in the total width */
+            padding: 5px;  /* Add some padding for better appearance */
+        }
+
+        textarea {
+            height: 300px;  /* Set initial height for the textarea */
+        }
+    </style>
+
+    <script src="https://cdn.ckeditor.com/4.16.0/full/ckeditor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            CKEDITOR.replace('id_content', {
+                height: window.innerHeight - 500
+            });
+        });
+    </script>
+</div>
+{% endblock %}

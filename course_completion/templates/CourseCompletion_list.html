@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Course Completion List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Analytic List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Course</th>
+                <th>Completion Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ course.user.user_name }}</td>
+                <td>{{ course.course.course_name }}</td>
+                <td>{{ course.completion_date }}</td>            
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}  
+{% load static %}  <!-- Load static files -->
+{% block title %}{{ assessment.assessment_title }}{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="assessment-header text-center">
+        <h1 class="display-4 mb-2">{{ assessment.assessment_title }}</h1>
+        <p class="text-muted lead">{{ assessment.assessment_description }}</p>
+    </div>
+
+    <form method="POST" class="assessment-form mt-5">
+    {% comment %} <form method="POST" action="{% url 'assessment:take_assessment' assessment.id %}" class="assessment-form mt-5"> {% endcomment %}
+
+        {% csrf_token %}
+        <input type="hidden" name="email" value="{{ request.GET.email }}">
+        
+        <!-- Countdown Timer -->
+        {% comment %} <div class="alert alert-warning text-center fixed-timer shadow-sm" id="timer">
+            <span class="font-weight-bold">Time Remaining: </span><span id="time">00:00</span>
+        </div> {% endcomment %}
+        <div id="time_start" time_start= "{{attempt.attempt_date|date:'Y-m-d H:i:s'}}"></div>
+        <div id="time_limit" value="{{ assessment.time_limit }}">Time Limit: <span class='time'>{{ assessment.time_limit }}</span></div>
+        <div id="timer">Time Left: 00:00:00</div>
+        <!-- Display Questions -->
+        <div class="mb-4">
+            <h3 class="text-primary mb-4">Questions</h3>
+            <div class="border rounded p-3" style="max-height: 500px; overflow-y: auto; background-color: #f8f9fa;">
+                {% for question in questions %}
+                <div class="card mb-4 shadow-sm question-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <h5 class="mr-2 question-number"><strong>{{ forloop.counter }}. </strong></h5>
+                            <p class="question-text">{{ question.question_text|linebreaksbr }}</p>
+                        </div>
+
+                        {% if question.question_type == "TEXT" %}
+                            <textarea name="text_response_{{ question.id }}" rows="4" class="form-control mt-3" required placeholder="Enter your answer..."></textarea>
+                        {% else %}
+                            <ul class="list-group mt-3">
+                                {% for option in question.answer_options.all %}
+                                <li class="list-group-item option-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ option.id }}" id="option_{{ option.id }}">
+                                        <label class="form-check-label" for="option_{{ option.id }}">
+                                            {{ option.option_text }}
+                                        </label>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Display Exercises -->
+        <div class="mb-4">
+            <h3 class="text-success mb-4">Exercises</h3>
+            <div class="border rounded p-3" style="max-height: 500px; overflow-y: auto; background-color: #e9f7ef;">
+                {% for exercise in exercises %}
+                <div class="card mb-4 shadow-sm exercise-card">
+                    <div class="card-body">
+                        <h6 class="exercise-title">Exercise {{ forloop.counter }}.
+                            {% if is_preview %}
+                                <a href="{% url 'exercises:exercise_detail' exercise.id 0 %}" target="_blank">{{ exercise.title }}</a>
+                            {% else %}
+                                  
+                            
+                                <a href="{% url 'exercises:exercise_detail' exercise.id assessment.id %}?email={{ email }}" target="_blank">{{ exercise.title }}</a>
+                            {% endif %}
+                        </h6>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="text-center">
+            {% if is_preview %}
+            <p>This is a preview of the assessment. You will not be able to submit your answers.</p>
+            {% else %}
+            <button id="submit_btn" type="submit" class="btn btn-success submit-btn">Submit Assessment</button>
+            {% endif %}
+            <a href="{% url 'assessment:assessment_list' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+  
+    </form>
+</div>
+
+<script src="{% static 'js/timer.js' %}"></script>
+<script src="{% static 'js/time_converter.js' %}"></script>
+
+{% endblock %}
+

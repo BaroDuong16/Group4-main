@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Create a New Backup</h2>
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Create Backup</button>
+        <a href="{% url 'backup:list_backups' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

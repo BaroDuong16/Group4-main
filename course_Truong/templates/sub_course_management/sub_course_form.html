@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% block title %}{% if form.instance.pk %}Edit Course Content{% else %}Add New Course Content{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% load form_filters %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.title.label_tag }}
+            {{ form.title|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        
+        <a href="{% url 'course_Truong:sub_course_list' course_pk %}" class="btn btn-secondary">Back</a>
+
+    </form>
+</div>
+{% endblock %}

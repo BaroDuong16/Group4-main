@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/excel_to_json_styles.css' %}">
+<div class="mt-1">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'tools:excel_to_json_view' %}" aria-controls="excel" aria-selected="true">Excel to JSON</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'tools:txt_to_json_view' %}" aria-controls="txt" aria-selected="false">TXT to JSON</a>
+        </li>
+    </ul>
+    <div class="mt-1 text-center">
+        <h2 class="mb-4 text-center">Convert Excel to JSON</h2>
+        <form id="excel-upload-form" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="file-upload" id="file-upload-area">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag and drop Excel files here</p>
+                <input type="file" name="files" multiple accept=".xlsx" style="display: none;" id="file-input">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('file-input').click();">Browse files</button>
+            </div>
+            <div id="uploaded-files" class="mt-3"></div>
+            <p id="file-count">You have uploaded 0 files.</p>
+            <button type="submit" class="btn btn-success convert-btn">Convert to JSON</button>
+        </form>
+    </div>
+    
+    <div class="mt-1">
+        <h3>JSON Preview:</h3>
+        <div id="json-preview" class="border p-3" style="max-height: 400px; overflow-y: auto;">
+            <!-- Your JSON content will go here -->
+          </div>          
+    </div>
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadedFilesContainer = document.getElementById('uploaded-files');
+        const fileCountText = document.getElementById('file-count');
+        const jsonPreview = document.getElementById('json-preview');
+
+        // Ngăn chặn hành động mặc định khi kéo file vào khu vực upload
+        const fileUploadArea = document.getElementById('file-upload-area');
+        fileUploadArea.addEventListener('dragover', (event) => {
+            event.preventDefault(); // Ngăn chặn hành động mặc định
+            event.dataTransfer.dropEffect = 'copy'; // Thay đổi biểu tượng chuột khi kéo file
+        });
+
+        fileUploadArea.addEventListener('drop', (event) => {
+            event.preventDefault(); // Ngăn chặn hành động mặc định
+
+            const files = event.dataTransfer.files; // Lấy các file đã kéo
+            fileInput.files = files; // Cập nhật file input
+
+            uploadedFilesContainer.innerHTML = ''; // Xóa nội dung trước đó
+            jsonPreview.textContent = ''; // Xóa JSON preview trước đó
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'uploaded-file';
+                fileDiv.innerHTML = `
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-file-alt"></i>
+                        <p class="mb-0 ml-2">${file.name}</p>
+                        <span class="ml-2">${(file.size / 1024).toFixed(2)} KB</span>
+                        <i class="fas fa-times remove-file ml-2" onclick="removeFile(this)"></i>
+                    </div>
+                `;
+                uploadedFilesContainer.appendChild(fileDiv);
+            }
+            fileCountText.innerText = `You have uploaded ${files.length} file${files.length > 1 ? 's' : ''}.`;
+
+            // Upload file cho JSON preview
+            updateJsonPreview();
+        });
+
+        // Xử lý khi người dùng chọn file từ input
+        fileInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+            uploadedFilesContainer.innerHTML = ''; // Xóa nội dung trước đó
+            jsonPreview.textContent = ''; // Xóa JSON preview trước đó
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'uploaded-file';
+                fileDiv.innerHTML = `
+                    <i class="fas fa-file-alt"></i>
+                    <p>${file.name}</p>
+                    <span>${(file.size / 1024).toFixed(2)} KB</span>
+                    <i class="fas fa-times remove-file" onclick="removeFile(this)"></i>
+                `;
+                uploadedFilesContainer.appendChild(fileDiv);
+            }
+            fileCountText.innerText = `You have uploaded ${files.length} file${files.length > 1 ? 's' : ''}.`;
+
+            // Upload file cho JSON preview
+            updateJsonPreview();
+        });
+
+        // Ngăn không cho form gửi nếu không có file nào
+        document.getElementById('excel-upload-form').addEventListener('submit', (event) => {
+            if (fileInput.files.length === 0) {
+                event.preventDefault(); // Ngăn chặn việc gửi form
+                alert('Please upload at least one Excel file to convert.'); // Hiển thị thông báo lỗi
+            }
+        });
+
+        function removeFile(element) {
+            const fileDiv = element.parentElement;
+            const index = Array.from(uploadedFilesContainer.children).indexOf(fileDiv);
+            const dt = new DataTransfer(); // Tạo đối tượng DataTransfer để quản lý danh sách file
+
+            for (let i = 0; i < fileInput.files.length; i++) {
+                if (i !== index) {
+                    dt.items.add(fileInput.files[i]); // Thêm các file còn lại vào đối tượng DataTransfer
+                }
+            }
+
+            fileInput.files = dt.files; // Cập nhật danh sách file trong input
+            uploadedFilesContainer.removeChild(fileDiv); // Xóa file khỏi hiển thị
+            fileCountText.innerText = `You have uploaded ${fileInput.files.length} file${fileInput.files.length > 1 ? 's' : ''}.`;
+            
+            // Xóa preview JSON khi xóa file
+            jsonPreview.textContent = ''; 
+        }
+
+        function updateJsonPreview() {
+            const formData = new FormData(document.getElementById('excel-upload-form'));
+            fetch("{% url 'tools:excel_to_json_view' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Convert JSON to a string with pretty formatting
+                let jsonString = JSON.stringify(data.json_preview, null, 2);
+                // Replace newline characters with <br> tags and spaces with &nbsp; for indentation
+                jsonString = jsonString.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;');
+                // Display formatted JSON as HTML
+                jsonPreview.innerHTML = jsonString;
+                })
+                .catch(error => {
+                    const jsonPreview = document.getElementById('json-preview'); // Đảm bảo bạn có phần tử này trong HTML
+                    jsonPreview.textContent = `Error: ${error}`;
+                });
+        }
+        
+        {% comment %} function updateJsonPreview() {
+            const formData = new FormData(document.getElementById('excel-upload-form'));
+            fetch("{% url 'tools:excel_to_json_view' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.json_preview) {
+                    jsonPreview.innerHTML = formatJson(data.json_preview); // Định dạng JSON cho preview
+                } else if (data.error) {
+                    jsonPreview.textContent = `Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                jsonPreview.textContent = `Error: ${error}`;
+            });
+        }
+
+        function formatJson(json) {
+            return JSON.stringify(json, (key, value) => {
+                if (typeof value === 'string') {
+                    return `<span class="json-string">"${value}"</span>`;
+                } else if (typeof value === 'number') {
+                    return `<span class="json-number">${value}</span>`;
+                } else if (typeof value === 'boolean') {
+                    return `<span class="json-boolean">${value}</span>`;
+                } else if (value === null) {
+                    return `<span class="json-null">null</span>`;
+                }
+                return value;
+            }, 2).replace(/\"([^(\")]+)\":/g, '<span class="json-key">"$1":</span>'); // Định dạng các key
+        } {% endcomment %}
+    </script>
+</div>
+{% endblock %}

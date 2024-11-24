@@ -1,0 +1,143 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<!-- CodeMirror CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<!-- CodeMirror JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<!-- CodeMirror Theme (Monokai) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/monokai.min.css">
+<!-- CodeMirror Language Modes -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <h2>{{ exercise.title }}</h2>
+        {{ exercise.description | safe }}
+    </div>
+    <div class="card-body">
+        <form id="code-form" method="POST" action="{% url 'exercises:submit_code' exercise.id assessment_id%}">
+            {% csrf_token %}
+            <label for="language-select">Language:</label>
+            <select id="language-select" disabled>
+                <option value="{{ exercise.language }}">{{ exercise.language|capfirst }}</option>
+            </select>
+            {{ form.code.label }}
+            <textarea id="code-editor" name="code" class="form-control"
+                rows="5">{{ form.code.value|default_if_none:"" }}</textarea>
+            <button type="button" id="precheck-button" class="btn btn-outline-warning mt-3">Pre-check</button>
+            <button type="button" id="clear-button" class="btn btn-outline-danger mt-3">Clear</button>
+            {% comment %} {% if submissed is False %} {% endcomment %}
+                <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#confirmModal">Submit Code</button>
+            {% comment %} {% else %}
+                <!-- Disabled Submit Button with Tooltip wrapped in a span -->
+                <span tabindex="0" data-toggle="tooltip" data-placement="top" data-title="Submission is disabled because you have already submitted once!!!">
+                    <button type="button" id="submit-code-button" class="btn btn-primary mt-3" disabled>
+                        Disabled Submit
+                    </button>
+                </span>
+                <button type="button" class="btn mt-3">{{score}} POINTS</button>
+            {% endif %} {% endcomment %}
+        </form>
+        <div id="output" class="mt-3"></div> <!-- Phần hiển thị kết quả -->
+    </div>
+</div>
+
+<!-- Modal confirm  -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Cofirm Submit Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to submit the code?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-submit">Submit Code</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Initialize CodeMirror -->
+<script>
+    var editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+        mode: 'python',  // Mặc định là Python
+        lineNumbers: true,
+        theme: 'default',
+        tabSize: 4,
+        indentUnit: 4,
+        matchBrackets: true,
+        autoCloseBrackets: true
+    });
+
+    document.getElementById('language-select').addEventListener('change', function () {
+        var selectedLanguage = this.value;
+        editor.setOption("mode", selectedLanguage);
+    });
+
+    document.querySelector('form').addEventListener('submit', function() {
+        editor.save();
+    });
+
+    // Đảm bảo textarea sẽ nhận giá trị từ CodeMirror khi submit form
+    document.querySelector('form').addEventListener('submit', function () {
+        editor.save();
+    });
+
+    
+    // Xử lý sự kiện nhấn nút Pre-check
+    document.getElementById('precheck-button').addEventListener('click', function () {
+        const code = editor.getValue(); // Get the code from CodeMirror
+        const language = document.getElementById('language-select').value; // Get the selected language
+
+        fetch("{% url 'exercises:precheck_code' exercise.id %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ code: code, language: language })
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Update the result section with the passed test cases
+                document.getElementById('output').innerHTML =
+                `<div class="alert alert-light" role="alert">
+                    ${data.combined_message}
+                </div>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('output').innerHTML = '<pre>Error: ' + 'Error during Pre-check' + '</pre>';
+            });
+    });
+
+    // Xử lý sự kiện nhấn nút Clear
+    document.getElementById('clear-button').addEventListener('click', function () {
+        // Find the element where the output is displayed
+        var outputElement = document.getElementById('output');
+
+        // Clear the contents of the output
+        outputElement.innerHTML = '';
+
+        // Optionally, display a message indicating that the output has been cleared
+        console.log("Output cleared.");
+    });
+
+    document.getElementById('confirm-submit').addEventListener('click', function() {
+        editor.save(); // Lưu giá trị từ CodeMirror vào textarea
+        document.getElementById('code-form').submit(); // Gửi form
+    });
+
+    $(document).ready(function(){
+        // Initialize all tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+{% endblock %}

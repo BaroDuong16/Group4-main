@@ -1,0 +1,161 @@
+/* Toàn bộ trang */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f7f9fc;
+}
+
+.quiz-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #333;
+}
+
+.quiz-header p {
+    color: #777;
+}
+
+/* Timer cố định góc trên */
+.fixed-timer {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    width: auto;
+    padding: 10px;
+    background-color: #ff6b6b;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 1.2rem;
+}
+
+/* Card chứa câu hỏi */
+.question-card {
+    border-radius: 15px;
+    border: none;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Số thứ tự câu hỏi */
+.question-number {
+    color: #6c757d;
+}
+
+/* Nội dung câu hỏi */
+.question-text {
+    font-size: 1.1rem;
+    color: #333;
+    margin-left: 10px;
+}
+
+/* Phong cách cho các lựa chọn */
+.option-item {
+    border: none;
+    padding: 12px 18px;
+    background-color: #f7f9fc;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.option-item:hover {
+    background-color: #e2e6ea;
+}
+
+.form-check-input {
+    margin-right: 10px;
+}
+
+/* Giao diện nút submit */
+.submit-btn {
+    background-color: #00c851;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    color: #fff;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #007e33;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Form nhập liệu */
+.form-control {
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #ced4da;
+    background-color: #f7f9fc;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.display-4 {
+    font-family: 'Poppins', sans-serif;
+    color: #2c3e50;
+}
+
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: #7f8c8d;
+}
+
+.alert-info {
+    background-color: #e8f4fa;
+    border-color: #b8e2f3;
+    font-size: 1.5rem;
+    border-radius: 15px;
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.btn-link {
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    border-color: #2980b9;
+    border-radius: 30px;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #1f6392;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+}
+
+.accordion .card-header {
+    border: none;
+    padding: 15px;
+}
+
+.list-group-item {
+    font-size: 1.1rem;
+}
+
+.list-group-item-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.list-group-item-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge-success {
+    background-color: #28a745;
+}

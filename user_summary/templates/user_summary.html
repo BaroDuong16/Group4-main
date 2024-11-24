@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+
+{% block title %}Certificate{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tab:hover {
+            background-color: #d0d0d0;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .progress-bar {
+            background-color: #4CAF50;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress {
+            background-color: #4CAF50;
+            height: 100%;
+            width: 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 7px;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            position: relative;
+            padding-bottom: 40px; /* Adds space for the paginator */
+        }
+
+        .pagination {
+            position: relative;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .pagination .step-links {
+            display: inline-block;
+        }
+        .pagination .step-links a {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #e0e0e0;
+            color: #333;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .pagination .step-links a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .pagination .current {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+        }
+       
+    
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <a href="{% url 'user_progress:user_progress_summary' %}"> 
+                <button class="tab" onclick="setTab('progress')">User Progress</button>
+            </a>
+            <a href="{% url 'performance_analytics:performance_analytics_summary' %}">
+                <button class="tab" onclick="setTab('performance')">Performance</button>
+            </a>
+            <a href="{% url 'ai_insights:ai_insights_summary' %}">
+                <button class="tab" onclick="setTab('insights')">AI Insights</button>
+            </a>
+            <a href="{% url 'certificate:certificate_summary' %}">
+                <button class="tab" onclick="setTab('certificates')">Certificates</button>
+            </a>
+        </div>
+    
+        <div id="progress" class="tab-content"></div>
+        <div id="performance" class="tab-content"></div>
+        <div id="insights" class="tab-content"></div>
+        <div id="certificates" class="tab-content"></div>
+    </div>
+    
+    <script>
+        // Function to store the active tab in localStorage
+        function setTab(tabName) {
+            localStorage.setItem('activeTab', tabName);
+            loadActiveTab();
+        }
+    
+        // Function to load the active tab
+        function loadActiveTab() {
+            var activeTab = localStorage.getItem('activeTab') || 'progress'; // Default to 'progress'
+    
+            document.querySelectorAll('.tab').forEach(button => {
+                if (button.getAttribute('onclick').includes(activeTab)) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+    
+            document.querySelectorAll('.tab-content').forEach(content => {
+                if (content.id === activeTab) {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
+            });
+        }
+    
+        // Reset activeTab on page unload (or close)
+        window.addEventListener('beforeunload', function () {
+            localStorage.removeItem('activeTab'); // Reset to default when leaving the page
+        });
+    
+        document.addEventListener('DOMContentLoaded', loadActiveTab);
+    </script>
+    
+    
+</body>
+{% endblock %}

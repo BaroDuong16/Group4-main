@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Course List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Course List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Course Name</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Created At</th>
+                <th>Modified At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td>{{ course.course_name }}</td>
+                <td>{{ course.description }}</td>
+                <td>
+                    <img src="{{ course.image.url }}" style="max-width: 18rem">
+                </td>
+                <td>{{ course.created_at|date:"Y-m-d" }}</td>
+                <td>{{ course.modified_at|date:"Y-m-d" }}</td>
+                <td>
+                   
+                          <a href="{% url 'course_Truong:course_view' course.pk %}" class="dropdown-item">Detail</a>
+                          <a href="{% url 'course_Truong:course_delete' course.pk %}" class="dropdown-item">Delete</a>
+                        
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'course_Truong:course_add' %}" class="btn btn-primary">Add New Course</a>
+    <a href="{% url 'course_Truong:upload_existed_course' %}" class="btn btn-primary">Upload Existed Course</a>
+</div>
+{% endblock %}

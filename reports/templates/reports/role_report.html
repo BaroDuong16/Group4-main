@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="mt-4">
+    <!-- Nút Back -->
+    <a href="{% url 'reports:report_dashboard' %}" class="btn btn-secondary mb-3">Back to Reports</a>
+</div>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_overview_report' %}">User Overview </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:student_id_report' %}">Student ID</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:role_report' %}">Role</a>
+    </li>   
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_statistics_report' %}">User Statistics</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:login_frequency_report' %}">Login Frequency</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_duration_login' %}">User Duration Login</a>
+    </li>
+</ul>
+
+<div class="container-fluid mt-4">  
+    <h1 class="text-center mb-4">Number of users by role</h1>
+
+    <!-- Canvas for Bar Chart -->
+    <canvas id="roleBarChart" style="width: 100%; height: 400px;"></canvas>  <!-- Đặt chiều rộng và chiều cao cho canvas -->
+
+    <div class="table-responsive mt-4">  <!-- Thêm div table-responsive để tự động cuộn trên thiết bị nhỏ -->
+        <table class="table table-striped table-sm">  <!-- Sử dụng table-sm để làm cho bảng nhỏ lại -->
+            <thead>
+                <tr>
+                    <th class="small">Role</th>  <!-- Thêm lớp small để làm tiêu đề nhỏ hơn -->
+                    <th class="small">Number of Users</th>  <!-- Thêm lớp small để làm tiêu đề nhỏ hơn -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for role_count in role_counts %}
+                    <tr>
+                        <td>{{ role_count.role__role_name }}</td>
+                        <td>{{ role_count.user_count }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2">No data available</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Lấy dữ liệu cho biểu đồ
+    const labels = [{% for role_count in role_counts %}"{{ role_count.role__role_name }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const data = [{% for role_count in role_counts %}{{ role_count.user_count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+    // Tạo biểu đồ cột
+    const ctx = document.getElementById('roleBarChart').getContext('2d');
+    const roleBarChart = new Chart(ctx, {
+        type: 'bar',  // Thay đổi kiểu biểu đồ thành 'bar'
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Users',
+                data: data,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Màu nền cho cột
+                borderColor: 'rgba(75, 192, 192, 1)', // Màu viền cho cột
+                borderWidth: 1 // Độ dày viền
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Users'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Roles'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'User Count by Role'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

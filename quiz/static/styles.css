@@ -1,0 +1,213 @@
+/* Định kiểu cho các nút */
+.btn {
+    border-radius: 5px; /* Bo tròn các góc nút */
+    padding: 10px 15px; /* Thêm khoảng cách cho nút */
+    font-size: 0.9em;   /*Kích thước chữ*/
+    font-weight: bold;  /* Đậm chữ trong nút */
+}
+
+/* Màu sắc nút */
+.btn-blue {
+    background-color: #86c6fb; /* Màu xanh dương nhạt */
+    color: black; /* Màu chữ trắng */
+}
+
+.btn-blue-green {
+    background-color: #66cccc; /* Màu xanh lam nhạt hơn */
+    color: black; /* Màu chữ trắng */
+}
+
+.btn-green {
+    background-color: #85e0a7; /* Màu xanh lá cây nhạt */
+    color: black; /* Màu chữ trắng */
+}
+
+.btn-yellow-green {
+    background-color: #c2e1a0; /* Màu xanh lá vàng nhạt */
+    color: black; /* Màu chữ đen */
+}
+
+.btn-yellow {
+    background-color: #ffe29b; /* Màu vàng nhạt */
+    color: black; /* Màu chữ đen */
+}
+
+.btn-yellow-orange {
+    background-color: #ffcc66; /* Màu vàng cam nhạt */
+    color: black; /* Màu chữ đen */
+}
+
+.btn-orange {
+    background-color: #ffb74d; /* Màu cam nhạt */
+    color: black; /* Màu chữ trắng */
+}
+
+.btn-red-orange {
+    background-color: #ff8a65; /* Màu cam đỏ nhạt */
+    color: black; /* Màu chữ trắng */
+}
+
+.btn-red {
+    background-color: #f88; /* Màu đỏ nhạt */
+    color: black; /* Màu chữ trắng */
+}
+
+/* Định kiểu cho các thẻ h1 */
+h1 {
+    color: #333; /* Màu chữ xám đậm */
+    font-size: 2rem; /* Kích thước chữ lớn */
+    text-align: center; /* Canh giữa chữ */
+}
+
+/* Định kiểu cho các thẻ card */
+.card {
+    border: 1px solid #ddd; /* Đường viền xám */
+    border-radius: 8px; /* Bo tròn góc cho card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng cho card */
+}
+
+/* Định kiểu cho phần tử chứa quiz-card */
+.quiz-card {
+    margin-bottom: 20px; /* Thêm khoảng cách phía dưới */
+}
+
+
+
+/*định kiểu cho phần mô tả nhỏ*/
+.small-description {
+    background-color: #f0f8ff; /* Màu nền nhạt */
+    border: 1px solid #d0e6ff; /* Đường viền nhẹ */
+    padding: 5px; /* Khoảng cách bên trong */
+    border-radius: 5px; /* Bo góc */
+    font-size: 0.4em; /* Kích thước chữ nhỏ hơn */
+    margin-left: 10px; /* Khoảng cách bên trái */
+    margin-bottom: 50px;
+}
+
+/* Định kiểu cho phần mô tả */
+.description {
+    background-color: transparent; /* Bỏ màu nền để không gây rối mắt */
+    padding: 0; /* Bỏ khoảng cách bên trong */
+    font-size: 0.8em; /* kích thước chữ */
+    margin-left: 0; /* Bỏ khoảng cách bên trái để tạo sự liên kết */
+    margin-top: 5px; /* Khoảng cách phía trên */
+    color: #333; /* Màu chữ tối hơn để dễ đọc */
+    font-weight: bold; /* In đậm để tạo sự chú ý */
+}
+
+
+/* Định kiểu cho tiêu đề */
+.card-title {
+    font-size: 1.8em; /* Kích thước chữ lớn hơn */
+    color: #333; /* Màu chữ tối hơn */
+    margin: 5px; /* Bỏ khoảng cách mặc định */
+}
+
+
+
+.take-quiz-button {
+    background-color: #66b3ff; /* Màu xanh dương nhạt */
+    color: white; /* Màu chữ trắng */
+    font-size: 1.0em; /* Kích thước chữ */
+    border: none; /* Bỏ đường viền */
+    border-radius: 8px; /* Bo góc cho nút */
+    padding: 10px 20px; /* Khoảng cách bên trong nút */
+    cursor: pointer; /* Đổi con trỏ khi di chuột */
+    animation: blink 1s infinite; /* Thêm hiệu ứng nhấp nháy */
+    text-decoration: none; /* Bỏ gạch chân nếu cần thiết */
+    display: inline-block; /* Để có thể áp dụng padding */
+    transition: background-color 0.3s; /* Hiệu ứng chuyển màu nền khi hover */
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1; /* Đầy đủ độ mờ */
+    }
+    50% {
+        opacity: 0; /* Biến mất hoàn toàn */
+    }
+}
+
+/* Hiệu ứng hover để đổi màu nền */
+.take-quiz-button:hover {
+    background-color: #007bff; /* Đổi sang màu xanh đậm hơn khi di chuột */
+}
+
+
+.dropdown-menu {
+    position: absolute;
+    will-change: transform;
+}
+
+
+.card-text {
+    margin-bottom: 0.5rem; /* Điều chỉnh khoảng cách giữa các dòng */
+    font-size: 15px;
+}
+
+.card-body {
+    padding: 10px 10px 20px 25px; /* (trên, phải, dưới, trái) */
+}
+
+
+
+.dropdown-item {
+    display: flex; /* Để căn chỉnh biểu tượng và chữ */
+    align-items: center; /* Căn giữa nội dung theo chiều dọc */
+    padding: 5px 10px; /* Khoảng cách bên trong */
+    border: 2px solid transparent; /* Đường viền mặc định */
+    border-radius: 5px; /* Bo góc cho khung */
+    transition: background-color 0.3s, border-color 0.3s; /* Hiệu ứng chuyển màu nền và đường viền */
+    font-size: 0.85em; /* Kích thước chữ nhỏ hơn */
+}
+
+/* Khung màu cho hover */
+.dropdown-item:hover {
+    border-color: #66b3ff; /* Màu viền khi hover */
+    background-color: rgba(102, 179, 255, 0.1); /* Màu nền nhạt khi hover */
+}
+
+.dropdown-item i {
+    margin-right: 5px; /* Khoảng cách giữa biểu tượng và chữ */
+}
+
+
+.card-title-description {
+    display: inline-block; /* Điều chỉnh chiều rộng của ô title */
+    font-size: 24px; /* Kích thước chữ tiêu đề */
+    text-align: center; /* Căn giữa nội dung bên trong */
+}
+
+.small-description-question {
+    background-color: transparent; /* Bỏ màu nền để không gây rối mắt */
+    padding: 0; /* Bỏ khoảng cách bên trong */
+    font-size: 1.0em; /* kích thước chữ */
+    margin-left: 0; /* Bỏ khoảng cách bên trái để tạo sự liên kết */
+    margin-top: 5px; /* Khoảng cách phía trên */
+    color: #333; /* Màu chữ tối hơn để dễ đọc */
+    font-weight: bold; /* In đậm để tạo sự chú ý */
+}
+
+
+
+/* Định kiểu cho phần mô tả */
+.description-question {
+    background-color: transparent; /* Bỏ màu nền để không gây rối mắt */
+    padding: 0; /* Bỏ khoảng cách bên trong */
+    font-size: 2.5em; /* kích thước chữ */
+    margin-left: 0; /* Bỏ khoảng cách bên trái để tạo sự liên kết */
+    margin-top: 5px; /* Khoảng cách phía trên */
+    color: #333; /* Màu chữ tối hơn để dễ đọc */
+    font-weight: bold; /* In đậm để tạo sự chú ý */
+}
+
+
+.custom-search-btn {
+    padding: 5px 10px; /* Điều chỉnh padding cho nút */
+    font-size: 0.875rem; /* Điều chỉnh kích thước font */
+}
+
+.small-heading {
+    font-size: 0.5em; /* Thay đổi kích thước chữ */
+    font-weight: bold; /* Nếu bạn muốn giữ độ đậm */
+}

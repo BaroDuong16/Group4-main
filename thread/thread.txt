@@ -1,0 +1,7 @@
+INSERT INTO module_group_modulegroup (id, group_name) VALUES
+(5, 'Forum');
+INSERT INTO module_group_module (id, module_name, module_url, icon, module_group_id) VALUES
+(13, 'Thread', 'thread:thread_list', 'fas fa-envelope', 5);
+
+#note: cái số nếu bị lỗi duplicate thì tăng số lên nào dc thì oke
+tại đôi khi add mấy cái khác vô số đó trước rồi.

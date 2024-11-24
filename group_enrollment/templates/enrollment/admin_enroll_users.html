@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Admin Enroll Users
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Enroll Users in a Course</h1>
+
+    <!-- Display Messages -->
+    {% if messages %}
+        <div class="alert alert-info">
+            {% for message in messages %}
+                {{ message }}<br>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Group and Course Selection -->
+    <div class="mb-4">
+        <div class="row">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <label for="groupSelect" class="form-label mb-0">Select Group:</label>
+                </div>
+                <div class="col">
+                    <form method="GET" id="groupForm" class="d-flex">
+                        <select class="form-select me-2" id="groupSelect" name="group" onchange="this.form.submit()">
+                            <option value="">-- Select Group --</option>
+                            {% for group in groups %}
+                                <option value="{{ group.id }}" {% if group.id|stringformat:"s" == selected_group_id|stringformat:"s" %}selected{% endif %}>
+                                    {{ group.group_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <a href="{% url 'collaboration_group:collaboration_group_list' %}" class="col-md-2 btn btn-secondary">Add group</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if selected_group_id %}
+    <form method="POST" id="enrollmentForm">
+        {% csrf_token %}
+        <!-- Course Selection -->
+        <div class="mb-4">
+            <label for="courseSelect" class="form-label">Select Course:</label>
+            <select class="form-select" id="courseSelect" name="course" required>
+                <option value="">-- Select Course --</option>
+                {% for course in courses %}
+                    <option value="{{ course.id }}" {% if course.id|stringformat:"s" == selected_course_id|stringformat:"s" %}selected{% endif %}>
+                        {{ course.course_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="mt-4" id="userTableContainer">
+            <h3>Users in Selected Course</h3>
+            <table class="table table-striped" id="userTable">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"> Select All
+                        </th>
+                        <th>Username</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- Users will be loaded here dynamically -->
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary" id="enrollButton" disabled>Enroll Selected Users</button>
+        </div>
+    {% endif %}
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    function toggleSelectAll(selectAllCheckbox) {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    }
+
+    $(document).ready(function() {
+        $('#courseSelect').change(function() {
+            const courseId = $(this).val();
+            const groupId = $('#groupSelect').val();
+            
+            $('#enrollButton').prop('disabled', true);
+            $('#userTableBody').empty();
+            
+            if (courseId && groupId) {
+                $.ajax({
+                    url: "{% url 'group_enrollment:fetch_enrolled_users' %}",
+                    data: {
+                        course_id: courseId,
+                        group_id: groupId
+                    },
+                    success: function(users) {
+                        alert('come here 1111' + users)
+                        users.forEach(user => {
+                            const checkedAttribute = user.is_enrolled ? 'checked disabled' : '';
+                            $('#userTableBody').append(`
+                                <tr>
+                                    <td><input type="checkbox" name="users" value="${user.user_id}" class="user-checkbox" ${checkedAttribute}></td>
+                                    <td>${user.username}</td>
+                                    <td>${user.email}</td>
+                                </tr>
+                            `);
+                        });
+
+                        if (users.length > 0) {
+                            $('#enrollButton').prop('disabled', false);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    </script>
+{% endblock %}

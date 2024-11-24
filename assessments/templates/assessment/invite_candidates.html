@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Invite Candidates{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Invite Candidates for <span class="text-primary">{{ assessment.title }}</span></h2>
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Send Invitations</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.as_p }}
+                </div>
+                <button type="submit" class="btn btn-success ">Send Invitations</button>
+                <a href="{% url 'assessment:assessment_list' %}" class="btn btn-secondary">Back to List</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

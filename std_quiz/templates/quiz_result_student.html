@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Result{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center">{{ quiz.quiz_title }}</h1>
+    <p class="text-muted text-center">Your results for this quiz</p>
+
+    <div class="alert alert-info text-center">
+        <h4>Score: <strong>{{ attempt.score }}</strong> / <strong>{{ attempt.quiz.total_marks }}</strong></h4>
+    </div>
+
+    <h2>Your Answers:</h2>
+    <div class="accordion" id="answersAccordion">
+        {% for answer in student_answers %}
+        <div class="card mb-2">
+            <div class="card-header" id="heading{{ forloop.counter }}">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                        {{ answer.question.question_text }}
+                    </button>
+                </h5>
+            </div>
+
+            <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" data-parent="#answersAccordion">
+                <div class="card-body">
+                    <strong>Your Answer: </strong>
+                    <span class="fw-bold {% if answer.selected_option.is_correct %}text-success{% else %}text-danger{% endif %}">
+                        {{ answer.selected_option.option_text }}
+                    </span><br>
+                    <strong>Correct: </strong>
+                    <span class="fw-bold {% if answer.selected_option.is_correct %}text-success{% else %}text-danger{% endif %}">
+                        {{ answer.selected_option.is_correct|yesno:"Yes,No" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'std_quiz:quiz_list' %}" class="btn btn-primary">Back to Quizzes</a>
+    </div>
+</div>
+{% endblock %}

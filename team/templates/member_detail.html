@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Team Member Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">{{ member.name }}'s Details</h1>
+    <div class="row justify-content-center">
+        <!-- Cột hình ảnh -->
+        <div class="col-md-3 text-center">
+            <div class="profile-frame">
+                {% if member.profile_picture %}
+                    <img src="{{ member.profile_picture.url }}" class="img-fluid rounded-3" alt="{{ member.name }}" style="max-height: 40vh; object-fit: contain;">
+                {% else %}
+                    <img src="{% static 'default-profile.png' %}" class="img-fluid rounded-3" alt="Default Profile" style="max-height: 40vh; object-fit: contain;">
+                {% endif %}
+
+            </div>
+        </div>
+        <!-- Cột thông tin -->
+        <div class="col-md-8">
+            <div class="info-box p-3 shadow-sm">
+                <h5 class="card-title text-primary fs-3">{{ member.name }}</h5>
+                <p class="card-text fs-4"><strong>Full Name:</strong> <span class="text-secondary">{{ member.full_name }}</span></p>
+                <p class="card-text fs-4"><strong>Role:</strong> <span class="text-secondary">{{ member.role }}</span></p>
+                <p class="card-text fs-4"><strong>Email:</strong> <span class="text-secondary">{{ member.email }}</span></p>
+                <p class="card-text fs-4"><strong>Homepage:</strong> 
+                    {% if member.homepage %}
+                        <a href="{{ member.homepage }}" target="_blank" class="text-primary">{{ member.homepage }}</a>
+                    {% else %}
+                        <span class="text-muted">Not available</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Các nút được di chuyển ra ngoài khung thông tin -->
+    <div class="d-flex justify-content-center mt-4">
+        <a href="{% url 'team:edit_member' member.pk %}" class="btn btn-warning me-2">Edit</a>
+        <a href="{% url 'team:team_list' %}" class="btn btn-secondary">LMS Team Members</a>
+    </div>
+</div>
+{% endblock %}

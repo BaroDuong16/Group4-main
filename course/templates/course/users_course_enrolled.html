@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Users Enrolled in {{ course.course_name }}{% endblock %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+</head>
+<body id="user-enrolled">
+
+<div class="content-wrapper">
+    <h1 class="course-title">Users Enrolled in {{ course.course_name }}</h1>
+
+{% if user_progress %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="table-header username-column">Username</th>
+                <th class="table-header progress-column">Progress (%)</th>
+                <th class="table-header action-column">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in user_progress %}
+                <tr>
+                    <td class="username-column">{{ item.user.username }}</td>
+                    <td class="progress-column">
+                        {{ item.progress|floatformat:2 }}%
+                        <div class="progress" style="margin-top: 5px;">
+                            <div class="progress-bar" style="width: {{ item.progress }}%;"></div>
+                        </div>
+                    </td>
+                    <td class="action-column">
+                        <a href="{% url 'user:user_detail' pk=item.user.id %}" class="btn btn-primary user-detail-btn">View User Details</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No users have enrolled in this course yet.</p>
+{% endif %}
+</div>
+</body>
+{% endblock %}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Material</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Upload Material</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="subject_id">Select Subject:</label>
+                <select name="subject_id" class="form-control" required>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.pk }}">{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Upload Files:</label>
+                <input type="file" name="file" multiple required class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="material_type">Material Type:</label>
+                {{ form.material_type }}
+            </div>
+            <button type="submit" class="btn btn-success">Upload</button>
+            <a href="{% url 'subject:subject_list' %}" class="btn btn-secondary">Back to Subject List</a>
+        </form>
+
+        
+        
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

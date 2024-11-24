@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Create Group Chat
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Create Group Chat</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <!-- Group Name Input -->
+        <div class="form-group">
+            <label for="group_name">Group Name</label>
+            <input type="text" name="group_name" class="form-control" placeholder="Enter group name" required>
+        </div>
+
+        <!-- Member Selection -->
+        <div class="form-group">
+            <label for="members">Select Members</label>
+            <select name="members" class="form-control" multiple required>
+                {% for user in users %}
+                    <option value="{{ user.username }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+            <small class="form-text text-muted">Hold down the Ctrl (Windows) or Command (Mac) button to select multiple users.</small>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Create Group</button>
+        </div>
+    </form>
+</div>
+
+<!-- Style -->
+<style>
+    body {
+        background-color: #f8f9fa; /* Light background */
+        font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+        background-color: #ffffff; /* White background for form container */
+        padding: 30px;
+        border-radius: 20px; /* Rounded corners for modern look */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    }
+
+    .form-group label {
+        font-weight: bold;
+        color: #333333; /* Darker text for labels */
+    }
+
+    .form-control {
+        border-radius: 30px; /* Rounded input fields */
+        padding: 10px 20px; /* Comfortable padding */
+        border: 1px solid #ced4da; /* Light gray border for inputs */
+    }
+
+    .btn-primary {
+        border-radius: 30px; /* Rounded button */
+        padding: 10px 20px;
+        background-color: #007bff; /* Primary blue button */
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
+    .form-text {
+        font-size: 0.875rem; /* Slightly smaller for helper text */
+        color: #6c757d; /* Muted text color */
+    }
+</style>
+{% endblock %}

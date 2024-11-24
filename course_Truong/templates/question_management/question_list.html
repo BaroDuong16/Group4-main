@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Question List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% include "course_management/nav_tab.html" %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Total Mark</th>
+                <th>Created At</th>
+                <th>Updated at</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quiz in quizzes %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ quiz.quiz_title }}</td>
+                <td>{{ quiz.quiz_description }}</td>
+                <td>{{ quiz.total_mark }}</td>
+                <td>{{ quiz.created_at|date:"Y-m-d" }}</td>
+                <td>{{ quiz.updated_at|date:"Y-m-d" }}</td>
+                <td>
+                    <div class="dropdown">
+                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-toggle="dropdown"
+                            aria-expanded="false">
+                            ...
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="{% url 'course_Truong:quiz_edit' course.pk quiz.pk%}" class="dropdown-item">Question List</a>
+                            <a href="{% url 'course_Truong:quiz_edit' course.pk quiz.pk%}" class="dropdown-item">Edit</a>
+                            <a href="{% url 'course_Truong:quiz_delete' course.pk quiz.pk%}" class="dropdown-item">Delete</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'course_Truong:quiz_add' course.pk%}" class="btn btn-primary">Add Quiz</a>
+    <a href="{% url 'course_Truong:course_list' %}" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}

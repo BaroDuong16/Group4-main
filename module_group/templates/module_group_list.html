@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Module Groups{% endblock %}
+
+{% block content %}
+
+<div class="mt-4">
+    <h2 class="mb-4">Module Groups</h2>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+        <form method="GET" class="flex-grow-1 mb-2 mb-md-0">
+            <div class="input-group gap-2">
+                <input type="text" name="search" class="form-control" 
+                       placeholder="Search Modules" aria-label="Search Modules" 
+                       value="{{ request.GET.search }}" style="min-width: 200px; max-width: 600px;">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-dark" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary" title="Import Module from Excel" 
+                    data-bs-toggle="modal" data-bs-target="#importModal" data-bs-toggle="tooltip">
+                <i class="fas fa-file-import"></i> Import
+            </button>
+
+            <a href="{% url 'module_group:export_module_groups' %}" class="btn btn-outline-secondary" 
+               title="Export Users to Excel" data-toggle="tooltip">
+                <i class="fas fa-file-export"></i> Export
+            </a>
+            <a href="{% url 'module_group:module_group_add' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Module
+            </a>
+        </div>
+    </div>
+
+
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th class="text-center">#</th>
+                <th>Group Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in module_groups %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td>{{ group.group_name }}</td>
+                <td>
+                    <a title="Details" href="{% url 'module_group:module_group_detail' group.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-info-circle"></i> 
+                    </a>
+                    <a title="Edit" href="{% url 'module_group:module_group_edit' group.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit"></i> 
+                    </a>
+                    <a title="Delete" href="{% url 'module_group:module_group_delete' group.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this module group?');">
+                        <i class="fas fa-trash-alt"></i> 
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Module Groups from Excel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Import Form -->
+                <form method="post" enctype="multipart/form-data" action="{% url 'module_group:import_module_groups' %}">
+                    <div class="mb-4">
+                        <span>
+                            Please download and use the <a href="{% static 'excel/import_module_groups.xlsx' %}" target="_blank">Excel template</a>. The Excel file must contain exactly one sheet with the required columns.
+                        </span>
+                    </div>
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Initialize Bootstrap Tooltips -->
+<script>
+    $(document).ready(function() {
+        $('[data-bs-toggle="tooltip"]').tooltip(); // Use data-bs-toggle for Bootstrap 5
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}Materials for {{ selected_subject.name }}{% endblock %}
+{% load custom_filters %}
+
+{% load material_tags %}
+
+{% block content %}
+
+<style>
+    .list-group-item.active {
+        background-color: gray; /* Change to your preferred active background color */
+    }
+</style>
+
+<div class="row">
+    <nav class="col-sm-3" style="background-color: #f8f9fa; padding: 20px; border-right: 1px solid #dee2e6;">
+        <!-- Training Program Selection -->
+        <h5 class="block">Training Programs</h5>
+        <p>Select a training program to view associated subjects and materials.</p>
+        <ul class="list-group" style="max-height: 200px; overflow-y: auto;">
+            {% for program in training_programs %}
+                <li class="list-group-item" 
+                    onclick="selectTrainingProgram({{ program.id }})" style="cursor: pointer;">
+                    {{ program.program_name }}
+                </li>
+            {% empty %}
+                <li class="list-group-item">No training programs available</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Subjects Selection -->
+        <div id="subjects-container" style="display: {% if selected_training_program %}block{% else %}none{% endif %}; margin-top: 20px;">
+            <h5>Subjects</h5>
+            <p>Select a subject to view the materials.</p>
+            <ul class="list-group" id="subjectList" style="max-height: 200px; overflow-y: auto;"></ul>
+        </div>
+
+        <!-- Materials Selection -->
+        <div id="materials-container" style="display: {% if selected_subject %}block{% else %}none{% endif %}; margin-top: 20px;">
+            <h5>Material Types</h5>
+            <p>Select a material type to see the available resources.</p>
+            <ul class="list-group" id="materialTypeList" style="max-height: 200px; overflow-y: auto;"></ul>
+        </div>
+    </nav>
+
+    <!-- Material Listing Section -->
+    <div class="col-sm-9">
+        <!-- Material listing table -->
+        <div class="table-responsive mt-4" id="material-list-container" style="display: {% if materials %}block{% else %}none{% endif %};">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>File Name</th>
+                        <th>File Type</th>
+                        <th>File Size</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="material-list-body">
+                    <tr>
+                        <td colspan="5">No materials available</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Function to select training program and load its subjects
+    function selectTrainingProgram(programId) {
+        document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+        document.querySelector(`li[onclick="selectTrainingProgram(${programId})"]`).classList.add('active');
+
+        fetch(`/student_materials/api/training_programs/${programId}/subjects/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(subjects => {
+                const subjectList = document.getElementById('subjectList');
+                subjectList.innerHTML = '';
+                subjects.forEach(subject => {
+                    const subjectItem = document.createElement('li');
+                    subjectItem.id = 'subject-' + subject.id;
+                    subjectItem.className = 'list-group-item';
+                    subjectItem.innerText = subject.name;
+                    subjectItem.style.cursor = 'pointer';
+                    subjectItem.onclick = () => selectSubject(subject.id);
+                    subjectList.appendChild(subjectItem);
+                });
+                document.getElementById('subjects-container').style.display = 'block';
+                document.getElementById('materials-container').style.display = 'none';
+            })
+            .catch(error => console.error('Error fetching subjects:', error));
+    }
+
+    // Function to select subject and load its material types
+    function selectSubject(subjectId) {
+        document.querySelectorAll('#subjectList .list-group-item').forEach(item => {
+            item.style.backgroundColor = '';
+            item.style.color = '';
+        });
+
+        const selectedItem = document.getElementById(`subject-${subjectId}`);
+        selectedItem.style.backgroundColor = 'gray';
+
+        fetch(`/student_materials/api/subjects/${subjectId}/material_types`)
+            .then(response => response.json())
+            .then(materialTypes => {
+                const materialTypeList = document.getElementById('materialTypeList');
+                materialTypeList.innerHTML = '';
+                Object.keys(materialTypes).forEach(materialType => {
+                    const materialItem = document.createElement('li');
+                    materialItem.id = 'material-' + materialType;
+                    materialItem.className = 'list-group-item';
+                    materialItem.innerText = `${materialType} (${materialTypes[materialType]} files)`;
+                    materialItem.style.cursor = 'pointer';
+                    materialItem.onclick = () => selectMaterialType(materialType);
+                    materialTypeList.appendChild(materialItem);
+                });
+                document.getElementById('materials-container').style.display = 'block';
+            });
+    }
+
+
+// Function to load materials of selected material type
+function selectMaterialType(materialType) {
+    // Clear previous styles
+    document.querySelectorAll('#materialTypeList .list-group-item').forEach(item => {
+        item.style.backgroundColor = '';
+        item.style.color = '';
+    });
+
+    // Highlight selected material type
+    const selectedItem = document.getElementById(`material-${materialType}`);
+    selectedItem.style.backgroundColor = 'gray';
+
+    // Fetch materials
+    fetch(`/student_materials/api/material_types/${materialType}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(materials => {
+            const materialListBody = document.getElementById('material-list-body');
+            materialListBody.innerHTML = ''; // Clear previous materials
+
+            materials.forEach((material, index) => {
+                const row = document.createElement('tr');
+
+                if (material.id) {
+                    // Check if the URL indicates a folder or a PDF file
+                    const isFolder = material.url.includes("folders");
+                    const isPdfFile = material.url.includes('file');
+
+                    if (isFolder) {
+                        // Create a row for Google Drive link
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td colspan="4">
+                                <a href="${material.url}" class="btn btn-info" target="_blank">
+                                      <i class="fas fa-folder-open"></i> View in Google Drive
+                                </a>
+                            </td>
+                        `;
+                    } else if(isPdfFile) {
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td colspan="4">
+                                <a href="${material.url}" class="btn btn-info" target="_blank">
+                                    <i class="fas fa-file-pdf"></i> View PDF
+                                </a>
+                            </td>
+                        `;
+
+                    }
+                    else{
+                        // For non-Google Drive materials
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><a href="${material.url}" target="_blank">${material.name}</a></td>
+                            <td>${material.file_type}</td>
+                            <td>${material.size ? material.size + ' bytes' : 'N/A'}</td>
+                            <td>
+                                <a href="${material.url}" class="btn btn-primary btn-sm" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <a href="/student_materials/view_material/${material.id}/" class="btn btn-info btn-sm" target="_blank">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        `;
+                    }
+
+                    // Append the row to the material list body
+                    materialListBody.appendChild(row);
+                } else {
+                    console.error(`Material ID is missing for material:`, material);
+                }
+            });
+
+            // Show the material list
+            document.getElementById('material-list-container').style.display = 'block';
+        })
+        .catch(error => console.error('Error fetching materials:', error));
+}
+
+
+
+
+
+</script>
+
+{% endblock %}

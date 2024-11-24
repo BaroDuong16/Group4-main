@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mt-4">
+        <!-- Nút Back -->
+        <a href="{% url 'reports:report_dashboard' %}" class="btn btn-secondary mb-3">Back to Reports</a>
+    </div>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_overview_report' %}">User Overview </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:student_id_report' %}">Student ID</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:role_report' %}">Role</a>
+    </li>   
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_statistics_report' %}">User Statistics</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:login_frequency_report' %}">Login Frequency</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:user_duration_login' %}">User Duration Login</a>
+    </li>
+</ul>
+<div class="container mt-4">
+    
+    <h1 class="text-center mb-4">Dashboard Report</h1>
+    <h3 class="text-center">Current Month: {{ current_month }}</h3>
+
+    <!-- Biểu đồ số lần đăng nhập -->
+    <canvas id="loginCountsChart" width="400" height="200"></canvas>
+
+    <!-- Bảng người dùng đã đăng nhập vào ngày được chọn -->
+    <div id="userList" class="mt-4">
+        <h4>Users who logged in on {{ selected_date|default:"selected date" }}:</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Date Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in selected_users %}
+                <tr>
+                    <td>{{ user.user__username }}</td>
+                    <td>{{ user.user__email }}</td>
+                    <td>{{ user.user__date_joined }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No users logged in on this date.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Biểu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginDates = {{ login_dates|safe }};
+            const userCounts = {{ user_counts|safe }};
+            
+            const ctx = document.getElementById('loginCountsChart').getContext('2d');
+            const loginCountsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: loginDates,
+                    datasets: [{
+                        label: 'User Login Counts',
+                        data: userCounts,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const selectedDate = loginDates[index];
+                            // Điều hướng đến URL với tham số login_date
+                            window.location.href = `/reports/user_statistics_report/?login_date=${selectedDate}`;
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Users'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Login Dates'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</div>
+{% endblock %}

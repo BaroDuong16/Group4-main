@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* CSS for a larger chart */
+    .chart-container {
+        width: 100%;
+        max-width: 600px; /* Adjust chart width */
+        height: 400px; /* Set the chart height */
+        margin: auto;
+    }
+
+    /* Ensure the canvas takes the full height */
+    canvas {
+        height: 100% !important; 
+    }
+</style>
+
+<!-- Include Tab Navigation -->
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:course_overview_report' %}">Course Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:student_enrollment_report' %}">Student Enrollment</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:course_completion_report' %}">Course Completion</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:session_overview_report' %}">Session Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:material_usage_report' %}">Material Usage</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:enrollment_trends_report' %}">Enrollment Trends</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:material_type_distribution_report' %}">Material Type Distribution</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:tag_report' %}">Tag Report</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:user_progress_report' %}">User Progress</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:instructor_performance_report' %}">Instructor Performance</a>
+    </li>
+</ul>
+
+<h1>Enrollment Trends Report</h1>
+
+<!-- Bootstrap Grid for Chart and Data Table -->
+<div class="row">
+    <!-- Chart Column -->
+    <div class="col-md-6">
+        <h2>Enrollment Trends Chart</h2>
+        <div class="chart-container">
+            <canvas id="enrollmentChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Data Table Column -->
+    <div class="col-md-6">
+        <h2>Enrollment Data</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Course</th>
+                    <th>Enrollment Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in enrollments %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ enrollment.course__course_name }}</td>
+                    <td>{{ enrollment.count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<script>
+    var ctx = document.getElementById('enrollmentChart').getContext('2d');
+    var xValues = [{% for enrollment in enrollments %}"{{ enrollment.course__course_name }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+    var yValues = [{% for enrollment in enrollments %}{{ enrollment.count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    var barColors = ["#FF5733", "#33FFBD", "#335BFF", "#FF33A2", "#33FF57"]; // Customize colors as needed
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: xValues,
+        datasets: [{
+          backgroundColor: barColors,
+          data: yValues
+        }]
+      },
+      options: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: "Enrollment Trends by Course"
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+      }
+    });
+</script>
+{% endblock %}

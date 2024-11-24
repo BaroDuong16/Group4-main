@@ -1,0 +1,532 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custome_filters %}
+{% block title %}User List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'user:user_list' %}">Users</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'user:student_list' %}">Students</a>
+        </li>
+    </ul>
+
+    <div class="mt-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="mt-3">
+                {% if request.user.is_authenticated and can_add_user %}
+                    <a href="{% url 'user:user_add' %}" class="btn btn-primary" title="Add New User">
+                        <i class="fas fa-plus"></i> Add User
+                    </a>
+                {% endif %}
+                {% if request.user.is_authenticated and can_delete_user %}
+                    <button type="button" id="delete_button" class="btn btn-danger" title="Delete Selected Users" data-bs-toggle="tooltip">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                {% endif %}
+                {% if request.user.is_authenticated and can_export_users %}
+                    <!-- Button to open Import Modal -->
+                    <button class="btn btn-success" title="Import Users" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fas fa-file-import"></i> Import
+                    </button>
+                
+                    <!-- Modal for Import -->
+                    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document" style="max-width: 100vw;">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="importModalLabel">Import Users</h5>
+                                    <button type="button" class="btn-close" id="closeImportModal" data-bs-dismiss="modal" aria-label="Close"></button>                                    
+                                </div>
+                                <form id="importForm" method="POST" enctype="multipart/form-data" action="{% url 'user:import_users' %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body text-center">
+                                        <h5>Choose a file (XLSX, CSV, JSON)</h5>
+                                        <div id="drop_area" class="drag-area">
+                                            <p>Drag and drop file here or click to browse</p>
+                                            <small>Limit 200MB per file • <span id="fileName"></span></small>
+                                            <input type="file" id="file" name="file" class="form-control" accept=".xlsx, .csv, .json" style="display: none;">
+                                        </div>                                  
+                
+                                        <!-- Table to display file content -->
+                                        <div id="filePreview" style="display:none;" class="file-preview mt-3">
+                                            <h5>File Preview</h5>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <!-- Search icon on the left -->
+                                                <div class="d-flex align-items-center me-auto">
+                                                    <div class="btn btn-success" style="margin-right: 1vh;">Search</div>
+                                                    <input type="text" id="searchInput" placeholder="Searching..." class="search-input">
+                                                </div>
+                                                
+                                                <!-- Confirm Import button on the right -->
+                                                <button type="submit" id="confirmImport" class="btn btn-primary" disabled>Confirm Import</button>
+                                            </div>
+                                        
+                                            <div class="table-responsive" style="max-height: 65vh;">
+                                                <table class="table" id="previewTable">
+                                                    <thead>
+                                                        <tr id="previewHeader">
+                                                            <!-- Add <th> tags here -->
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="previewBody">
+                                                        <!-- Add data rows here -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>                                                                             
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-info" title="Export Users" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+
+                    <!-- Modal Export -->
+                    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered custom-small-modal" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exportModalLabel">Export Users</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form method="GET" action="{% url 'user:export_users' %}">
+                                    <div class="modal-body">
+                                        <select name="format" class="form-select" aria-label="Export Format">
+                                            <option value="csv">Export to CSV</option>
+                                            <option value="yaml">Export to YAML</option>
+                                            <option value="json">Export to JSON</option>
+                                            <option value="tsv">Export to TSV</option>
+                                            <option value="xlsx">Export to Excel</option>
+                                        </select>
+                                        <input type="hidden" name="role" value="{{ selected_role }}">
+                                        <input type="hidden" name="q" value="{{ query }}">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Export</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <a href="{% url 'user:user_list' %}" class="btn btn-warning" title="Refresh User List" id="refresh_button">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </a>
+            </div>
+            <form method="GET" action="{% url 'user:user_list' %}">
+                <div class="input-group">
+                    <input type="text" name="q" value="{{ query|default_if_none:'' }}" 
+                           class="form-control me-2 " 
+                           placeholder="Search users..." aria-label="Search users" >
+                    
+                    <select name="role" class="form-select me-2">
+                        <option value="">Select Role</option>
+                        {% for role in roles %}
+                            <option value="{{ role.role_name }}" {% if role.role_name == selected_role %}selected{% endif %}>
+                                {{ role.role_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <button type="submit" class="btn btn-outline-success" >Search</button>
+                </div>
+            </form>                    
+        </div>
+
+        <!-- Form xử lý xóa nhiều người dùng -->
+        <form id="delete_form" method="POST" action="{% url 'user:user_delete' %}">
+            {% csrf_token %}
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select_all" class="form-check-input"></th>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Full Name</th>
+                        {% if request.user.profile.role.role_name == 'Manager' or request.user.is_superuser %}
+                            <th>Role</th>
+                        {% endif %}
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_users" value="{{ user.pk }}" id="userCheckbox{{ user.pk }}" class="form-check-input"></td>
+                        <td>{{ users.number|add:'-1'|multiply:5|add:forloop.counter }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.first_name }} {{ user.last_name }}</td>
+                        {% if request.user.profile.role.role_name == 'Manager' or request.user.is_superuser %}
+                            <td>{{ user.profile.role.role_name }}</td>
+                        {% endif %}
+                        <td>
+                            {% if request.user.is_authenticated and can_detail_user %}
+                                <a href="{% url 'user:user_detail' user.pk %}" class="btn btn-outline-dark btn-sm" title="View User Details" data-bs-toggle="tooltip">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            {% endif %}
+                            {% if request.user.is_authenticated and can_edit_user %}
+                                <a href="{% url 'user:user_edit' user.pk %}" class="btn btn-outline-dark btn-sm" title="Edit User" data-bs-toggle="tooltip">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>        
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&search={{ query }}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ query }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+        
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&search={{ query }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+        
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ query }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&search={{ query }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        {% if messages %}
+            <div class="mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ message.tags }}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropArea = document.getElementById('drop_area');
+        const fileInput = document.getElementById('file');
+        const previewHeader = document.getElementById('previewHeader');
+        const previewBody = document.getElementById('previewBody');
+        const filePreview = document.getElementById('filePreview');
+        const confirmImportButton = document.getElementById('confirmImport');
+        const fileNameDisplay = document.getElementById('fileName');
+        const searchInput = document.getElementById('searchInput');
+        
+        // Khi nhấp vào vùng kéo và thả, mở hộp thoại tệp
+        dropArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+    
+        // Ngăn chặn hành vi mặc định khi kéo tệp
+        dropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropArea.style.borderColor = 'green';
+        });
+    
+        // Đặt lại màu viền khi rời khỏi khu vực kéo
+        dropArea.addEventListener('dragleave', function() {
+            dropArea.style.borderColor = '#ccc';
+        });
+    
+        // Xử lý thả tệp
+        dropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropArea.style.borderColor = '#ccc';
+            const files = e.dataTransfer.files;
+    
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileNameDisplay.textContent = files[0].name;
+                readFile(files[0]);
+            }
+        });
+    
+        // Khi người dùng chọn tệp qua input
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                fileNameDisplay.textContent = fileName;
+                readFile(fileInput.files[0]);
+            }
+        });
+    
+        // Hàm đọc tệp và hiển thị bản xem trước
+        function readFile(file) {
+            const reader = new FileReader();
+        
+            if (file.type === "application/json") {
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    displayPreview(content, file.type);
+                };
+                reader.readAsText(file);
+            } else if (file.type === "text/csv") {
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    displayPreview(content, file.type);
+                };
+                reader.readAsText(file);
+            } else if (file.type === "text/tab-separated-values" || file.name.endsWith(".tsv")) {
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    displayPreview(content, "text/tab-separated-values");
+                };
+                reader.readAsText(file);
+            } else if (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "application/vnd.ms-excel") {
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    displayExcelPreview(content);
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.type === "application/x-yaml" || file.type === "text/yaml" || file.name.endsWith(".yaml") || file.name.endsWith(".yml")) {
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    displayYAMLPreview(content);
+                };
+                reader.readAsText(file);
+            } else {
+                alert("Định dạng tệp không được hỗ trợ.");
+            }
+        }
+
+        // Cập nhật hàm displayPreview để xử lý JSON, CSV, và TSV
+        function displayPreview(content, fileType) {
+            const rows = [];
+            let headers = [];
+        
+            if (fileType === "application/json") {
+                const jsonData = JSON.parse(content);
+                headers = Object.keys(jsonData[0]);
+                jsonData.forEach(item => {
+                    const row = headers.map(header => `<td>${item[header]}</td>`).join('');
+                    rows.push(`<tr>${row}</tr>`);
+                });
+            } else if (fileType === "text/csv" || fileType === "text/tab-separated-values") {
+                const lines = content.split('\n');
+                const delimiter = fileType === "text/csv" ? ',' : '\t'; // Phân tách theo dấu phẩy hoặc tab
+                headers = lines[0].split(delimiter);
+                lines.slice(1).forEach(line => {
+                    const cells = line.split(delimiter);
+                    const row = cells.map(cell => `<td>${cell}</td>`).join('');
+                    rows.push(`<tr>${row}</tr>`);
+                });
+            }
+        
+            // Hiển thị bảng dữ liệu
+            previewHeader.innerHTML = headers.map(header => `<th>${header}</th>`).join('');
+            previewBody.innerHTML = rows.join('');
+            filePreview.style.display = 'block';
+            confirmImportButton.disabled = false;
+
+            // Thiết lập chức năng tìm kiếm
+            setupSearchFunctionality(rows, headers);
+        }
+
+        // Hàm hiển thị bản xem trước cho tệp YAML
+        function displayYAMLPreview(content) {
+            try {
+                const yamlData = jsyaml.load(content); // Sử dụng jsyaml để phân tích cú pháp YAML
+                const rows = [];
+                const headers = Object.keys(yamlData[0]); // Lấy header từ dòng đầu tiên
+        
+                yamlData.forEach(item => {
+                    const row = headers.map(header => `<td>${item[header]}</td>`).join('');
+                    rows.push(`<tr>${row}</tr>`);
+                });
+        
+                previewHeader.innerHTML = headers.map(header => `<th>${header}</th>`).join('');
+                previewBody.innerHTML = rows.join('');
+                filePreview.style.display = 'block';
+                confirmImportButton.disabled = false;
+
+                // Thiết lập chức năng tìm kiếm
+                setupSearchFunctionality(rows, headers);
+            } catch (e) {
+                alert("Lỗi khi xử lý tệp YAML: " + e.message);
+            }
+        }
+        
+        // Hàm hiển thị bản xem trước cho tệp Excel
+        function displayExcelPreview(content) {
+            const data = new Uint8Array(content);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        
+            const rows = [];
+            const headers = jsonData[0];
+        
+            // Kiểm tra cấu trúc tệp
+            if (!isValidUserStructure(headers)) {
+                alert("Cấu trúc tệp không hợp lệ. Vui lòng kiểm tra lại.");
+                return;
+            }
+        
+            jsonData.slice(1).forEach(row => {
+                const tableRow = row.map(cell => `<td>${cell}</td>`).join('');
+                rows.push(`<tr>${tableRow}</tr>`);
+            });
+        
+            // Hiển thị bảng dữ liệu
+            previewHeader.innerHTML = headers.map(header => `<th>${header}</th>`).join('');
+            previewBody.innerHTML = rows.join('');
+            filePreview.style.display = 'block';
+            confirmImportButton.disabled = false;
+        
+            // Thiết lập chức năng tìm kiếm
+            setupSearchFunctionality(rows, headers);
+        }
+        
+        // Hàm kiểm tra cấu trúc tệp
+        function isValidUserStructure(headers) {
+            const requiredHeaders = ['username', 'first_name', 'last_name', 'email', 'password', 'profile__role__role_name', 'profile__profile_picture_url', 'profile__bio', 'profile__interests', 'profile__learning_style', 'profile__preferred_language', 'student_code'];
+            return requiredHeaders.every(header => headers.includes(header));
+        }
+    
+        // Hàm thiết lập chức năng tìm kiếm
+        function setupSearchFunctionality(rows, headers) {
+            // Sự kiện tìm kiếm
+            searchInput.addEventListener('input', function() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const allRows = previewBody.querySelectorAll('tr'); // Lấy tất cả các hàng trong bảng
+    
+                allRows.forEach(row => {
+                    const rowData = row.innerText.toLowerCase(); // Lấy dữ liệu của hàng
+                    if (rowData.includes(searchTerm)) {
+                        row.style.display = ''; // Hiển thị hàng nếu có từ khóa tìm kiếm
+                    } else {
+                        row.style.display = 'none'; // Ẩn hàng nếu không có từ khóa tìm kiếm
+                    }
+                });
+            });
+        }
+        
+        // Thêm sự kiện để xóa dữ liệu khi đóng modal
+        document.getElementById('closeImportModal').addEventListener('click', function() {
+            const importModal = new bootstrap.Modal(document.getElementById('importModal'), {});
+            importModal.hide();
+
+            // Reset dữ liệu
+            fileInput.value = ""; // Xóa tệp đã chọn
+            fileNameDisplay.textContent = ""; // Xóa tên tệp hiển thị
+            previewHeader.innerHTML = ""; // Xóa tiêu đề
+            previewBody.innerHTML = ""; // Xóa nội dung bản xem trước
+            filePreview.style.display = 'none'; // Ẩn bảng bản xem trước
+            confirmImportButton.disabled = true; // Vô hiệu hóa nút xác nhận
+            searchInput.value = ""; // Xóa ô tìm kiếm
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedCheckboxes = JSON.parse(localStorage.getItem('selectedUsers')) || {};
+        const checkboxes = document.querySelectorAll('input[name="selected_users"]');
+    
+        // Cập nhật trạng thái checkbox dựa trên localStorage
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = storedCheckboxes[checkbox.value] || false;
+        });
+    
+        // Lưu trạng thái checkbox vào localStorage khi checkbox được thay đổi
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                storedCheckboxes[checkbox.value] = checkbox.checked;
+                localStorage.setItem('selectedUsers', JSON.stringify(storedCheckboxes));
+            });
+        });
+    
+        // Chọn tất cả checkbox
+        const selectAllCheckbox = document.getElementById('select_all');
+        selectAllCheckbox.addEventListener('change', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+                storedCheckboxes[checkbox.value] = checkbox.checked; // Cập nhật trạng thái cho tất cả
+            });
+            localStorage.setItem('selectedUsers', JSON.stringify(storedCheckboxes));
+        });
+    
+        // Xóa người dùng đã chọn
+        document.getElementById('delete_button').addEventListener('click', function() {
+            const selectedUsers = Object.keys(storedCheckboxes).filter(userId => storedCheckboxes[userId]);
+            
+            if (selectedUsers.length === 0) {
+                alert('Please select at least one user to delete.');
+                return;
+            }
+            if (confirm('Are you sure you want to delete the selected users?')) {
+                const deleteForm = document.getElementById('delete_form');
+    
+                // Tạo các input ẩn để gửi các giá trị đã chọn
+                selectedUsers.forEach(userId => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selected_users'; // Tên phải khớp với tên trong form
+                    input.value = userId;
+                    deleteForm.appendChild(input);
+                });
+    
+                // Reset trạng thái checkbox trong localStorage
+                selectedUsers.forEach(userId => {
+                    delete storedCheckboxes[userId]; // Xóa người dùng đã chọn khỏi localStorage
+                });
+                localStorage.setItem('selectedUsers', JSON.stringify(storedCheckboxes));
+                deleteForm.submit(); // Gửi form xóa
+            }
+        });
+    
+        // Xóa dữ liệu trong localStorage khi nhấn nút Refresh
+        document.getElementById('refresh_button').addEventListener('click', function() {
+            localStorage.removeItem('selectedUsers');
+        });
+    
+        // Khởi tạo tooltip cho Bootstrap 5
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>   
+{% endblock %}

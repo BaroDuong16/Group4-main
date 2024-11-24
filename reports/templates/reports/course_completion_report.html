@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Include Tab Navigation -->
+<ul class="nav nav-tabs">
+   
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'reports:course_completion_report' %}">Course Completion</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:session_overview_report' %}">Session Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:material_usage_report' %}">Material Usage</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:enrollment_trends_report' %}">Enrollment Trends</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:material_type_distribution_report' %}">Material Type Distribution</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:tag_report' %}">Tag Report</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:user_progress_report' %}">User Progress</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'reports:instructor_performance_report' %}">Instructor Performance</a>
+    </li>
+</ul>
+
+<h1>Course Completion Report</h1>
+
+<div class="row">
+    <!-- Charts Section -->
+    <div class="col-lg-8 col-md-12 mb-4">
+        <div class="row"><!-- justify-content-center -->
+            {% for course, percent in course_progress.items %}
+            <div class="col-md-4 col-sm-12 mb-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ course.course_name }}</h5>
+                        <canvas id="chart_{{ forloop.counter }}" width="150" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const ctx = document.getElementById('chart_{{ forloop.counter }}').getContext('2d');
+                    const completionChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Completed', 'Not Completed'],
+                            datasets: [{
+                                label: 'Completion Percentage',
+                                data: [{{ percent }}, {{ 100|floatformat:0 }} - {{ percent }}],
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 1)',// Completed
+                                    // 'rgba(75, 192, 192, 1)',  // Completed
+                                    'rgba(192, 192, 192, 1)'   // Not Completed (gray)
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(192, 192, 192, 1)'   // Border color for not completed (gray)
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(tooltipItem) {
+                                            return tooltipItem.label + ': ' + tooltipItem.raw + '%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+            </script>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Data Table Section -->
+    <div class="col-lg-4 col-md-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Course Name</th>
+                    <th>Completion Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course, percent in course_progress.items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ course.course_name }}</td>
+                    <td>{{ percent|floatformat:2 }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% load static %}
+
+<div class="course-material">
+    <h2 class="text-center">{{ current_session.name }}</h2>
+    
+    {% if current_material %}
+        <div class="material-preview">
+            <h4>{{ current_material.title }}</h4>
+            <div class="content">
+                {% if content_type == 'video' %}
+                    <video controls>
+                        <source src="{{ current_material.file.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                {% elif content_type == 'document' %}
+                    <iframe src="{{ current_material.file.url }}" width="100%" height="600px"></iframe>
+                {% else %}
+                    <p>No content available for this material type.</p>
+                {% endif %}
+            </div>
+            <div class="completion-status">
+                {% if completion_status %}
+                    <span class="text-success">You have completed this material.</span>
+                {% else %}
+                    <span class="text-danger">You have not completed this material yet.</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="navigation-buttons mt-4">
+            {% if previous_material %}
+                <a href="{% url 'student_portal:course_content' course.pk current_session.id %}?file_id={{ previous_material.id }}&file_type={{ previous_material.material_type }}" class="btn btn-outline-secondary">Previous</a>
+            {% endif %}
+            {% if next_material %}
+                <a href="{% url 'student_portal:course_content' course.pk current_session.id %}?file_id={{ next_material.id }}&file_type={{ next_material.material_type }}" class="btn btn-outline-secondary">Next</a>
+            {% else %}
+                {% if next_session %}
+                    <a href="{% url 'student_portal:course_content' course.pk next_session.id %}" class="btn btn-outline-secondary">Next Session</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="text-warning">No material available for this session.</p>
+    {% endif %}
+</div>

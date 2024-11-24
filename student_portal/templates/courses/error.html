@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+{% load static %}
+
+{% block title %}Course Content{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Course Content Not Available</h1>
+        <p>We're sorry, but there are currently no sessions available for this course.</p>
+        
+        <!-- Optional Button to Redirect to Course List or Home -->
+        <p><a href="{% url 'student_portal:course_list' %}" class="btn btn-primary">Back to Courses</a></p>
+    </div>
+{% endblock %}

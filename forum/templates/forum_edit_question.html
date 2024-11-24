@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{%block extra_css%}
+<style>
+.form-horizontal {
+    max-width: 900px;
+    margin: 0;
+    padding: 30px;
+    border-radius: 10px;
+    background-color: transparent;
+    border: none;
+}
+
+h2 {
+    color: #006666;
+    text-align: left;
+    margin-left: 0;
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #006666;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #66b2b2;
+    background-color: #f2f9f9;
+}
+.form-title {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #66b2b2;
+    background-color: #f2f9f9;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #00cccc;
+    color: white;
+    border: none;
+}
+
+.btn-danger {
+    background-color: #ff6666;
+    color: white;
+    border: none;
+}
+
+.form-group textarea {
+    width: 100%;
+    height: 250px;
+    border-radius: 10px;
+    border: 1px solid #66b2b2;
+    padding: 12px;
+    font-size: 16px;
+    resize: vertical;
+    background-color: #f2f9f9;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Question</h2>
+    <form method="post" enctype="multipart/form-data" class="form-horizontal">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="course" style="display: inline-block; width: auto; margin-right: 10px;">Course:</label>
+            <input type="text" id="courseSearch" class="form-control mb-2" placeholder="Search for a course..." style="display: inline-block; width: auto;">
+            <select name="course" id="course" class="form-control" size="5">
+                <option value="">All Courses</option>
+                {% for course in courses %}
+                <option value="{{ course.id }}" {% if course.id == form.course.value %}selected{% endif %}>
+                    {{ course.course_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="title" style="display: inline-block; width: auto; margin-right: 10px;">Title:</label>
+            <input type="text" name="title" id="title" class="form-title" value="{{ form.title.value }}">
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            {{ form.content }}
+        </div>
+        <div class="form-group">
+            <label for="image">Image</label>
+            {{ form.image }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save All</button>
+    </form>
+</div>
+{% endblock %}
+{%block extra_js%}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const courseSearch = document.getElementById('courseSearch');
+    const courseSelect = document.getElementById('course');
+
+    courseSearch.addEventListener('keyup', function() {
+        const filter = courseSearch.value.toLowerCase();
+        const options = courseSelect.options;
+
+        for (let i = 0; i < options.length; i++) {
+            const optionText = options[i].text.toLowerCase();
+            options[i].style.display = optionText.includes(filter) ? '' : 'none';
+        }
+    });
+});
+</script>
+{%endblock%}

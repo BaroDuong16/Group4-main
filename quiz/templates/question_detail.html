@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Question Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ question.question_text }}</h2>
+
+    <h3>Answer Options</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Option Text</th>
+                <th>Is Correct</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if answer_options %}
+                {% for option in answer_options %}
+                <tr>
+                    <td>{{ option.option_text }}</td>
+                    <td>{{ option.is_correct|yesno:"Yes,No" }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="2">No answer options available.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+    <a href="{% url 'quiz:quiz_detail' question.quiz.pk %}" class="btn btn-secondary">Back</a>
+    
+    {% if answer_options %}
+        <!-- If there are existing options, show 'Edit Answer Option' -->
+        <a href="{% url 'quiz:answer_option_add' question.pk %}" class="btn btn-primary">Edit Answer Option</a>
+    {% else %}
+        <!-- If no options exist, show 'Add New Answer Option' -->
+        <a href="{% url 'quiz:answer_option_add' question.pk %}" class="btn btn-primary">Add New Answer Option</a>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'learning_path.css' %}">
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar for learning paths -->
+        <div class="col-md-3 sidebar p-4 bg-light shadow-sm rounded-3">
+           <h4 class="mb-3"><a href="{% url 'learning_path:learning_path_list' %}" class="text-dark">Learning Paths</a></h4>
+            <ul class="list-group list-group-flush">
+                {% for path in learning_paths %}
+                    <li class="list-group-item {% if path.id == learning_path.id %}bg-secondary text-white{% else %}bg-transparent{% endif %}">
+                        <a href="{% url 'learning_path:step_list' path.id %}" class="text-decoration-none {% if path.id == learning_path.id %}text-white{% else %}text-dark{% endif %}">
+                            {{ path.title }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">No learning paths available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Main content for steps -->
+        <div class="col-md-9">
+            <h1 class="text-center my-4">{{ learning_path.title }}</h1>
+
+            <div class="d-flex justify-content-end mb-3">
+                <a href="{% url 'learning_path:step_add' learning_path.id %}" class="btn btn-primary me-2">Add Step</a>
+                <a href="{% url 'learning_path:learning_path_list' %}" class="btn btn-outline-secondary">Back</a>
+            </div>
+
+            <div class="timeline">
+                <ol class="list-unstyled">
+                    {% for step in steps %}
+                        <li class="timeline-item p-3 mb-4 rounded-3 bg-white shadow-sm">
+                            <div class="row align-items-center">
+                                
+                                <h4 class="fw-bold text-secondary">{{ step.title }}</h4>
+                                <p class="text-muted">{{ step.description|truncatewords:20 }}</p>
+                                
+                                <div class="col-md-8 d-flex align-items-center">
+                                    {% for course in step.courses.all %}
+                                        <div class="col-md-2">
+                                            <div class="card h-100 shadow-sm">
+                                                {% if course.image %}
+                                                    <img src="{{ course.image.url }}" class="card-img-top img-fluid custom-img" alt="Course image">
+                                                {% else %}
+                                                    <img src="{% static 'images/default-course.jpeg' %}" class="card-img-top img-fluid custom-img" alt="Default course image">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title text-dark">{{ course.course_name }}</h5>
+                                                <p class="card-text">{{ course.description|truncatewords:15 }}</p>
+                                            </div>
+                                        </div>
+
+                                        
+                                    {% empty %}
+                                        <p class="text-muted">No courses for this step.</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-4 d-flex justify-content-end">
+                                    <a href="{% url 'learning_path:step_edit' learning_path.id step.id %}" class="btn btn-outline-dark me-2">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <form action="{% url 'learning_path:step_delete' learning_path.id step.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash-alt"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <p class="text-center text-muted">No steps available for this learning path.</p>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

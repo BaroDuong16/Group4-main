@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Learning Path</h1>
+<form method="post">
+    {% csrf_token %}
+    
+    <!-- Title Field -->
+    <div class="form-group">
+        <label for="{{ form.title.id_for_label }}">Title</label>
+        {{ form.title.errors }}
+        {{ form.title }}
+        <script>
+            document.getElementById("{{ form.title.id_for_label }}").classList.add("form-control");
+        </script>
+    </div>
+    
+    <!-- Description Field -->
+    <div class="form-group">
+        <label for="{{ form.description.id_for_label }}">Description</label>
+        {{ form.description.errors }}
+        {{ form.description }}
+        <script>
+            document.getElementById("{{ form.description.id_for_label }}").classList.add("form-control");
+        </script>
+    </div>
+
+    <!-- Creator Field -->
+    <div class="form-group">
+        <label for="{{ form.creator.id_for_label }}">Creator</label>
+        {{ form.creator.errors }}
+        {{ form.creator }}  <!-- Dropdown for selecting the creator -->
+        <script>
+            document.getElementById("{{ form.creator.id_for_label }}").classList.add("form-control");
+        </script>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'learning_path:learning_path_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

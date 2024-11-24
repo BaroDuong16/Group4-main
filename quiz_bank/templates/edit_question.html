@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load form_filters %}
+
+{% block title %}Edit Question{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4 border rounded" style="margin-bottom: 1.5rem !important;
+    padding: 15px;">
+    <h2>Edit Question</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ question_form.question_text.label_tag }}
+            {{ question_form.question_text|add_class:"form-control" }}
+        </div>
+        
+        {{ answer_formset.management_form }}
+        {% for answer_form in answer_formset %}
+            <div class="form-group">
+                {{ answer_form.id }}
+                {{ answer_form.option_text.label_tag }}
+                {{ answer_form.option_text|add_class:"form-control" }}
+                {{ answer_form.is_correct.label_tag }}
+                {{ answer_form.is_correct }}
+            </div>
+            {% if answer_form.errors %}
+            <div id="empty-form" class="form-group"></div>
+    <div class="alert alert-danger">
+        {% for error in answer_form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+        {% for field in answer_form %}
+            {% for error in field.errors %}
+                <p>{{ field.label }}: {{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endif %}
+        {% endfor %}
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <button type="button" class="btn btn-primary" id="add-more">Add answer</button>
+    </form>
+{% if quiz_form.errors %}
+{% for field in question_form %} {% for error in field.errors %}
+<span>wrong question</span>
+<ul>
+    <li>{{ error }}{{ field }}{{ forloop.counter }}</li>
+</ul>
+{% endfor %} {% endfor %}
+{% endif %}
+{% if answer_formset.errors %}
+{% for form in answer_formset %} 
+{% for field in form %}
+{% for error in field.errors %}
+<ul>
+    <li>{{ error }}{{ field }}{{ forloop.counter }}</li>
+</ul>
+{% endfor %} {% endfor %} {% endfor %}
+{% endif %}
+{% endblock %}

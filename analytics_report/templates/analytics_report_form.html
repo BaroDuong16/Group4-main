@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Analytics Report,Add New Analytics Report" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Edit Analytics Report,Add New Analytics Report" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.report_type.label_tag }}
+            {{ form.report_type|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.report_data.label_tag }}
+            {{ form.report_data|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.generated_by.label_tag }}
+            {{ form.generated_by|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'analytics_report:analytics_report_list' %}" class="btn btn-secondary">Back to Analytics Report List</a>
+    </form>
+</div>
+{% endblock %}

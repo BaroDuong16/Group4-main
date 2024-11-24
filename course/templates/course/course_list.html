@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- <head>
+    <link rel="stylesheet" type="text/css" href="{% static 'course/course.css' %}">
+</head> -->
+<body id="course-list">
+<div class="full-width-container bg-white p-6">
+    {% comment %} <h1 class="text-2xl font-bold mb-6 main-color-text">Courses</h1> {% endcomment %}
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="course-title font-bold mb-6 main-color-text">Courses</h1>
+
+        <!-- Search Form -->
+        <div class="row align-items-center mb-3">
+            <div class="col-md-8">
+                <form method="GET" action="{% url 'course:course_search' %}" class="d-flex">
+                    <input type="text" name="query" class="form-control me-2" placeholder="Search..." aria-label="Search">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                {% if is_instructor or user.is_superuser %}
+                    <a href="{% url 'course:course_add' %}" class="btn btn-primary">Add New Course</a>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        {% for course in page_obj %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-light">
+                <!-- Course Image -->
+
+                <div class="ratio ratio-16x9"> <!-- Aspect Ratio Wrapper -->
+                    {% if course.image %}
+                        <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.course_name }}" style="object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'course/images/chotbg.png' %}" alt="Default Image" class="course-image">
+
+                    {% endif %}
+                </div>
+
+
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <h5 class="card-title main-color-text">{{ course.course_name }}</h5>
+                    <p class="card-text text-muted">{{ course.description|truncatewords:20 }}</p>
+
+                    {% if not is_instructor %}
+                        <!-- Completion Progress Bar -->
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar main-color" role="progressbar" style="width: {{ course.completion_percent }}%;" aria-valuenow="{{ course.completion_percent }}" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ course.completion_percent }}% Complete</small>
+                    {% endif %}
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                    <a href="{% url 'course:course_detail' course.id %}" class="btn main-color btn-sm" title="View Details">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    {% if user.is_superuser or course.instructor == user %}
+                        <div>
+                            <a href="{% url 'course:course_edit_detail' course.id %}" class="btn btn-warning btn-sm me-2" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'course:course_delete' course.id %}" class="btn btn-danger btn-sm me-2" title="Delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+
+                            {% if course.published %}
+                                <a href="{% url 'course:toggle_publish' course.pk %}" class="btn btn-secondary" >Unpublish</a>
+                            {% else %}
+                                <a href="{% url 'course:toggle_publish' course.pk %}" class="btn btn-primary" style="background-color: #097969 !important;">Publish</a>
+
+                            {% endif %}
+
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-4">
+            No courses found.
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <nav aria-label="Page navigation" class="mb-6">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link main-color-text" href="?page=1" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link main-color-text" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><a class="page-link main-color">{{ num }}</a></li>
+                {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                    <li class="page-item"><a class="page-link main-color-text" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link main-color-text" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link main-color-text" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    {% if not is_instructor %}
+        <h3 class="text-xl font-semibold mb-4 main-color-text">Recommended Courses</h3>
+        <div id="recommendedCarousel" class="carousel slide" data-ride="carousel" data-interval="3000">
+            <div class="carousel-inner">
+                {% if recommended_courses %}
+                    {% for course in recommended_courses %}
+                        {% if forloop.counter0|divisibleby:3 %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <div class="row">
+                        {% endif %}
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                {% if course.image %}
+                                                    <img src="{{ course.image.url }}" alt="{{ course.course_name }}" class="course-image">
+                                                {% else %}
+                                                    <img src="{% static 'default_course_image.jpg' %}" alt="Default Image" class="course-image">
+                                                {% endif %}
+                                                <a href="{% url 'course:course_detail' course.id %}" class="card-link">
+                                                <h5 class="card-title">{{ course.course_name }}</h5>
+                                                <h6 class="card-subtitle mb-2 text-muted">Code: {{ course.course_code }}</h6>
+                                                <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                        {% if forloop.counter0|add:1|divisibleby:3 or forloop.last %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="carousel-item active">
+                        <div class="row">
+                            <div class="col-12">
+                                <p>No recommendations available at this time.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <a class="carousel-control-prev" href="#recommendedCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#recommendedCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    {% endif %}
+</div>
+</body>
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.1.1/svg.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#feedbackCarousel').carousel({
+        interval: 3000
+    });
+
+    // Enable carousel controls
+    $(".carousel-control-prev").click(function(){
+        $("#feedbackCarousel").carousel("prev");
+    });
+    $(".carousel-control-next").click(function(){
+        $("#feedbackCarousel").carousel("next");
+    });
+</script>
+{% endblock %}
+

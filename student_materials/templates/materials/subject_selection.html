@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Subject{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Select a Subject</h1>
+    <form method="GET" action="{% url 'student_materials:select_material' %}">
+        <div class="form-group">
+            <label for="subjectSelect">Choose a subject:</label>
+            <select id="subjectSelect" name="subject_id" class="form-control">
+                {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% empty %}
+                    <option value="">No subjects available</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">View Materials</button>
+    </form>
+</div>
+{% endblock %}

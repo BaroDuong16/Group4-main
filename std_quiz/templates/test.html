@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.quiz_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="quiz-header text-center">
+        <h1 class="display-4 mb-2">{{ quiz.quiz_title }}</h1>
+        <p class="text-muted lead">{{ quiz.quiz_description }}</p>
+    </div>
+
+    <!-- Phần hiển thị thời gian đếm ngược -->
+    <div class="alert alert-warning text-center fixed-timer shadow-sm" id="timer">
+        <span class="font-weight-bold">Time Remaining: </span><span id="time">00:00</span>
+    </div>
+    
+    <form method="POST" class="quiz-form mt-5">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+        <div class="card mb-4 shadow-sm question-card">
+            <div class="card-body">
+                <div class="d-flex align-items-start">
+                    <!-- Số thứ tự câu hỏi -->
+                    <h5 class="mr-2 question-number"><strong>Question {{ forloop.counter }}:</strong></h5>
+
+                    <!-- Nội dung câu hỏi -->
+                    <p class="question-text">{{ question.question_text|linebreaksbr }}</p>
+                </div>
+
+                {% if question.question_type == "TEXT" %}
+                    <textarea name="question_{{ question.id }}" rows="4" class="form-control mt-3" required placeholder="Enter your answer..."></textarea>
+                {% else %}
+                    <ul class="list-group mt-3">
+                        {% for option in question.answer_options.all %}
+                        <li class="list-group-item option-item">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ option.id }}" id="option_{{ option.id }}">
+                                <label class="form-check-label" for="option_{{ option.id }}">
+                                    {{ option.option_text }}
+                                </label>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="text-center">
+            <button type="submit" class="btn btn-lg btn-success submit-btn px-5 py-2">Submit Quiz</button>
+        </div>
+    </form>
+</div>
+
+<!-- CSS cho giao diện -->
+<style>
+    /* Toàn bộ trang */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f7f9fc;
+    }
+
+    .quiz-header h1 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .quiz-header p {
+        color: #777;
+    }
+
+    /* Timer cố định góc trên */
+    .fixed-timer {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        width: auto;
+        padding: 10px;
+        background-color: #ff6b6b;
+        color: #fff;
+        border-radius: 10px;
+        font-size: 1.2rem;
+    }
+
+    /* Card chứa câu hỏi */
+    .question-card {
+        border-radius: 15px;
+        border: none;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Số thứ tự câu hỏi */
+    .question-number {
+        color: #6c757d;
+    }
+
+    /* Nội dung câu hỏi */
+    .question-text {
+        font-size: 1.1rem;
+        color: #333;
+        margin-left: 10px;
+    }
+
+    /* Phong cách cho các lựa chọn */
+    .option-item {
+        border: none;
+        padding: 12px 18px;
+        background-color: #f7f9fc;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: background-color 0.2s ease;
+    }
+
+    .option-item:hover {
+        background-color: #e2e6ea;
+    }
+
+    .form-check-input {
+        margin-right: 10px;
+    }
+
+    /* Giao diện nút submit */
+    .submit-btn {
+        background-color: #00c851;
+        border: none;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        color: #fff;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .submit-btn:hover {
+        background-color: #007e33;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Form nhập liệu */
+    .form-control {
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #ced4da;
+        background-color: #f7f9fc;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+</style>
+
+<script>
+    let countdownTime = {{ quiz.time_limit|default:0 }} * 60;
+
+    function startTimer(duration) {
+        let timer = duration, minutes, seconds;
+        const display = document.getElementById('time');
+        
+        const interval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+            
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.textContent = minutes + ":" + seconds;
+
+            if (--timer < 0) {
+                clearInterval(interval);
+                document.querySelector('form').submit();
+            }
+        }, 1000);
+    }
+
+    window.onload = function () {
+        startTimer(countdownTime);
+    };
+</script>
+
+{% endblock %}

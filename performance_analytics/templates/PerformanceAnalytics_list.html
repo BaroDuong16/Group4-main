@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytic List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Analytic List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Analytics ID</th>
+                <th>User ID</th>
+                <th>Course ID</th>
+                <th>Average Score</th>
+                <th>Completion Rate</th>
+                <th>Predicted Performance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for analytic in analytics %}
+            <tr>
+                <td>{{ analytic.analytics_id }}</td>
+                <td>{{ analytic.user_id }}</td>
+                <td>{{ analytic.course_id }}</td>
+                <td>{{ analytic.average_score }}</td>
+                <td>{{ analytic.completion_rate }}</td>
+                <td>{{ analytic.predicted_performance }}</td>
+                <td>
+                    <a href="{% url 'performance_analytics:PerformanceAnalytics_detail' analytic.pk %}" class="btn btn-info btn-sm">Details</a>
+                    <a href="{% url 'performance_analytics:PerformanceAnalytics_edit' analytic.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                </td>                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'Performance_Analytics:PerformanceAnalytics_add' %}" class="btn btn-primary">Add New Analytic</a>
+</div>
+{% endblock %}
+
+

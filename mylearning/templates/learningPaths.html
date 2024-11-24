@@ -1,0 +1,53 @@
+{% extends 'basePortal.html' %}
+{% load static %}
+{% block title %}My Learning{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'mylearning.css' %}">
+<div class="container bg-light my-4 p-4 rounded shadow-sm">
+    <h1 class="mb-3">My Learning</h1>
+    <!-- Include the tabs here -->
+    {% include "mylearning_tabs.html" %}
+</div>
+
+<main class="container">
+    <div class="row">
+        {% for path in learning_paths %}
+            <div class="col-md-12 mb-4"> <!-- Two columns for learning paths -->
+                <div class="path-content p-3 border rounded bg-light">
+                    <h4>{{ path.title }}</h4> <!-- Display the title of the Learning Path -->
+                    <p>{{ path.description }}</p> <!-- Display the description -->
+                    
+                    <!-- Display steps associated with this learning path -->
+                    {% if path.steps.all %}
+                        <ul>
+                            {% for step in path.steps.all %}
+                                <li>
+                                    <strong>{{ step.title }}</strong>: {{ step.description }}
+                                    <br>
+                                    <!-- Optional: Link to courses associated with this step -->
+                                    {% if step.courses.all %}
+                                        <em>Courses:</em>
+                                        <ul>
+                                            {% for course in step.courses.all %}
+                                                <li>{{ course.course_name }}</li> <!-- Assuming Course model has a title field -->
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No steps defined for this learning path.</p>
+                    {% endif %}
+
+                   
+                </div>
+            </div>
+        {% empty %}
+            <p>You have no learning paths yet.</p>
+        {% endfor %}
+    </div>
+
+</main>
+{% endblock %}

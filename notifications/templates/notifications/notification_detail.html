@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Tiêu đề trang -->
+    <h2 class="text-center text-primary mb-4">Notification Detail</h2>
+    
+    <!-- Thẻ thông báo với hiệu ứng shadow và border mềm mại -->
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-5">
+            <!-- Tiêu đề thông báo -->
+            <h3 class="font-weight-bold text-dark mb-4">{{ notification.title }}</h3>
+            
+            <!-- Thông tin người gửi và thời gian tạo -->
+            <div class="d-flex justify-content-between align-items-center text-muted mb-4">
+                <span><i class="fas fa-user mr-2"></i> <strong>From:</strong> {{ notification.from_user.get_full_name|default:"Admin" }}</span>
+                <span><i class="fas fa-calendar-alt mr-2"></i> {{ notification.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+
+            <!-- Nội dung thông báo với spacing đẹp mắt -->
+            <p class="card-text text-dark" style="line-height: 1.7;">
+                {{ notification.message|linebreaks }}
+            </p>
+
+            <!-- Tải xuống tệp đính kèm nếu có -->
+            {% if notification.file %}
+            <div class="mt-4 text-center">
+                <a href="{% url 'download_file' notification.id %}" class="btn btn-outline-primary btn-lg" target="_blank">
+                    <i class="fas fa-download"></i> Download Attachment
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Nút quay lại với spacing hợp lý -->
+    <div class="text-center mt-5">
+        <a href="{% url 'notifications_list' %}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left"></i> Back to Notifications
+        </a>
+    </div>
+</div>
+{% endblock %}

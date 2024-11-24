@@ -1,0 +1,21 @@
+{% extends 'basePortal.html' %}
+{% load static %}
+{% block title %}My Learning{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'mylearning.css' %}">
+<div class="container bg-light my-4 p-4 rounded shadow-sm">
+    <h1 class="mb-3">My Learning</h1>
+   
+
+    <!-- Include the tabs here -->
+    {% include "mylearning_tabs.html" %}
+
+</div>
+
+<main class="container">
+    <div class="row">
+    No learning tools
+    </div>
+</main>
+{% endblock %}
