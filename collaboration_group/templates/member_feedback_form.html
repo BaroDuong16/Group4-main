@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}
-    Delete Collaboration Group
-{% endblock %}
+{% block title %}Feedback{% endblock %}
 
 {% block content %}
+<div class="container mt-5">
+    {% if request.user.is_superuser %}
+    <h1 class="mb-4 text-center">Admin Collaboration Groups</h1>
+    {% else %}
+    <h1 class="mb-4 text-center">Collaboration Groups</h1>
+    {% endif %}
 <!-- Navigation Tabs -->
 <ul class="nav nav-tabs mb-4">
     {% if not request.user.is_superuser %}
@@ -42,17 +46,13 @@
         </li>
     {% endif %}
 </ul>
-    <div class="container mt-5">
-        <div class="alert alert-danger" role="alert">
-            <h1 class="text-center">Are you sure you want to delete "<strong>{{ collaboration_group.group_name }}</strong>"?</h1>
-        </div>
-
-        <div class="d-flex justify-content-center">
-            <form method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger me-2">Confirm</button>
-                <a href="{% url 'collaboration_group:collaboration_group_list' %}" class="btn btn-secondary">Cancel</a>
-            </form>
-        </div>
-    </div>
+</div>
+<div class="container mt-5">
+    <h2>Leave Feedback</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+    </form>
+</div>
 {% endblock %}

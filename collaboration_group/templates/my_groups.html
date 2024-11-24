@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}My Groups{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if request.user.is_superuser %}
+    <h1 class="mb-4 text-center">Admin Collaboration Groups</h1>
+    {% else %}
+    <h1 class="mb-4 text-center">Collaboration Groups</h1>
+    {% endif %}
+
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4">
+    {% if not request.user.is_superuser %}
+        <!-- List of Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">List of Groups</a>
+        </li>
+
+        <!-- My Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'my_groups' %}active{% endif %}" href="{% url 'collaboration_group:my_groups' %}">My Groups</a>
+        </li>
+    {% endif %}
+
+    <!-- Create Group (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_add' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_add' %}">Create Group</a>
+    </li>
+
+    <!-- Leave Feedback (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}" href="{% url 'collaboration_group:feedback' %}">Leave Feedback</a>
+    </li>
+
+    <!-- Superuser-only tabs -->
+    {% if request.user.is_superuser %}
+        <!-- Manage Groups (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">Manage Groups</a>
+        </li>
+
+        <!-- View Feedbacks (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view_feedback' %}active{% endif %}" href="{% url 'collaboration_group:view_feedback' %}">View Feedbacks</a>
+        </li>
+    {% endif %}
+</ul>
+
+    <table class="table table-striped table-bordered mt-3">
+        <thead class="table-white">
+            <tr>
+                <th>No</th>
+                <th>Group Name</th>
+                <th>Courses</th>
+                <th>Created By</th>
+                <th>Date Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in page_obj %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ group.group_name }}</td>
+                    <td>
+                        {% if group.courses.all %}
+                            {% for course in group.courses.all %}
+                                {{ course.course_name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ group.created_by }}</td>
+                    <td>{{ group.created_at|date:"F j, Y" }}</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'collaboration_group:check_members' group.id %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-users"></i> Check Members
+                            </a>
+                            <a href="{% url 'collaboration_group:leave_group' group.id %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-sign-out-alt"></i> Leave Group
+                            </a>
+                            {% if user == group.created_by %}
+                                <a href="{% url 'collaboration_group:manage_group' group.id %}" class="btn btn-info btn-sm">
+                                    <i class="fas fa-cog"></i> Manage Group
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No collaboration groups available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-container d-flex justify-content-center mt-4">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

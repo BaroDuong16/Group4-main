@@ -1,43 +1,79 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Collaboration Group Form
+    Add Collaboration Group
 {% endblock %}
 
 {% block content %}
+<div class="container mt-5">
+    {% if request.user.is_superuser %}
+    <h1 class="mb-4 text-center">Admin Collaboration Groups</h1>
+    {% else %}
+    <h1 class="mb-4 text-center">Collaboration Groups</h1>
+    {% endif %}
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4">
+    {% if not request.user.is_superuser %}
+        <!-- List of Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">List of Groups</a>
+        </li>
+
+        <!-- My Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'my_groups' %}active{% endif %}" href="{% url 'collaboration_group:my_groups' %}">My Groups</a>
+        </li>
+    {% endif %}
+
+    <!-- Create Group (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_add' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_add' %}">Create Group</a>
+    </li>
+
+    <!-- Leave Feedback (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}" href="{% url 'collaboration_group:feedback' %}">Leave Feedback</a>
+    </li>
+
+    <!-- Superuser-only tabs -->
+    {% if request.user.is_superuser %}
+        <!-- Manage Groups (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">Manage Groups</a>
+        </li>
+
+        <!-- View Feedbacks (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view_feedback' %}active{% endif %}" href="{% url 'collaboration_group:view_feedback' %}">View Feedbacks</a>
+        </li>
+    {% endif %}
+</ul>
+</div>
     <div class="container mt-5">
-        <h1 class="mb-4 text-center">Collaboration Group Form</h1>
-        <form method="post">
-            {% csrf_token %}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Please fill in the details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        {% for field in form %}
-                            <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
-                            <div class="input-group mb-3">
-                                {{ field }}  <!-- Render the multi-select field -->
-                                {% if field.help_text %}
-                                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                                {% endif %}
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="text-center mb-4">Add Collaboration Group</h1>
+
+                <!-- Card for Form -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <!-- Display the form fields -->
+                            {{ form.as_p }}
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary mt-3">
+                                    <i class="fas fa-save"></i> Save Collaboration Group
+                                </button>
+                                <a href="{% url 'collaboration_group:collaboration_group_list' %}" class="btn btn-secondary mt-3">
+                                    <i class="fas fa-arrow-left"></i> Cancel
+                                </a>
                             </div>
-                            {% if field.errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    {% for error in field.errors %}
-                                        {{ error }}<br>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <a href="{% url 'collaboration_group:collaboration_group_list' %}" class="btn btn-secondary">Cancel</a>
+                        </form>
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 {% endblock %}

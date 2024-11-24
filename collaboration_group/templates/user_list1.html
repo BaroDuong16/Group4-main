@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if request.user.is_superuser %}
+    <h1 class="mb-4 text-center">Admin Collaboration Groups</h1>
+    {% else %}
+    <h1 class="mb-4 text-center">Collaboration Groups</h1>
+    {% endif %}
+    <!-- Navigation Tabs -->
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4">
+    {% if not request.user.is_superuser %}
+        <!-- List of Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">List of Groups</a>
+        </li>
+
+        <!-- My Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'my_groups' %}active{% endif %}" href="{% url 'collaboration_group:my_groups' %}">My Groups</a>
+        </li>
+    {% endif %}
+
+    <!-- Create Group (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_add' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_add' %}">Create Group</a>
+    </li>
+
+    <!-- Leave Feedback (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}" href="{% url 'collaboration_group:feedback' %}">Leave Feedback</a>
+    </li>
+
+    <!-- Superuser-only tabs -->
+    {% if request.user.is_superuser %}
+        <!-- Manage Groups (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">Manage Groups</a>
+        </li>
+
+        <!-- View Feedbacks (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view_feedback' %}active{% endif %}" href="{% url 'collaboration_group:view_feedback' %}">View Feedbacks</a>
+        </li>
+    {% endif %}
+</ul>
+</div>
+    <div class="container mt-4">
+        <h1 class="mb-4 ">Add Users to Group: <strong>{{ group.group_name }}</strong></h1>
+
+        <!-- Search and Date Range Filter Form -->
+        <form method="get" class="mb-4">
+            <div class="row g-3 justify-content-center">
+                <!-- Search by Username or Email -->
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" name="search" placeholder="Search by username or email" value="{{ request.GET.search }}" class="form-control" aria-label="Search">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                </div>
+
+                <!-- Filter by Start Date -->
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Start Date</span>
+                        <input type="date" name="start_date" value="{{ request.GET.start_date }}" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Filter by End Date -->
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text">End Date</span>
+                        <input type="date" name="end_date" value="{{ request.GET.end_date }}" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-md-2 text-center">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter"></i> Filter</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Main Form for Adding Users -->
+        <form method="post">
+            {% csrf_token %}
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">
+                            <button type="button" id="select-all" class="btn btn-outline-secondary btn-sm">Select All</button>
+                        </th>
+                        <th scope="col">#</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Time Joined</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="users" value="{{ user.id }}" class="user-checkbox">
+                            </td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.date_joined|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'collaboration_group:add_member' group.id user.id %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-user-plus"></i> Add 
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No users available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Add Selected Members Button and Return Button -->
+
+            <div class="d-flex justify-content-end gap-3">
+                <!-- Button to submit selected members -->
+                <button type="submit" class="btn btn-success mt-3">
+                    <i class="fas fa-user-check"></i> Add Selected Members
+                </button>
+            
+                <!-- Button to return to the manage group page -->
+                <a href="{% url 'collaboration_group:manage_group' group.id %}" class="btn btn-secondary btn-sm mt-3">
+                    <i class="fas fa-arrow-left"></i> Return
+                </a>
+            </div>
+            
+
+
+        </form>
+    </div>
+
+    <!-- JavaScript for Select All functionality -->
+    <script>
+        document.getElementById('select-all').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            const allSelected = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allSelected;
+            });
+        });
+    </script>
+{% endblock %}
