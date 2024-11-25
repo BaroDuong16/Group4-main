@@ -1,5 +1,5 @@
 from django import forms
-from .models import DiscussionThread,ThreadComments
+from .models import DiscussionThread,ThreadComments,ReportThread
 from user.models import User  # Assuming you have a User model
 from course.models import Course
 class ThreadForm(forms.ModelForm):
@@ -13,3 +13,8 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = ThreadComments
         fields = ['comment_text','image']
+
+class ThreadReportForm(forms.ModelForm):
+    class Meta:
+        model = ReportThread
+        fields = ['reason','additional_comments']

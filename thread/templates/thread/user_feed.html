@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>My Feed</h1>
+    <div class="create-thread-btn-container">
+        <a href="{% url 'thread:create_thread' %}" class="add-comment-btn create-thread-btn">Create New Thread</a>
+    </div>
+    <div class="thread-feed">
+        {% if page_obj %}
+            {% for thread in page_obj %}
+                <div class="thread-card">
+                    <div class="thread-header">
+                        <h2 class="thread-title">{{ thread.thread_title }}</h2>
+                        <p class="thread-meta">Created on: {{ thread.created|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                    <div class="thread-content">
+                        <p>{{ thread.thread_content }}</p>
+                    </div>
+
+                    <div class="comments-section">
+                        <p class="comments-count">Comments ({{ thread.comments.count }}):</p>
+                    </div>
+
+                    <div class="comment-footer">
+                        <a href="{% url 'thread:thread_detail' thread.id %}" class="add-comment-btn">Detail</a>
+                        <a href="{% url 'thread:delete_thread' thread.id %}" class="delete-btn">Delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-threads-message">You have not created any threads yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+
+    <style>
+        /* Create New Thread Button Style (Now same as Detail button) */
+        .create-thread-btn {
+            background-color: #3b5998;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            display: inline-block;
+        }
+
+        .create-thread-btn:hover {
+            background-color: #2d4373;
+        }
+
+        /* Thread Feed Container */
+        .thread-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        /* Thread Card Style */
+        .thread-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Hover Effect for Thread Card */
+        .thread-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Thread Header */
+        .thread-header {
+            margin-bottom: 15px;
+        }
+
+        .thread-title {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .thread-meta {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        /* Thread Content */
+        .thread-content {
+            font-size: 1em;
+            color: #444;
+            margin-bottom: 20px;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 20px;
+        }
+
+        .comments-count {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        /* Comment Footer */
+        .comment-footer {
+            margin-top: 10px;
+        }
+
+        .add-comment-btn {
+            background-color: #3b5998;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            display: inline-block;
+        }
+
+        .add-comment-btn:hover {
+            background-color: #2d4373;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-left: 10px;
+            display: inline-block;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* No Threads Message */
+        .no-threads-message {
+            font-size: 1.2em;
+            color: #888;
+            text-align: center;
+        }
+
+        /* Pagination */
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 5px 10px;
+            margin: 0 5px;
+            text-decoration: none;
+            color: #3b5998;
+        }
+
+        .pagination .current {
+            font-weight: bold;
+            color: #888;
+        }
+
+        .pagination .step-links a:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+{% endblock %}

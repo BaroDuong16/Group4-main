@@ -39,6 +39,30 @@
                     <input type="hidden" name="reaction_type" value="love">
                     <button type="submit" class="btn btn-outline-danger btn-sm">❤️ Love ({{ loves_count }})</button>
                 </form>
+                <form method="post" action="{% url 'thread:react_to_thread' thread.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" name="reaction_type" value="haha" class="btn btn-outline-warning btn-sm">
+                        😂 Haha ({{ haha_count }})
+                    </button>
+                </form>
+                <form method="post" action="{% url 'thread:react_to_thread' thread.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" name="reaction_type" value="wow" class="btn btn-outline-info btn-sm">
+                        😮 Wow ({{ wow_count }})
+                    </button>
+                </form>
+                <form method="post" action="{% url 'thread:react_to_thread' thread.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" name="reaction_type" value="sad" class="btn btn-outline-secondary btn-sm">
+                        😢 Sad ({{ sad_count }})
+                    </button>
+                </form>
+                <form method="post" action="{% url 'thread:react_to_thread' thread.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" name="reaction_type" value="angry" class="btn btn-outline-dark btn-sm">
+                        😡 Angry ({{ angry_count }})
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -71,17 +95,45 @@
                                 <form method="post" action="{% url 'thread:react_to_comment' item.comment.pk %}" class="d-inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="reaction_type" value="like">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">👍 Like ({{ item.likes_count }})</button>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">👍 Like ({{ item.comment_likes_count}})</button>
                                 </form>
                                 <form method="post" action="{% url 'thread:react_to_comment' item.comment.pk %}" class="d-inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="reaction_type" value="love">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">❤️ Love ({{ item.loves_count }})</button>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">❤️ Love ({{ item.comment_loves_count}})</button>
+                                </form>
+                                <form method="post" action="{% url 'thread:react_to_comment' item.comment.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reaction_type" value="haha">
+                                    <button type="submit" class="btn btn-outline-warning btn-sm">
+                                        😂 Haha ({{ item.comment_haha_count }})
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'thread:react_to_comment' item.comment.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reaction_type" value="wow">
+                                    <button type="submit" class="btn btn-outline-info btn-sm">
+                                        😮 Wow ({{ item.comment_wow_count }})
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'thread:react_to_comment' item.comment.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reaction_type" value="sad">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        😢 Sad ({{ item.comment_sad_count }})
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'thread:react_to_comment' item.comment.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="reaction_type" value="angry">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm">
+                                        😡 Angry ({{ item.comment_angry_count }})
+                                    </button>
                                 </form>
                             </div>
 
                             <!-- Edit and Delete options for comment owner -->
-                            {% if request.user == item.comment.user %}
+                            {% if request.user == item.comment.user or request.user.is_superuser %}
                             <div class="d-flex justify-content-start mt-2">
                                 <a href="{% url 'thread:update_comment' thread.pk item.comment.pk %}" class="btn btn-sm btn-outline-warning me-2">
                                     <i class="fas fa-edit"></i> Edit
@@ -140,7 +192,7 @@ function previewImage(event) {
         reader.onload = function(e) {
             imagePreview.src = e.target.result;
             imagePreviewBox.style.display = 'block';
-            commentText.value += `<img src="${e.target.result}" alt="Uploaded Image" style="max-width: 100%; border-radius: 10px;">\n`;
+            commentText.value += `<img src="${e.target.result}" alt="Uploaded Image" style="max-width: 65%; border-radius: 10px;">\n`;
 
         }
         
