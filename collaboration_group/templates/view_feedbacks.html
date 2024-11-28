@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {% extends 'base.html' %}
 
 {% block content %}
@@ -133,3 +134,140 @@
     </nav>
 </div>
 {% endblock %}
+=======
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>All Feedbacks</h2>
+
+    <!-- Filter by Group -->
+    <form method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="groupFilter" class="form-label">Filter by Group</label>
+                <select id="groupFilter" name="group" class="form-select">
+                    <option value="">All Groups</option>
+                    {% for group in groups %}
+                        <option value="{{ group.id }}" {% if group.id|stringformat:"s" == selected_group %}selected{% endif %}>
+                            {{ group.group_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 align-self-end">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Display Group Feedback -->
+    <h3>Group Feedback</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Group</th>
+                <th>Submitted By</th>
+                <th>Engagement</th>
+                <th>Collaboration Quality</th>
+                <th>Goal Achievement</th>
+                <th>Comments</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for feedback in group_feedbacks %}
+            <tr>
+                <td>{{ feedback.group.group_name }}</td>
+                <td>{{ feedback.submitted_by.username }}</td>
+                <td>{{ feedback.group_engagement }}</td>
+                <td>{{ feedback.collaboration_quality }}</td>
+                <td>{{ feedback.goal_achievement }}</td>
+                <td>{{ feedback.comments|default:"N/A" }}</td>
+                <td>{{ feedback.created_at|date:"F j, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No group feedback available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination for Group Feedback -->
+    <nav>
+        <ul class="pagination">
+            {% if group_feedbacks.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?group_feedback_page={{ group_feedbacks.previous_page_number }}&group={{ selected_group }}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ group_feedbacks.number }} of {{ group_feedbacks.paginator.num_pages }}</span>
+            </li>
+            {% if group_feedbacks.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?group_feedback_page={{ group_feedbacks.next_page_number }}&group={{ selected_group }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Display Member Feedback -->
+    <h3>Member Feedback</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Member</th>
+                <th>Group</th>
+                <th>Submitted By</th>
+                <th>Teamwork</th>
+                <th>Reliability</th>
+                <th>Leadership</th>
+                <th>Communication</th>
+                <th>Comments</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for feedback in member_feedbacks %}
+            <tr>
+                <td>{{ feedback.member.username }}</td>
+                <td>{{ feedback.group.group_name }}</td>
+                <td>{{ feedback.submitted_by.username }}</td>
+                <td>{{ feedback.teamwork }}</td>
+                <td>{{ feedback.reliability }}</td>
+                <td>{{ feedback.leadership }}</td>
+                <td>{{ feedback.communication }}</td>
+                <td>{{ feedback.comments|default:"N/A" }}</td>
+                <td>{{ feedback.created_at|date:"F j, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">No member feedback available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination for Member Feedback -->
+    <nav>
+        <ul class="pagination">
+            {% if member_feedbacks.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?member_feedback_page={{ member_feedbacks.previous_page_number }}&group={{ selected_group }}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ member_feedbacks.number }} of {{ member_feedbacks.paginator.num_pages }}</span>
+            </li>
+            {% if member_feedbacks.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?member_feedback_page={{ member_feedbacks.next_page_number }}&group={{ selected_group }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+>>>>>>> Stashed changes

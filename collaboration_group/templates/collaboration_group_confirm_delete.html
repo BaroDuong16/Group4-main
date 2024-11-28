@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {% extends 'base.html' %}
 
 {% block title %}
@@ -56,3 +57,63 @@
         </div>
     </div>
 {% endblock %}
+=======
+{% extends 'base.html' %}
+
+{% block title %}
+    Delete Collaboration Group
+{% endblock %}
+
+{% block content %}
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4">
+    {% if not request.user.is_superuser %}
+        <!-- List of Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">List of Groups</a>
+        </li>
+
+        <!-- My Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'my_groups' %}active{% endif %}" href="{% url 'collaboration_group:my_groups' %}">My Groups</a>
+        </li>
+    {% endif %}
+
+    <!-- Create Group (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_add' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_add' %}">Create Group</a>
+    </li>
+
+    <!-- Leave Feedback (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}" href="{% url 'collaboration_group:feedback-selection' %}">Leave Feedback</a>
+    </li>
+
+    <!-- Superuser-only tabs -->
+    {% if request.user.is_superuser %}
+        <!-- Manage Groups (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">Manage Groups</a>
+        </li>
+
+        <!-- View Feedbacks (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view_feedback' %}active{% endif %}" href="{% url 'collaboration_group:view_feedback' %}">View Feedbacks</a>
+        </li>
+    {% endif %}
+</ul>
+    <div class="container mt-5">
+        <div class="alert alert-danger" role="alert">
+            <h1 class="text-center">Are you sure you want to delete "<strong>{{ collaboration_group.group_name }}</strong>"?</h1>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger me-2">Confirm</button>
+                <a href="{% url 'collaboration_group:collaboration_group_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+>>>>>>> Stashed changes

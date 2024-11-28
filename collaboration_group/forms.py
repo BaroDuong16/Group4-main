@@ -64,4 +64,9 @@ class MemberFeedbackForm(forms.ModelForm):
         group = kwargs.pop('group', None)
         super().__init__(*args, **kwargs)
         if group:
+<<<<<<< Updated upstream
             self.fields['member'].queryset = group.members.all()
+=======
+            # Filter the member field queryset to include only users who are members of the group
+            self.fields['member'].queryset = User.objects.filter(group_memberships__group=group)
+>>>>>>> Stashed changes

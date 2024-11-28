@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'group_list' %}active{% endif %}" href="{% url 'reports:group_list' %}">Group List</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'course_distribution' %}active{% endif %}" href="{% url 'reports:course_distribution' %}">Course Distribution</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'group_performance' %}active{% endif %}" href="{% url 'reports:group_performance' %}">Group Performance</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'member_feedback' %}active{% endif %}" href="{% url 'reports:member_feedback' %}">Member Feedback</a>
+    </li>
+</ul>
+
+<div class="container mt-4">
+    <h1>Member Feedback</h1>
+
+    <div class="row">
+        <!-- Chart Section -->
+        <div class="col-md-6 d-flex justify-content-center align-items-center">
+            <canvas id="memberFeedbackChart" style="max-width: 100%; width: 400px; height: 400px;"></canvas>
+        </div>
+
+        <!-- Table Section -->
+        <div class="col-md-6">
+            <form method="get">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Member</th>
+                            <th>Teamwork</th>
+                            <th>Reliability</th>
+                            <th>Leadership</th>
+                            <th>Communication</th>
+                            <th>Average</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <td>
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input" 
+                                    id="member{{ member.member__id }}" 
+                                    name="members" 
+                                    value="{{ member.member__id }}"
+                                    {% if member.member__id in selected_members %}checked{% endif %}>
+                            </td>
+                            <td>{{ member.member__username }}</td>
+                            <td>{{ member.avg_teamwork|floatformat:2 }}</td>
+                            <td>{{ member.avg_reliability|floatformat:2 }}</td>
+                            <td>{{ member.avg_leadership|floatformat:2 }}</td>
+                            <td>{{ member.avg_communication|floatformat:2 }}</td>
+                            <td>{{ member.avg_overall|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary mt-2">Update Chart</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('memberFeedbackChart').getContext('2d');
+
+    const memberData = {
+        labels: ['Teamwork', 'Reliability', 'Leadership', 'Communication'],
+        datasets: [
+            {% for member in members %}
+            {
+                label: "{{ member.member__username }}",
+                data: [
+                    {{ member.avg_teamwork|floatformat:2 }},
+                    {{ member.avg_reliability|floatformat:2 }},
+                    {{ member.avg_leadership|floatformat:2 }},
+                    {{ member.avg_communication|floatformat:2 }}
+                ],
+                fill: true,
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(153, 102, 255, 1)'
+            },
+            {% endfor %}
+        ]
+    };
+
+    new Chart(ctx, {
+        type: 'radar',
+        data: memberData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { display: true },
+                    suggestedMin: 0,
+                    suggestedMax: 5
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return context.dataset.label + ': ' + context.raw;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -21,6 +21,12 @@ urlpatterns = [
 
     # User-specific and feedback views
     path('my-groups/', views.my_groups_view, name='my_groups'),
+<<<<<<< Updated upstream
     path('leave-feedback/<int:group_id>/', views.leave_feedback, name='leave_feedback'),
+=======
+    path('feedback/<int:group_id>/', views.feedback_selection_view, name='feedback_selection'),
+    path('feedback/group/<int:group_id>/', views.group_feedback_view, name='group_feedback'),
+    path('feedback/member/<int:group_id>/', views.member_feedback_view, name='member_feedback'),
+>>>>>>> Stashed changes
     path('view-feedbacks/', views.view_feedbacks, name='view_feedbacks'),
 ]

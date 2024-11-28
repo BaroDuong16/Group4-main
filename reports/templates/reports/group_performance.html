@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'group_list' %}active{% endif %}" href="{% url 'reports:group_list' %}">Group List</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'course_distribution' %}active{% endif %}" href="{% url 'reports:course_distribution' %}">Course Distribution</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'group_performance' %}active{% endif %}" href="{% url 'reports:group_performance' %}">Group Performance</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'member_feedback' %}active{% endif %}" href="{% url 'reports:member_feedback' %}">Member Feedback</a>
+    </li>
+</ul>
+
+<div class="container mt-4">
+    <h1>Group Performance</h1>
+
+    <div class="row">
+        <!-- Chart Section -->
+        <div class="col-md-8">
+            <canvas id="groupPerformanceChart"></canvas>
+        </div>
+
+        <!-- Table Section -->
+        <div class="col-md-4">
+            <form method="get">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Group Name</th>
+                            <th>Engagement</th>
+                            <th>Collaboration</th>
+                            <th>Goal Achievement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group in groups %}
+                        <tr>
+                            <td>
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input" 
+                                    id="group{{ group.group__id }}" 
+                                    name="groups" 
+                                    value="{{ group.group__id }}"
+                                    {% if group.group__id in selected_groups %}checked{% endif %}>
+                            </td>
+                            <td>{{ group.group__group_name }}</td>
+                            <td>{{ group.avg_engagement|floatformat:2 }}</td>
+                            <td>{{ group.avg_collaboration|floatformat:2 }}</td>
+                            <td>{{ group.avg_goal_achievement|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary mt-2">Update Chart</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('groupPerformanceChart').getContext('2d');
+
+    const groupData = {
+        labels: ['Engagement', 'Collaboration', 'Goal Achievement'],
+        datasets: [
+            {% for group in groups %}
+            {
+                label: "{{ group.group__group_name }}",
+                data: [
+                    {{ group.avg_engagement|floatformat:2 }},
+                    {{ group.avg_collaboration|floatformat:2 }},
+                    {{ group.avg_goal_achievement|floatformat:2 }}
+                ],
+                fill: true,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(75, 192, 192, 1)'
+            },
+            {% endfor %}
+        ]
+    };
+
+    new Chart(ctx, {
+        type: 'radar',
+        data: groupData,
+        options: {
+            scales: {
+                r: {
+                    angleLines: { display: true },
+                    suggestedMin: 0,
+                    suggestedMax: 5
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return context.dataset.label + ': ' + context.raw;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

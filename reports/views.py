@@ -15,6 +15,86 @@ from django.utils.dateformat import DateFormat
 from django.shortcuts import render
 import plotly.graph_objs as go
 from django.utils.timezone import make_aware
+from django.shortcuts import render
+from django.db.models import Count
+from collaboration_group.models import CollaborationGroup, GroupFeedback, MemberFeedback
+from django.db.models import Avg
+from django.db.models import F
+
+@login_required
+def group_list(request):
+    groups = CollaborationGroup.objects.annotate(member_count=Count('members')).all()
+    return render(request, 'reports/group_list.html', {
+        'groups': groups,
+        'active_tab': 'group_list',
+    })
+
+
+@login_required
+def course_distribution(request):
+    # Aggregate groups by course name
+    courses = (
+        CollaborationGroup.objects.values('courses__course_name')  # Use 'courses' for the ManyToManyField
+        .annotate(count=Count('id'))  # Count the number of groups associated with each course
+        .order_by('-count')  # Optional: Order by count descending
+    )
+    return render(request, 'reports/course_distribution.html', {
+        'courses': courses,
+        'active_tab': 'course_distribution',
+    })
+
+@login_required
+def group_performance(request):
+    # Get selected group IDs from the request
+    selected_groups = request.GET.getlist('groups')
+    
+    # If groups are selected, filter based on those; otherwise, show all groups
+    group_feedbacks = GroupFeedback.objects.filter(group_id__in=selected_groups) if selected_groups else GroupFeedback.objects.all()
+    
+    # Aggregate average feedback ratings for the selected groups
+    groups = group_feedbacks.values('group__id', 'group__group_name').annotate(
+        avg_engagement=Avg('group_engagement'),
+        avg_collaboration=Avg('collaboration_quality'),
+        avg_goal_achievement=Avg('goal_achievement')
+    )
+
+    # Fetch all groups for the toggle options
+    all_groups = CollaborationGroup.objects.all()
+
+    return render(request, 'reports/group_performance.html', {
+        'groups': groups,
+        'all_groups': all_groups,
+        'selected_groups': [int(group_id) for group_id in selected_groups],
+        'active_tab': 'group_performance',
+    })
+
+@login_required
+def member_feedback(request):
+    selected_members = request.GET.getlist('members')
+
+    # Query member feedback and calculate averages for each metric
+    member_feedbacks = MemberFeedback.objects.values(
+        member__id=F('member__id'),
+        member__username=F('member__username')
+    ).annotate(
+        avg_teamwork=Avg('teamwork'),
+        avg_reliability=Avg('reliability'),
+        avg_leadership=Avg('leadership'),
+        avg_communication=Avg('communication'),
+        avg_overall=(
+            Avg('teamwork') + Avg('reliability') + Avg('leadership') + Avg('communication')
+        ) / 4.0
+    )
+
+    if selected_members:
+        member_feedbacks = member_feedbacks.filter(member__id__in=selected_members)
+
+    return render(request, 'reports/member_feedback.html', {
+        'members': member_feedbacks,
+        'selected_members': [int(member_id) for member_id in selected_members],
+        'active_tab': 'member_feedback',
+    })
+
 @login_required
 def user_duration_login(request):
     user = request.user

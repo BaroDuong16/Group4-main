@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {% extends 'base.html' %}
 
 {% block title %}
@@ -77,3 +78,84 @@
         </div>
     </div>
 {% endblock %}
+=======
+{% extends 'base.html' %}
+
+{% block title %}
+    Add Collaboration Group
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if request.user.is_superuser %}
+    <h1 class="mb-4 text-center">Admin Collaboration Groups</h1>
+    {% else %}
+    <h1 class="mb-4 text-center">Collaboration Groups</h1>
+    {% endif %}
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4">
+    {% if not request.user.is_superuser %}
+        <!-- List of Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">List of Groups</a>
+        </li>
+
+        <!-- My Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'my_groups' %}active{% endif %}" href="{% url 'collaboration_group:my_groups' %}">My Groups</a>
+        </li>
+    {% endif %}
+
+    <!-- Create Group (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_add' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_add' %}">Create Group</a>
+    </li>
+
+    <!-- Leave Feedback (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}" href="{% url 'collaboration_group:feedback' %}">Leave Feedback</a>
+    </li>
+
+    <!-- Superuser-only tabs -->
+    {% if request.user.is_superuser %}
+        <!-- Manage Groups (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">Manage Groups</a>
+        </li>
+
+        <!-- View Feedbacks (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view_feedback' %}active{% endif %}" href="{% url 'collaboration_group:view_feedback' %}">View Feedbacks</a>
+        </li>
+    {% endif %}
+</ul>
+</div>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="text-center mb-4">Add Collaboration Group</h1>
+
+                <!-- Card for Form -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <!-- Display the form fields -->
+                            {{ form.as_p }}
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary mt-3">
+                                    <i class="fas fa-save"></i> Save Collaboration Group
+                                </button>
+                                <a href="{% url 'collaboration_group:collaboration_group_list' %}" class="btn btn-secondary mt-3">
+                                    <i class="fas fa-arrow-left"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+>>>>>>> Stashed changes

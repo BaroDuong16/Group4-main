@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'group_list' %}active{% endif %}" href="{% url 'reports:group_list' %}">Group List</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'course_distribution' %}active{% endif %}" href="{% url 'reports:course_distribution' %}">Course Distribution</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'group_performance' %}active{% endif %}" href="{% url 'reports:group_performance' %}">Group Performance</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'member_feedback' %}active{% endif %}" href="{% url 'reports:member_feedback' %}">Member Feedback</a>
+    </li>
+</ul>
+
+<div class="container mt-4">
+    <h1>Group List</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Group Name</th>
+                <th>Courses</th>
+                <th>Number of Members</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+            <tr>
+                <td>{{ group.id }}</td>
+                <td>{{ group.group_name }}</td>
+                <td>
+                    {% if group.courses.all %}
+                        {% for course in group.courses.all %}
+                            {{ course.course_name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ group.member_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Leave Feedback for {{ group.group_name }}</h2>
+    <p>Select the type of feedback you want to provide:</p>
+    <div class="mt-3">
+        <a href="{% url 'collaboration_group:group_feedback' group.id %}" class="btn btn-primary">Group Feedback</a>
+        <a href="{% url 'collaboration_group:member_feedback' group.id %}" class="btn btn-secondary">Member Feedback</a>
+    </div>
+</div>
+{% endblock %}

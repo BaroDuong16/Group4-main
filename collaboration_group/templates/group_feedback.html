@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Leave Group Feedback for {{ group.group_name }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ group_feedback_form.as_p }}
+        <button type="submit" class="btn btn-primary mt-3">Submit Feedback</button>
+    </form>
+</div>
+{% endblock %}
+
