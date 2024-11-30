@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Leave Feedback for {{ group.group_name }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Feedback Type Selector -->
+        <div class="mb-3">
+            <label for="feedbackType" class="form-label">Select Feedback Type:</label>
+            <select name="feedback_type" id="feedbackType" class="form-select">
+                <option value="group">Group Feedback</option>
+                <option value="member">Member Feedback</option>
+            </select>
+        </div>
+
+        <!-- Group Feedback Form -->
+        <div id="groupFeedbackForm">
+            <h4>Group Feedback</h4>
+            {{ group_feedback_form.as_p }}
+        </div>
+
+        <!-- Member Feedback Form -->
+        <div id="memberFeedbackForm" style="display: none;">
+            <h4>Member Feedback</h4>
+            {{ member_feedback_form.as_p }}
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Submit Feedback</button>
+    </form>
+</div>
+
+<script>
+    // Toggle between forms based on feedback type
+    const feedbackType = document.getElementById('feedbackType');
+    const groupForm = document.getElementById('groupFeedbackForm');
+    const memberForm = document.getElementById('memberFeedbackForm');
+
+    feedbackType.addEventListener('change', () => {
+        if (feedbackType.value === 'member') {
+            groupForm.style.display = 'none';
+            memberForm.style.display = 'block';
+        } else {
+            groupForm.style.display = 'block';
+            memberForm.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

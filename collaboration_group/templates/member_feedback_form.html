@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if request.user.is_superuser %}
+    <h1 class="mb-4 text-center">Admin Collaboration Groups</h1>
+    {% else %}
+    <h1 class="mb-4 text-center">Collaboration Groups</h1>
+    {% endif %}
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs mb-4">
+    {% if not request.user.is_superuser %}
+        <!-- List of Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">List of Groups</a>
+        </li>
+
+        <!-- My Groups (visible only to non-superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'my_groups' %}active{% endif %}" href="{% url 'collaboration_group:my_groups' %}">My Groups</a>
+        </li>
+    {% endif %}
+
+    <!-- Create Group (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_add' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_add' %}">Create Group</a>
+    </li>
+
+    <!-- Leave Feedback (visible to all users) -->
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}" href="{% url 'collaboration_group:feedback' %}">Leave Feedback</a>
+    </li>
+
+    <!-- Superuser-only tabs -->
+    {% if request.user.is_superuser %}
+        <!-- Manage Groups (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'collaboration_group_list' %}active{% endif %}" href="{% url 'collaboration_group:collaboration_group_list' %}">Manage Groups</a>
+        </li>
+
+        <!-- View Feedbacks (visible only to superusers) -->
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'view_feedback' %}active{% endif %}" href="{% url 'collaboration_group:view_feedback' %}">View Feedbacks</a>
+        </li>
+    {% endif %}
+</ul>
+</div>
+<div class="container mt-5">
+    <h2>Leave Feedback</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+    </form>
+</div>
+{% endblock %}

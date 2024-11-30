@@ -23,5 +23,8 @@ urlpatterns = [
     path('user_statistics_report/', views.user_statistics_report, name='user_statistics_report'),  
     path('login-frequency-report/', views.login_frequency_report, name='login_frequency_report'),
     path('user_duration_login/', views.user_duration_login, name='user_duration_login'),
-
+    path('group-list/', views.group_list, name='group_list'),
+    path('course-distribution/', views.course_distribution, name='course_distribution'),
+    path('group-performance/', views.group_performance, name='group_performance'),
+    path('member_feedback/', views.member_feedback, name='member_feedback'),
 ]
