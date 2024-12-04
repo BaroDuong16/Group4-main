@@ -21,27 +21,27 @@
 
     <div class="row">
         <!-- Chart Section -->
-        <div class="col-md-8">
-            <canvas id="groupPerformanceChart"></canvas>
+        <div class="col-md-6">
+            <canvas id="groupPerformanceChart" style="max-width: 100%; height: 400px;"></canvas>
         </div>
 
         <!-- Table Section -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <form method="get">
-                <table class="table table-bordered">
-                    <thead>
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
                         <tr>
                             <th>Select</th>
                             <th>Group Name</th>
-                            <th>Engagement</th>
-                            <th>Collaboration</th>
-                            <th>Goal Achievement</th>
+                            <th class="text-center">Engagement</th>
+                            <th class="text-center">Collaboration</th>
+                            <th class="text-center">Goal Achievement</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for group in groups %}
                         <tr>
-                            <td>
+                            <td class="text-center">
                                 <input 
                                     type="checkbox" 
                                     class="form-check-input" 
@@ -51,9 +51,9 @@
                                     {% if group.group__id in selected_groups %}checked{% endif %}>
                             </td>
                             <td>{{ group.group__group_name }}</td>
-                            <td>{{ group.avg_engagement|floatformat:2 }}</td>
-                            <td>{{ group.avg_collaboration|floatformat:2 }}</td>
-                            <td>{{ group.avg_goal_achievement|floatformat:2 }}</td>
+                            <td class="text-center">{{ group.avg_engagement|floatformat:2 }}</td>
+                            <td class="text-center">{{ group.avg_collaboration|floatformat:2 }}</td>
+                            <td class="text-center">{{ group.avg_goal_achievement|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -95,6 +95,8 @@
         type: 'radar',
         data: groupData,
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 r: {
                     angleLines: { display: true },
@@ -106,7 +108,7 @@
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return context.dataset.label + ': ' + context.raw;
+                            return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
                         }
                     }
                 }
