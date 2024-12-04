@@ -105,8 +105,8 @@ def manage_group(request, group_id):
     group = get_object_or_404(CollaborationGroup, pk=group_id)
 
     # Check if the logged-in user is the creator of the group
-    if group.created_by != request.user:
-        return redirect('collaboration_group:collaboration_group_list')
+    if not (request.user == group.created_by or request.user.is_superuser):
+        return redirect('collaboration_group:collaboration_group_list') 
 
     members = GroupMember.objects.filter(group=group).order_by('joined_at')
     all_users = User.objects.exclude(id__in=members.values_list('user_id', flat=True))
@@ -230,31 +230,6 @@ def add_member(request, group_id, user_id):
     return redirect('collaboration_group:manage_group', group_id=group.id)
 
 @login_required
-<<<<<<< Updated upstream
-def leave_feedback(request, group_id):
-    group = get_object_or_404(CollaborationGroup, id=group_id)
-    group_feedback_form = GroupFeedbackForm()
-    member_feedback_form = MemberFeedbackForm(group=group)  # Pass group to filter members
-
-    if request.method == 'POST':
-        feedback_type = request.POST.get('feedback_type')
-        if feedback_type == 'group':
-            group_feedback_form = GroupFeedbackForm(request.POST)
-            if group_feedback_form.is_valid():
-                feedback = group_feedback_form.save(commit=False)
-                feedback.group = group
-                feedback.submitted_by = request.user
-                feedback.save()
-                return redirect('collaboration_group:collaboration_group_list')  # Replace with the list of feedbacks view
-        elif feedback_type == 'member':
-            member_feedback_form = MemberFeedbackForm(request.POST, group=group)
-            if member_feedback_form.is_valid():
-                feedback = member_feedback_form.save(commit=False)
-                feedback.group = group
-                feedback.submitted_by = request.user
-                feedback.save()
-                return redirect('collaboration_group:collaboration_group_list')  # Replace with the list of feedbacks view
-=======
 def group_feedback_view(request, group_id):
     group = get_object_or_404(CollaborationGroup, id=group_id)
 
@@ -268,16 +243,10 @@ def group_feedback_view(request, group_id):
             return redirect('collaboration_group:collaboration_group_list')  # Redirect to group feedback list
     else:
         group_feedback_form = GroupFeedbackForm()
->>>>>>> Stashed changes
 
     context = {
         'group': group,
         'group_feedback_form': group_feedback_form,
-<<<<<<< Updated upstream
-        'member_feedback_form': member_feedback_form,
-    }
-    return render(request, 'leave_feedback.html', context)
-=======
     }
     return render(request, 'group_feedback.html', context)
 
@@ -303,7 +272,6 @@ def member_feedback_view(request, group_id):
     }
     return render(request, 'member_feedback.html', context)
 
->>>>>>> Stashed changes
 
 @login_required
 def view_feedbacks(request):
@@ -335,11 +303,8 @@ def view_feedbacks(request):
         'member_feedbacks': member_feedbacks,
     }
     return render(request, 'view_feedbacks.html', context)
-<<<<<<< Updated upstream
-=======
 
 @login_required
 def feedback_selection_view(request, group_id):
     group = get_object_or_404(CollaborationGroup, id=group_id)
     return render(request, 'feedback_selection.html', {'group': group})
->>>>>>> Stashed changes
