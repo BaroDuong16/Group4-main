@@ -17,35 +17,71 @@
 </ul>
 
 <div class="container mt-4">
-    <h1>Group List</h1>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Group Name</th>
-                <th>Courses</th>
-                <th>Number of Members</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for group in groups %}
-            <tr>
-                <td>{{ group.id }}</td>
-                <td>{{ group.group_name }}</td>
-                <td>
-                    {% if group.courses.all %}
-                        {% for course in group.courses.all %}
-                            {{ course.course_name }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </td>
-                <td>{{ group.member_count }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h1>Group List - Pie Chart</h1>
+
+    <!-- Pie Chart Section -->
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="groupPieChart" width="400" height="400"></canvas>
+        </div>
+
+        <!-- Summary Table Section -->
+        <div class="col-md-4">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Total Metrics</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total Groups</td>
+                        <td>{{ total_groups }}</td>
+                    </tr>
+                    <tr>
+                        <td>Total Members</td>
+                        <td>{{ total_members }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('groupPieChart').getContext('2d');
+    const groupData = {
+        labels: [{% for group in groups %}"{{ group.group_name }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Number of Members',
+            data: [{% for group in groups %}{{ group.member_count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#F44336', '#FF9F40', '#9966FF'
+            ],
+            hoverOffset: 4
+        }]
+    };
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: groupData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw + ' members';
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

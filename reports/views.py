@@ -16,16 +16,22 @@ from django.shortcuts import render
 import plotly.graph_objs as go
 from django.utils.timezone import make_aware
 from django.shortcuts import render
-from django.db.models import Count
+from django.db.models import Count, Sum
 from collaboration_group.models import CollaborationGroup, GroupFeedback, MemberFeedback
 from django.db.models import Avg
 from django.db.models import F
 
+
 @login_required
 def group_list(request):
     groups = CollaborationGroup.objects.annotate(member_count=Count('members')).all()
+    total_groups = groups.count()  # Total number of groups
+    total_members = groups.aggregate(total_members=Sum('member_count'))['total_members'] or 0  # Total members across all groups
+
     return render(request, 'reports/group_list.html', {
         'groups': groups,
+        'total_groups': total_groups,  # Pass total groups to template
+        'total_members': total_members,  # Pass total members to template
         'active_tab': 'group_list',
     })
 
